@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/* 
+@theme {
+  font-family: "Manrope", sans-serif;
+  line-height: 1.5;
+  font-weight: 300;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  
+  --main-background-color: #0B1422;
+
+  --background-color: #182134;
+  --background-color2: #192B45;
+
+  --primary-color: #29BDFF;
+  --hover-primary-color: #27A7E0;
+  --pressed-primary-color: #0284C7;
+  --disabled-color: #E8EBEF;
+
+  --text-color: #E5E7EB;
+  --secondary-text-color: #94A3B8;
+
+  --textfield-height: 55px;
+  --textfield-width: 100%; 
+  --textfield-padding: 15px;
+  --textfield-border-radius: 5px;
+
+  --font-size-reg: 18px;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} 
+  */
+
+:root {
+  font-family: "Manrope", sans-serif;
+  line-height: 1.5;
+  font-weight: 300;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  
+  --main-background-color: #0B1422;
+
+  /* Define colours from Figma */
+  --background-color: #182134; /* originally 0F172A*/
+  --background-color2: #192B45; /*192B45*/
+  --background-inner-color: #030c1d;
+
+  --primary-color: #29BDFF;
+  --hover-primary-color: #27A7E0;
+  --pressed-primary-color: #0284C7;
+  --disabled-color: #E8EBEF;
+
+  --text-color: #E5E7EB;
+  --secondary-text-color: #94A3B8;
+
+  --textfield-height: 55px;
+  --textfield-width: 100%; 
+  --textfield-padding: 15px;
+  --textfield-border-radius: 5px;
+
+  --font-size-reg: 18px;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root, html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+input[type="text"], input[type="password"] {
+  width: var(--textfield-width);
+  height: var(--textfield-height);
+  padding: var(--textfield-padding);
+  border-radius: var(--textfield-border-radius);
+  background-color: white;
+  color: var(--background-color);
+  font-size: var(--font-size-reg);
+}
+
+input::placeholder{
+  color: var(--secondary-text-color);
+}
+
+input:focus {
+  outline: 2px solid #2EB8FF;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f172a;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}

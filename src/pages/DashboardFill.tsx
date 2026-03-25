@@ -1,0 +1,61 @@
+import { useOutletContext } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { getRandomGreeting } from '@/utils/greetingHelper';
+
+import MetricCard from '../components/metricCards';
+import GamePicker from '@/components/gamePicker';
+import TopGames from '@/components/top3Games';
+import CostPerHour from '@/components/costPerHour';
+import GamesOwnedChart from '@/components/gamesOwnedChart';
+
+
+export default function DashboardFill() {
+    const { username } = useOutletContext<{ username: string }>();
+    const [greeting, setGreeting] = useState('Welcome');
+
+    useEffect(() => {
+        const loadGreeting = async () => {
+            const loginCount = parseInt(localStorage.getItem('loginCount') || '1', 10);
+            const randomGreeting = await getRandomGreeting(username, loginCount);
+            setGreeting(randomGreeting);
+        };
+        loadGreeting();
+    }, [username]);
+
+    return (
+        <>
+            {/* max width to control content stretching on large screens, and padding on sides */}
+            <div className="px-4 sm:px-6 lg:px-8 max-w-350 mx-auto mt-5">
+                <h2 className="text-4xl font-bold text-(--text-color)">{greeting}</h2>
+
+                {/* Grid container for metric cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10 w-full">
+                    <MetricCard dataFile="SampleData.json" metric="totalGames" label="TOTAL GAMES" />
+                    <MetricCard dataFile="SampleData.json" metric="unplayedGames" label="UNPLAYED GAMES" />
+                    <MetricCard dataFile="SampleData.json" metric="totalHours" label="TOTAL PLAYTIME" unit="hrs" />
+                </div>
+
+                {/* MONITOR UP TO 3 GAMES */}
+                <GamePicker />
+
+                {/* Games owned chart with cost per hour on the right */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 w-full">
+                    <div className="lg:col-span-2">
+                        <GamesOwnedChart />
+                    </div>
+                    <div className='lg:col-span-1'>
+                        <CostPerHour />
+                    </div>
+                </div>
+
+                {/* Most Played Games */}
+                <TopGames />
+
+                <div className='mb-10'>
+                    {/* Just footer space here */}
+                </div>
+            </div>
+        </>
+    );
+
+}

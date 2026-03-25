@@ -1,0 +1,10 @@
+{
+    "greetings": [
+        "Good morning, {username}!",
+        "Good afternoon, {username}!",
+        "Good evening, {username}!",
+        "Welcome back, {username}!",
+        "Hello, {username}!",
+        "Welcome, {username}!"
+    ]
+}
