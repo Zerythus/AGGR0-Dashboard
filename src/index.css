@@ -40,12 +40,10 @@
   font-family: "Manrope", sans-serif;
   line-height: 1.5;
   font-weight: 300;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: white;
   
   --main-background-color: #0B1422;
-
+  
   /* Define colours from Figma */
   --background-color: #182134; /* originally 0F172A*/
   --background-color2: #192B45; /*192B45*/
@@ -109,17 +107,4 @@ h1 {
 
 button {
   cursor: pointer;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }
