@@ -1,3 +1,6 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
+
 import { useState, useEffect } from 'react';
 
 interface Game {
@@ -47,21 +50,38 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
 }
 
     return (
-        <div className="mt-5 bg-(--background-color) p-5 rounded-sm outline outline-white/10 w-full mx-auto h-50vh">
-            {filteredGames.length > 0 ? (
-                <>
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-xl font-semibold text-(--text-color)">
-                            Games in "{selectedCategory}" category ({filteredGames.length})
-                        </h4>
-                        <button
-                            onClick={onClose}
-                            className="text-sm bg-(--hover-primary-color) text-black px-3 py-1 rounded-sm hover:opacity-80"
-                        >
-                            Close
-                        </button>
+        <>
+            {/* Modal Backdrop */}
+            <div 
+                className="fixed inset-0 bg-black/50 z-40"
+                onClick={onClose}
+            />
+            
+            {/* Modal */}
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+                <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-4xl h-50vh flex flex-col">
+                    <div className='flex justify-between'>
+                        <div className="flex justify-between items-center gap-1 p-5 border-b border-(--disabled-color)/10">
+                            <h4 className="text-xl font-semibold text-(--text-color)">
+                                Games in 
+                            </h4>
+                            <h4 className='text-xl font-semibold text-(--primary-color)'>
+                                {selectedCategory}
+                            </h4>
+                            <h4 className="text-xl font-semibold text-(--text-color)">
+                                category
+                            </h4> 
+                            
+                        </div>
+                        <FontAwesomeIcon 
+                            icon={faRectangleXmark} 
+                            style={{color: "#29bdff",}}
+                            className="text-4xl cursor-pointer hover:opacity-80"
+                            onClick={(onClose)}
+                        />
                     </div>
-                    <div className="bg-(--background-inner-color) rounded-sm p-4 h-5/6 flex flex-col">
+                    
+                    <div className="bg-(--background-inner-color) flex-1 p-4 overflow-hidden flex flex-col">
                         <ul className="flex-1 space-y-2">
                             {paginatedGames.map((game) => (
                                 <li
@@ -72,17 +92,16 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                                         <div className="flex gap-5 items-start">
                                             <div className="h-6 w-6 overflow-hidden rounded-sm bg-slate-200">
                                                 <img
-                                                src={
-                                                    game.header_image ||
-                                                    game.image ||
-                                                    getGameIconUrl(Number(game.appid), game.img_icon_url || "")
-                                                }
-                                                alt={game.name}
-                                                className="h-full w-full object-cover"
+                                                    src={
+                                                        game.header_image ||
+                                                        game.image ||
+                                                        getGameIconUrl(Number(game.appid), game.img_icon_url || "")
+                                                    }
+                                                    alt={game.name}
+                                                    className="h-full w-full object-cover"
                                                 />
                                             </div>
                                             <span className="font-medium">{game.name}</span>
-                                            
                                         </div>
                                         <div>
                                             <span className="text-(--secondary-text-color)">
@@ -93,9 +112,11 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                                 </li>
                             ))}
                         </ul>
-                        
-                        {/* Pagination Controls */}
-                        <div className="flex justify-between items-center mt-4 pt-4">
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="p-4">
+                        <div className="flex justify-between items-center">
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
@@ -115,18 +136,8 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                             </button>
                         </div>
                     </div>
-                </>
-            ) : (
-                <div className="mt-8 text-center text-(--secondary-text-color)">
-                    <p>No games found in the "{selectedCategory}" category</p>
-                    <button
-                        onClick={onClose}
-                        className="text-sm bg-(--hover-primary-color) text-black px-3 py-1 rounded-sm hover:opacity-80 mt-4"
-                    >
-                        Close
-                    </button>
                 </div>
-            )}
-        </div>
+            </div>
+        </>
     );
 }

@@ -120,9 +120,12 @@ export default function CostPerHour() {
     <section className="w-full max-w-full rounded-sm bg-(--background-color) outline outline-white/10 p-5">
 
     <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-semibold mb-2 text-(--disabled-color)">Cost per hour</h3>  
-        <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/>
+        <h3 className="text-2xl font-semibold text-(--disabled-color)">Cost per hour</h3>  
+        {/* <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/> */}
     </div>
+    <p className='text-base text-gray-300'>
+      Cost per hour calculates how much money you've spent for each hour of gameplay on a specific game.
+    </p>
 
       <div ref={wrapperRef} className="relative mb-6">
         <SearchFilter 
@@ -181,7 +184,7 @@ export default function CostPerHour() {
         </div>
 
         <h3 className="mb-3 text-2xl font-bold tracking-tight text-slate-50">
-          {selectedGame?.name || "Select a game"}
+          {selectedGame?.name || "Game Title"}
         </h3>
 
         <div className="mb-3 flex items-center justify-between gap-4">

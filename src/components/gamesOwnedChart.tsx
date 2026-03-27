@@ -81,19 +81,19 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
     return (
         <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 w-full mx-auto h-full">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-semibold mb-2 text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
-                <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/>
+                <h3 className="text-2xl font-semibold text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
+                {/* <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/> */}
             </div>
             <p className='text-base text-gray-300'>
-                This chart categorizes your owned games based on total playtime, giving you a visual overview of how many games you've played for different durations. It helps identify how many games you've never played, lightly played, or heavily invested time in.
+                This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in.
             </p>
             <ResponsiveContainer 
                 width="100%" 
-                height={500}
+                height={550}
             >
                 <BarChart
                     width={1000}
-                    height={500}
+                    height={550}
                     data={playtimeCategoryData}
                     margin={{ top: 20, right: 0, left: 10, bottom: 20 }}
                 >
