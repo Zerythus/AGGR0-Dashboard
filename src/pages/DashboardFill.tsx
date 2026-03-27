@@ -7,11 +7,20 @@ import GamePicker from '@/components/gamePicker';
 import TopGames from '@/components/top3Games';
 import CostPerHour from '@/components/costPerHour';
 import GamesOwnedChart from '@/components/gamesOwnedChart';
+import GamesCategoryList from '@/components/gamesCategoryList';
 
+interface Game {
+    appid: number;
+    name: string;
+    playtime_forever: number;
+    rtime_last_played: number;
+}
 
 export default function DashboardFill() {
     const { username } = useOutletContext<{ username: string }>();
     const [greeting, setGreeting] = useState('Welcome');
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [filteredGames, setFilteredGames] = useState<Game[]>([]);
 
     useEffect(() => {
         const loadGreeting = async () => {
@@ -21,6 +30,16 @@ export default function DashboardFill() {
         };
         loadGreeting();
     }, [username]);
+
+    const handleBarClick = (category: string, games: Game[]) => {
+        setSelectedCategory(category);
+        setFilteredGames(games);
+    };
+
+    const handleCloseList = () => {
+        setSelectedCategory(null);
+        setFilteredGames([]);
+    };
 
     return (
         <>
@@ -41,11 +60,20 @@ export default function DashboardFill() {
                 {/* Games owned chart with cost per hour on the right */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 w-full">
                     <div className="lg:col-span-2">
-                        <GamesOwnedChart />
+                        <GamesOwnedChart onBarClick={handleBarClick} />
                     </div>
                     <div className='lg:col-span-1'>
                         <CostPerHour />
                     </div>
+                </div>
+
+                {/* Games Category List */}
+                <div className="mt-5 w-full">
+                    <GamesCategoryList
+                        selectedCategory={selectedCategory}
+                        filteredGames={filteredGames}
+                        onClose={handleCloseList}
+                    />
                 </div>
 
                 {/* Most Played Games */}

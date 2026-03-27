@@ -19,14 +19,6 @@ function minToHours(minutes: number): number {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
 }
 
-// function epochToDate(epoch: number): string {
-//     const date = new Date(epoch * 1000); // Convert seconds to milliseconds
-//     if (epoch === 0) {
-//         return "Never Played";
-//     }
-//     return date.toLocaleDateString(undefined, {year: "numeric", month: "short", day: "2-digit"}); // Format as local date string
-// }
-
 function getGameImage(appid: number): string {
     return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
 }

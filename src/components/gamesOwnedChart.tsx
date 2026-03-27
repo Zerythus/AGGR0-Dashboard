@@ -1,3 +1,5 @@
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons/faCircleInfo';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -6,6 +8,10 @@ interface Game {
     name: string;
     playtime_forever: number;
     rtime_last_played: number;
+}
+
+interface GamesOwnedChartProps {
+    onBarClick?: (category: string, games: Game[]) => void;
 }
 
 // Playtime category constants
@@ -21,15 +27,17 @@ const PLAYTIME_CATEGORIES = [
     { min: 6001, max: Infinity, label: '100+ hrs' }
 ];
 
-export default function GamesOwnedChart() {
+export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
     const dataUrl = `data/SampleData.json`;
     const [playtimeCategoryData, setPlaytimeCategoryData] = useState<{ category: string; count: number; }[]>([]);
+    const [allGames, setAllGames] = useState<Game[]>([]);
 
     useEffect(() => {
         fetch(dataUrl)
             .then((response) => response.json())
             .then((jsonData) => {
                 const games: Game[] = jsonData.response?.games || [];
+                setAllGames(games);
 
                 // Count games by time played categories
                 const categoryCounts = PLAYTIME_CATEGORIES.map(cat => ({
@@ -57,9 +65,25 @@ export default function GamesOwnedChart() {
             });
     }, [dataUrl]);
 
+    const handleBarClick = (data: { category: string; count: number }) => {
+        if (!onBarClick) return;
+
+        const categoryInfo = PLAYTIME_CATEGORIES.find(cat => cat.label === data.category);
+        if (categoryInfo) {
+            const games = allGames.filter(game => {
+                const playtimeMinutes = game.playtime_forever;
+                return playtimeMinutes >= categoryInfo.min && playtimeMinutes <= categoryInfo.max;
+            });
+            onBarClick(data.category, games);
+        }
+    };
+
     return (
         <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 w-full mx-auto h-full">
-            <h3 className="text-2xl font-semibold mb-4">Number of games owned per playtime (hours)</h3>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-semibold mb-2 text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
+                <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/>
+            </div>
             <p className='text-base text-gray-300'>
                 This chart categorizes your owned games based on total playtime, giving you a visual overview of how many games you've played for different durations. It helps identify how many games you've never played, lightly played, or heavily invested time in.
             </p>
@@ -106,7 +130,8 @@ export default function GamesOwnedChart() {
                         name="Games Count" 
                         fill="var(--primary-color)" 
                         radius={[5, 5, 0, 0]} 
-                        activeBar={{ fill: "var(--hover-primary-color)" }}
+                        activeBar={{ fill: "var(--hover-primary-color)", cursor: 'pointer' }}
+                        onClick={(data) => handleBarClick(data)}
                     />
                 </BarChart>
             </ResponsiveContainer>

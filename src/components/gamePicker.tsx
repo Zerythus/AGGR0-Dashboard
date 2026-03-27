@@ -241,7 +241,7 @@ export default function GamePicker() {
                     />
 
                     <div 
-                        className="bg-white rounded-lg max-w-200 max-h-[80vh] overflow-y-auto"
+                        className="bg-white rounded-sm max-w-200 max-h-[80vh] overflow-y-auto"
                         ref={modalRef}
                         >
                         <div className="sticky top-0 z-10 bg-white px-4 py-2 flex justify-between items-center border-b">
