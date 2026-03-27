@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 type UserMenuProps = {
   username: string;
   chevronSrc?: string;
@@ -13,9 +13,25 @@ export default function UserMenu({
   onLogout,
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [isOpen]);
 
   return (
-    <div className="relative">
+    <div ref={menuRef} className="relative z-100">
       <button
         onClick={() => setIsOpen((v) => !v)}
         className="flex px-4 py-2 items-center gap-2 text-xl text-(--text-color) font-medium hover:opacity-80"

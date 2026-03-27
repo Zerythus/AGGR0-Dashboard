@@ -209,7 +209,7 @@ export default function GamePicker() {
 
                                     <div className="flex justify-between items-center">
                                         <p>Achievements: </p>
-                                        <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0}</p>
+                                        <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
                                     </div>
 
                                 </div>

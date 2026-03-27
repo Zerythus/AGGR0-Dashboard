@@ -106,6 +106,7 @@ export default function GamesOwnedChart() {
                         name="Games Count" 
                         fill="var(--primary-color)" 
                         radius={[5, 5, 0, 0]} 
+                        activeBar={{ fill: "var(--hover-primary-color)" }}
                     />
                 </BarChart>
             </ResponsiveContainer>

@@ -193,7 +193,14 @@ export default function CostPerHour() {
         </h3>
 
         <div className="mb-3 flex items-center justify-between gap-4">
-          <span className="text-xl text-slate-200">Price paid</span>
+          <span className="text-xl text-white">Your hours</span>
+          <span className="text-xl text-white">
+            {selectedGame ? `${hours} h` : "--"}
+          </span>
+        </div>
+
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <span className="text-xl text-slate-200">Price paid (CAD)</span>
 
           <div
             className={`flex items-center gap-1 ${
@@ -230,13 +237,6 @@ export default function CostPerHour() {
               <FontAwesomeIcon icon={faPencil} className="h-6 w-6" strokeWidth={2.2} />
             </button>
           </div>
-        </div>
-
-        <div className="mb-3 flex items-center justify-between gap-4">
-          <span className="text-xl text-white">Your hours</span>
-          <span className="text-xl text-white">
-            {selectedGame ? `${hours} h` : "--"}
-          </span>
         </div>
 
         <div className="flex items-center">

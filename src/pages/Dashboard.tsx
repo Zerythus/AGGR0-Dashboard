@@ -18,7 +18,7 @@ export default function Dashboard() {
   }, [navigate]);
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className="px-4 sm:px-6 lg:px-8 mt-5">
       <div>
         <h2 className="text-3xl font-bold text-(--text-color)">Welcome, {username}!</h2>
       </div>
