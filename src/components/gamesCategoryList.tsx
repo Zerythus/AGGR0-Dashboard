@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Game {
     appid: number;
@@ -26,11 +26,35 @@ export default function GamesCategoryList({
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const modalRef = useRef<HTMLDivElement>(null);
 
     // Reset to page 1 when category changes
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedCategory, filteredGames.length]);
+
+    useEffect(() => {
+        function handleEscKey(e: KeyboardEvent) {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        }
+
+        function handleClickOutside(event: MouseEvent) {
+            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        }
+
+        if (selectedCategory) {
+            document.addEventListener("keydown", handleEscKey);
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("keydown", handleEscKey);
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }
+    }, [selectedCategory, onClose]);
 
     if (!selectedCategory) {
         return null;
@@ -54,14 +78,16 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
             {/* Modal Backdrop */}
             <div 
                 className="fixed inset-0 bg-black/50 z-40"
-                onClick={onClose}
             />
             
             {/* Modal */}
             <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-                <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-4xl h-50vh flex flex-col">
+                <div 
+                    ref={modalRef}
+                    className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-4xl h-50vh flex flex-col"
+                >
                     <div className='flex justify-between'>
-                        <div className="flex justify-between items-center gap-1 p-5 border-b border-(--disabled-color)/10">
+                        <div className="flex justify-between items-center gap-1 p-5">
                             <h4 className="text-xl font-semibold text-(--text-color)">
                                 Games in 
                             </h4>

@@ -130,7 +130,7 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
                         name="Games Count" 
                         fill="var(--primary-color)" 
                         radius={[5, 5, 0, 0]} 
-                        activeBar={{ fill: "var(--hover-primary-color)", cursor: 'pointer' }}
+                        activeBar={{ fill: "var(--hover-primary-color)", stroke: "var(--text-color)", strokeWidth: 3, cursor: "pointer" }}
                         onClick={(data) => handleBarClick(data)}
                     />
                 </BarChart>

@@ -190,7 +190,7 @@ export default function CostPerHour() {
         <div className="mb-3 flex items-center justify-between gap-4">
           <span className="text-xl text-white">Your hours</span>
           <span className="text-xl text-white">
-            {selectedGame ? `${hours} h` : "--"}
+            {selectedGame ? `${hours} hours` : "--"}
           </span>
         </div>
 
