@@ -77,7 +77,7 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
         <>
             {/* Modal Backdrop */}
             <div 
-                className="fixed inset-0 bg-black/50 z-40"
+                className="fixed inset-0 bg-black/60 z-40"
             />
             
             {/* Modal */}
