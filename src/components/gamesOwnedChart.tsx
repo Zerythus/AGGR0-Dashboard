@@ -63,9 +63,10 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
             });
     }, [dataUrl]);
 
-    const handleBarClick = (data: { category: string; count: number }) => {
-        if (!onBarClick) return;
+    const handleBarClick = (props: any) => {
+        if (!onBarClick || !props.payload) return;
 
+        const data = props.payload;
         const categoryInfo = PLAYTIME_CATEGORIES.find(cat => cat.label === data.category);
         if (categoryInfo) {
             const games = allGames.filter(game => {

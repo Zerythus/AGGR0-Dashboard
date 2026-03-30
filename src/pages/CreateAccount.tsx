@@ -1,6 +1,7 @@
 import HomeHero from "@/components/homeHero";
 import { ArrowLeft } from "lucide-react";
-import { useId, useState, FormEvent } from "react";
+import { useId, useState } from "react";
+import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/services/supabaseClient";

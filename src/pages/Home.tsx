@@ -109,6 +109,12 @@ export default function Home() {
                 </a>
             </div>
 
+            {errorMessage && (
+                <div className="rounded-sm bg-red-500/20 border border-red-500/50 px-4 py-3 text-red-400 text-sm">
+                    {errorMessage}
+                </div>
+            )}
+
             <button
                 type="submit"
                 className="h-14 w-full rounded-sm bg-(--primary-color) text-slate-950 hover:bg-(--hover-primary-color) active:bg-(--pressed-primary-color)"
