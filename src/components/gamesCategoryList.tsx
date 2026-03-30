@@ -31,7 +31,7 @@ export default function GamesCategoryList({
     // Reset to page 1 when category changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedCategory, filteredGames.length]);
+    }, [selectedCategory]);
 
     useEffect(() => {
         function handleEscKey(e: KeyboardEvent) {

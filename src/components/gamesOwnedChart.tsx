@@ -1,5 +1,3 @@
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons/faCircleInfo';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 

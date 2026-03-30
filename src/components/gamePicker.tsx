@@ -6,7 +6,6 @@ import { supabase } from "../services/supabaseClient";
 import SearchFilter from "./searchFilter";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons/faCircleInfo";
 import { faCircleMinus } from "@fortawesome/free-solid-svg-icons/faCircleMinus";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
 

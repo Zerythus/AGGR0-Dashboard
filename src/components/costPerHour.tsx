@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons/faCircleInfo';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SearchFilter from "./searchFilter";
 

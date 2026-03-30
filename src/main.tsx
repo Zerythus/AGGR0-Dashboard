@@ -11,7 +11,7 @@ import Dashboard from "./pages/Dashboard"; // This is displayed when the users f
 import Library from "./pages/Library";
 import Settings from "./pages/Settings";
 
-import DashboardFill from "./pages/DashboardFill"; //TEST ONLY - DELETE LATER
+import DashboardFill from "./pages/DashboardFill"; //FOR SHOW ONLY TO FILL IN THE DASHBOARD WITH COMPONENTS
 
 import "./index.css";
 
