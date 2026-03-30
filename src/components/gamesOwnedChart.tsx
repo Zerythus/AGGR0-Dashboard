@@ -34,7 +34,7 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
         fetch(dataUrl)
             .then((response) => response.json())
             .then((jsonData) => {
-                const games: Game[] = jsonData.response?.games || [];
+                const games: Game[] = jsonData.steam?.games || [];
                 setAllGames(games);
 
                 // Count games by time played categories

@@ -45,7 +45,7 @@ export default function CostPerHour() {
       try {
         const response = await fetch("/data/SampleData.json");
         const data = await response.json();
-        const gameList: GameItem[] = data.response?.games || [];
+        const gameList: GameItem[] = data.steam?.games || [];
         setGames(gameList);
       } catch (error) {
         console.error("Error fetching games:", error);

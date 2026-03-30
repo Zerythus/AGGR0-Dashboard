@@ -58,7 +58,7 @@ export default function GamePicker() {
         fetch("/public/data/SampleData.json")
             .then((r) => r.json())
             .then((json) => {
-                setGames(json.response.games);
+                setGames(json.steam.games);
             });
     }, []);
 

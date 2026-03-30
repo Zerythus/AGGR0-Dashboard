@@ -31,7 +31,7 @@ export default function TopGames() {
         fetch("/public/data/SampleData.json")
             .then((r) => r.json())
             .then((json) => {
-                const allGames: Game[] = json.response.games;
+                const allGames: Game[] = json.steam.games;
                 const top3 = allGames
                     .sort((a, b) => b.playtime_forever - a.playtime_forever)
                     .slice(0, 3);
