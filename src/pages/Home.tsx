@@ -121,32 +121,6 @@ export default function Home() {
             >
                 Log in
             </button>
-            {/* <div className="flex items-center gap-3 pt-2">
-                <div className="h-px flex-1 bg-white/15" />
-                <span className="text-base text-white/60">or log in with</span>
-                <div className="h-px flex-1 bg-white/15" />
-            </div> */}
-
-            {/* Google - to add Steam or Discord, time permitted, otherwise, just keep google */}
-            {/* <div className="flex justify-center">
-                <button
-                    type="button"
-                    className="
-                        flex h-12 w-30 items-center justify-center gap-3 text-base
-                        rounded-sm border border-white/35
-                        bg-transparent text-white/90
-                        hover:bg-white/10
-                    "
-                    >
-                    <img
-                        src="/public/icons/google.svg"
-                        alt=""
-                        className="h-5 w-5"
-                        aria-hidden="true"
-                    />
-                    <span>Google</span>
-                </button>
-            </div> */}
 
             <button
                 type="button"
