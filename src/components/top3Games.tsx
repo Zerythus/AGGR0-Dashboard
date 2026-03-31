@@ -101,7 +101,7 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                             transition={{ duration: 0.2 }}
                             />
                         <div className="p-4">
-                            <h3 className="text-lg font-semibold text-(--primary-color)">{game.name}</h3>
+                            <h3 className="text-lg font-semibold mb-2 text-(--primary-color)">{game.name}</h3>
 
                             <div className="flex justify-between items-center">
                                 <p className="text-base text-(--secondary-text-color)">Playtime:</p> 

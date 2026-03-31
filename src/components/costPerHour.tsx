@@ -170,29 +170,29 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
         />
 
         {isDropdownOpen && (
-          <div className="absolute left-0 right-0 z-20 max-h-72 overflow-y-auto rounded-sm border border-slate-300 bg-white shadow-lg">
+          <div className="absolute left-0 right-0 z-20 max-h-72 overflow-y-auto rounded-sm bg-(--background-inner-color) outline outline-white/10">
             {filteredGames.length > 0 ? (
               filteredGames.map((game) => (
                 <button
                   key={game.appid}
                   type="button"
                   onClick={() => handleSelectGame(game)}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-100"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition text-(--text-color) hover:bg-white/10"
                 >
-                  <div className="h-6 w-6 overflow-hidden rounded-sm bg-slate-200">
+                  <div className="rounded-sm">
                     <img
                       src={getGameIconUrl(game)}
                       alt={game.name}
-                      className="h-full w-full object-cover"
+                      className="w-6 h-6 inline mr-2"
                     />
                   </div>
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-(--text-color)">
                     {game.name}
                   </span>
                 </button>
               ))
             ) : (
-              <div className="px-4 py-4 text-lg text-slate-500">
+              <div className="px-4 py-4 text-lg text-(--disabled-color)">
                 No games found
               </div>
             )}
@@ -209,7 +209,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
           />
         </div>
 
-        <h3 className="mb-3 text-2xl font-bold tracking-tight text-slate-50">
+        <h3 className="mb-3 text-2xl font-bold tracking-tight text-(--primary-color)">
           {selectedGame?.name || "Game Title"}
         </h3>
 

@@ -226,7 +226,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                     <motion.img 
                                         src={getGameHeaderUrl(game)} 
                                         alt={game.name} 
-                                        className="object-contain rounded-sm" 
+                                        className="w-full h-50 object-cover rounded-sm" 
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.2 }}
                                     />
