@@ -127,8 +127,8 @@ html {
 html.high-contrast {
   --text-color: #FFFFFF;
   --secondary-text-color: #FFFFFF;
-  --primary-color: #00BFFF;
-  --hover-primary-color: #1E90FF;
+  --primary-color: #1E90FF;
+  --hover-primary-color: #369aff;
   --pressed-primary-color: #0066FF;
   --background-color: #000000;
   --background-color2: #848484;
