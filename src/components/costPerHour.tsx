@@ -26,7 +26,9 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
     return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
 }
 
-export default function CostPerHour() {
+interface CostPerHourProps {}
+
+export default function CostPerHour({}: CostPerHourProps) {
   const [games, setGames] = useState<GameItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(null);
@@ -39,11 +41,11 @@ export default function CostPerHour() {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch games from SampleData.json
+  // Fetch games from SteamData.json
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch("/data/SampleData.json");
+        const response = await fetch("/data/SteamData.json");
         const data = await response.json();
         const gameList: GameItem[] = data.steam?.games || [];
         setGames(gameList);

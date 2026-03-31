@@ -10,6 +10,7 @@ interface Game {
     rtime_last_played: number;
     header_image?: string;
     image?: string;
+    platform?: "steam" | "epic"; //Track which platform the game came from
     img_icon_url?: string;
 }
 
@@ -87,9 +88,15 @@ const minutesToHours = (minutes: number) => {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
 };
 
-function getGameIconUrl(appid: number, img_icon_url: string): string {
-    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
+function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" | "epic"): string {
+    if (platform === "epic") {
+        return "/icons/epic-games.svg";
+    }
+    // Default to Steam CDN for steam games
+
+    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`; // Do not change this url for Steam
 }
+
 
     return (
         <>
@@ -155,9 +162,9 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                                             <div className="h-6 w-6 overflow-hidden rounded-sm bg-slate-200">
                                                 <img
                                                     src={
-                                                        game.header_image ||
-                                                        game.image ||
-                                                        getGameIconUrl(Number(game.appid), game.img_icon_url || "")
+                                                        game.platform === "epic"
+                                                            ? "/icons/epic-games.svg"
+                                                            : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
                                                     }
                                                     alt={game.name}
                                                     className="h-full w-full object-cover"

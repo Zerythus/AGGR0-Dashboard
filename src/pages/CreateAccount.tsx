@@ -53,6 +53,7 @@ export default function CreateAccount() {
     try {
       setLoading(true);
 
+      // Proceed with signup
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -64,7 +65,12 @@ export default function CreateAccount() {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        // Check if it's a duplicate email error from auth
+        if (error.message.includes("already registered")) {
+          setErrorMessage("This email is already associated with an account.");
+        } else {
+          setErrorMessage(error.message);
+        }
         return;
       }
 
@@ -149,7 +155,7 @@ export default function CreateAccount() {
                     <div className="relative">
                         <input
                         id={confirmPasswordId}
-                        type={showPassword ? "text" : "password"}
+                        type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm Password"
                         autoComplete="confirm-password"
                         value={confirmPassword}
@@ -166,12 +172,12 @@ export default function CreateAccount() {
                                 text-slate-500 hover:text-slate-700
                                 focus:outline-none"
                         >
-                        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                        {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
                         </button>
                     </div>
 
                     {errorMessage && (
-                        <p className="text-sm text-red-400">{errorMessage}</p>
+                        <p className="text-base text-red-400 text-center">{errorMessage}</p>
                     )}
 
                     <button

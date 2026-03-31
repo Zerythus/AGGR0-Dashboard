@@ -17,6 +17,8 @@ type Game = {
     img_icon_url: string; //game icon url
     total_achievements?: number;
     unlocked_achievements?: number;
+    platform?: "steam" | "epic"; //Track which platform the game came from
+    image_url?: string; //Direct image URL for Epic games
 }
 
 function minToHours(minutes: number): number {
@@ -31,15 +33,29 @@ function epochToDate(epoch: number): string {
     return date.toLocaleDateString(undefined, {year: "numeric", month: "short", day: "2-digit"}); // Format as local date string
 }
 
-function getGameIconUrl(appid: number, img_icon_url: string): string {
-    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
+function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" | "epic"): string {
+    if (platform === "epic") {
+        return "/icons/epic-games.svg";
+    }
+    // Default to Steam CDN for steam games
+
+    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`; // Do not change this url for Steam
 }
 
-function getGameHeaderUrl(appid: number): string {
-    return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
+function getGameHeaderUrl(game: Game): string {
+    if (game.platform === "epic" && game.image_url) {
+        return game.image_url;
+    }
+    // Default to Steam CDN for steam games
+    return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
-export default function GamePicker() {
+interface GamePickerProps {
+    isSteamConnected: boolean;
+    isEpicConnected: boolean;
+}
+
+export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePickerProps) {
     const [games, setGames] = useState<Game[]>([]);
     const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]); // 3 null slots for selected games
 
@@ -55,12 +71,42 @@ export default function GamePicker() {
     );
 
     useEffect(() => {
-        fetch("/public/data/SampleData.json")
-            .then((r) => r.json())
-            .then((json) => {
-                setGames(json.steam.games);
-            });
-    }, []);
+        const fetchGames = async () => {
+            const allGames: Game[] = [];
+
+            if (isSteamConnected) {
+                try {
+                    const response = await fetch("/data/SteamData.json");
+                    const json = await response.json();
+                    const steamGames = json.steam.games.map((game: Game) => ({
+                        ...game,
+                        platform: "steam" as const
+                    }));
+                    allGames.push(...steamGames);
+                } catch (error) {
+                    console.error("Error fetching Steam data:", error);
+                }
+            }
+
+            if (isEpicConnected) {
+                try {
+                    const response = await fetch("/data/EpicData.json");
+                    const json = await response.json();
+                    const epicGames = json.epic.games.map((game: Game) => ({
+                        ...game,
+                        platform: "epic" as const
+                    }));
+                    allGames.push(...epicGames);
+                } catch (error) {
+                    console.error("Error fetching Epic data:", error);
+                }
+            }
+
+            setGames(allGames);
+        };
+
+        fetchGames();
+    }, [isSteamConnected, isEpicConnected]);
 
     // Fetch selected games - persists even after refreshing
     useEffect(() => {
@@ -178,7 +224,7 @@ export default function GamePicker() {
                             >
                                 <div className="relative">
                                     <motion.img 
-                                        src={getGameHeaderUrl(game.appid)} 
+                                        src={getGameHeaderUrl(game)} 
                                         alt={game.name} 
                                         className="object-contain rounded-sm" 
                                         whileHover={{ scale: 1.05 }}
@@ -208,6 +254,11 @@ export default function GamePicker() {
                                     <div className="flex justify-between items-center">
                                         <p>Achievements: </p>
                                         <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
+                                    </div>
+
+                                    <div className="flex justify-between items-center mt-5">
+                                        <p>Gaming Platform: </p>
+                                        <p>{game.platform === "epic" ? "Epic Games" : "Steam"}</p>
                                     </div>
 
                                 </div>
@@ -258,7 +309,7 @@ export default function GamePicker() {
                                     <button onClick={() => selectGame(game.appid)} 
                                         className="w-full text-left px-3 py-3 rounded-sm hover:bg-white/10 text-(--text-color)"
                                         >
-                                        <img src={getGameIconUrl(game.appid, game.img_icon_url)} alt={game.name} 
+                                        <img src={getGameIconUrl(game.appid, game.img_icon_url, game.platform)} alt={game.name} 
                                             className="w-6 h-6 inline mr-2" 
                                         />
                                         {game.name}
