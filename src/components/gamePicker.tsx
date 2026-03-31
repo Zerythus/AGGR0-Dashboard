@@ -230,7 +230,7 @@ export default function GamePicker() {
 
             {/* Game Picker Modal */}
             {pickerOpen && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
                     <div 
                         className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl h-[80vh] flex flex-col relative"
                         ref={modalRef}
