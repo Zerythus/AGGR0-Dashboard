@@ -28,7 +28,7 @@ export default function TopGames() {
     const [games, setGames] = useState<Game[]>([]);
     
     useEffect(() => {
-        fetch("/public/data/SampleData.json")
+        fetch("/data/SampleData.json")
             .then((r) => r.json())
             .then((json) => {
                 const allGames: Game[] = json.steam.games;
