@@ -39,7 +39,12 @@ function getGameHeaderUrl(appid: number): string {
     return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
 }
 
-export default function GamePicker() {
+interface GamePickerProps {
+    isSteamConnected: boolean;
+    isEpicConnected: boolean;
+}
+
+export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePickerProps) {
     const [games, setGames] = useState<Game[]>([]);
     const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]); // 3 null slots for selected games
 
@@ -55,12 +60,35 @@ export default function GamePicker() {
     );
 
     useEffect(() => {
-        fetch("/public/data/SampleData.json")
-            .then((r) => r.json())
-            .then((json) => {
-                setGames(json.steam.games);
-            });
-    }, []);
+        const fetchGames = async () => {
+            const allGames: Game[] = [];
+
+            if (isSteamConnected) {
+                try {
+                    const response = await fetch("/data/SteamData.json");
+                    const json = await response.json();
+                    allGames.push(...json.steam.games);
+                } catch (error) {
+                    console.error("Error fetching Steam data:", error);
+                }
+            }
+
+            if (isEpicConnected) {
+                try {
+                    const response = await fetch("/data/EpicData.json");
+                    const json = await response.json();
+                    // Assuming EpicData also has a games array, adjust if structure is different
+                    allGames.push(...(json.epic?.games || json.games || []));
+                } catch (error) {
+                    console.error("Error fetching Epic data:", error);
+                }
+            }
+
+            setGames(allGames);
+        };
+
+        fetchGames();
+    }, [isSteamConnected, isEpicConnected]);
 
     // Fetch selected games - persists even after refreshing
     useEffect(() => {

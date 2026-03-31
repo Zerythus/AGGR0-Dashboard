@@ -9,43 +9,64 @@ interface MetricCardProps {
   label: string;
   value?: number | string;
   unit?: string; //hours, mins
-  dataFile?: string;
   metric?: 'totalHours' | 'totalGames' | 'unplayedGames';
+  isSteamConnected?: boolean;
+  isEpicConnected?: boolean;
 }
 
-export default function MetricCard({ label, value, unit, dataFile, metric }: MetricCardProps) {
+export default function MetricCard({ label, value, unit, metric, isSteamConnected = false, isEpicConnected = false }: MetricCardProps) {
   const [displayValue, setDisplayValue] = useState<number | string>(value || 0);
 
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        let steamGames = [];
+        let epicGames = [];
 
-    const url = `data/${dataFile}`;
-    fetch(url)
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`);
-        return r.json();
-      })
-      .then((jsonData) => {
-        const games = jsonData.steam.games;
+        // Fetch Steam data if connected
+        if (isSteamConnected) {
+          const steamRes = await fetch('data/SteamData.json');
+          if (steamRes.ok) {
+            const steamData = await steamRes.json();
+            steamGames = steamData.steam.games || [];
+          }
+        }
+
+        // Fetch Epic data if connected
+        if (isEpicConnected) {
+          const epicRes = await fetch('data/EpicData.json');
+          if (epicRes.ok) {
+            const epicData = await epicRes.json();
+            epicGames = epicData.epic.games || [];
+          }
+        }
+
+        // Combine games from both platforms
+        const allGames = [...steamGames, ...epicGames];
 
         switch (metric) {
           case 'totalHours': {
-            const totalMinutes = games.reduce((sum: number, game: { playtime_forever: number }) => sum + game.playtime_forever, 0);
+            const totalMinutes = allGames.reduce((sum: number, game: { playtime_forever: number }) => sum + game.playtime_forever, 0);
             setDisplayValue(parseFloat((totalMinutes / 60).toFixed(1)));
             break;
           }
           case 'totalGames': {
-            setDisplayValue(games.length);
+            setDisplayValue(allGames.length);
             break;
           }
           case 'unplayedGames': {
-            const unplayed = games.filter((game: { playtime_forever: number }) => game.playtime_forever === 0).length;
+            const unplayed = allGames.filter((game: { playtime_forever: number }) => game.playtime_forever === 0).length;
             setDisplayValue(unplayed);
             break;
           }
         }
-      })
-      .catch((err) => console.error("Failed to load JSON", err));
-  }, [value, dataFile, metric]);
+      } catch (err) {
+        console.error("Failed to load JSON", err);
+      }
+    };
+
+    loadData();
+  }, [isSteamConnected, isEpicConnected, metric]);
 
   return (
     <>

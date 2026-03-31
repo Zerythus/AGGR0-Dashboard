@@ -26,11 +26,11 @@ function getGameHeaderUrl(appid: number): string {
     return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
 }
 
-export default function TopGames() {
+export default function Top3Games() {
     const [games, setGames] = useState<Game[]>([]);
     
     useEffect(() => {
-        fetch("/data/SampleData.json")
+        fetch("/data/SteamData.json")
             .then((r) => r.json())
             .then((json) => {
                 const allGames: Game[] = json.steam.games;

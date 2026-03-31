@@ -11,6 +11,8 @@ interface Game {
 
 interface GamesOwnedChartProps {
     onBarClick?: (category: string, games: Game[]) => void;
+    isSteamConnected?: boolean;
+    isEpicConnected?: boolean;
 }
 
 // Playtime category constants
@@ -26,9 +28,8 @@ const PLAYTIME_CATEGORIES = [
     { min: 6001, max: Infinity, label: '100+ hrs' }
 ];
 
-export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
+export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, isEpicConnected = false }: GamesOwnedChartProps) {
     const { settings } = useAccessibility();
-    const dataUrl = `data/SampleData.json`;
     const [playtimeCategoryData, setPlaytimeCategoryData] = useState<{ category: string; count: number; }[]>([]);
     const [allGames, setAllGames] = useState<Game[]>([]);
 
@@ -41,11 +42,35 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
     const chartHeight = chartHeightMap[settings.fontSizeLevel] || 600;
 
     useEffect(() => {
-        fetch(dataUrl)
-            .then((response) => response.json())
-            .then((jsonData) => {
-                const games: Game[] = jsonData.steam?.games || [];
-                setAllGames(games);
+        const fetchData = async () => {
+            try {
+                let allGamesData: Game[] = [];
+
+                // Fetch Steam data if connected
+                if (isSteamConnected) {
+                    try {
+                        const steamResponse = await fetch('data/SteamData.json');
+                        const steamData = await steamResponse.json();
+                        const steamGames: Game[] = steamData.steam?.games || [];
+                        allGamesData = [...allGamesData, ...steamGames];
+                    } catch (error) {
+                        console.error('Error loading Steam data:', error);
+                    }
+                }
+
+                // Fetch Epic data if connected
+                if (isEpicConnected) {
+                    try {
+                        const epicResponse = await fetch('data/EpicData.json');
+                        const epicData = await epicResponse.json();
+                        const epicGames: Game[] = epicData.epic?.games || [];
+                        allGamesData = [...allGamesData, ...epicGames];
+                    } catch (error) {
+                        console.error('Error loading Epic data:', error);
+                    }
+                }
+
+                setAllGames(allGamesData);
 
                 // Count games by time played categories
                 const categoryCounts = PLAYTIME_CATEGORIES.map(cat => ({
@@ -53,7 +78,7 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
                     count: 0
                 }));
 
-                games.forEach((game) => {
+                allGamesData.forEach((game) => {
                     const playtimeMinutes = game.playtime_forever;
                     
                     for (let i = 0; i < PLAYTIME_CATEGORIES.length; i++) {
@@ -66,12 +91,14 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
                 });
 
                 setPlaytimeCategoryData(categoryCounts);
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error('Error loading data:', error);
                 setPlaytimeCategoryData([]);
-            });
-    }, [dataUrl]);
+            }
+        };
+
+        fetchData();
+    }, [isSteamConnected, isEpicConnected]);
 
     const handleBarClick = (props: any) => {
         if (!onBarClick || !props.payload) return;
