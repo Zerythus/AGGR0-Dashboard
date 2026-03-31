@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Game {
     appid: number;
@@ -81,7 +81,6 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
         <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 w-full mx-auto h-full">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-semibold text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
-                {/* <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/> */}
             </div>
             <p className='text-base text-gray-300'>
                 This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in.
@@ -123,6 +122,11 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
                             border: '1px solid white',
                         }}
                         cursor={false}
+                    />
+                    <Legend 
+                        verticalAlign="top"
+                        align="right"
+                        height={36}
                     />
                     <Bar 
                         dataKey="count" 
