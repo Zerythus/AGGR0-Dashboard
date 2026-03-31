@@ -63,6 +63,9 @@
   --textfield-border-radius: 5px;
 
   --font-size-reg: 18px;
+  
+  /* Accessibility: Font size multiplier (default 1 = no scaling) */
+  --font-size-multiplier: 1;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -107,4 +110,26 @@ h1 {
 
 button {
   cursor: pointer;
+}
+
+/* Font Size Scaling (Accessibility) */
+/* Scale the root font size to affect all rem-based Tailwind sizes */
+html {
+  font-size: calc(16px * var(--font-size-multiplier, 1)) !important;
+}
+
+/* Also apply to px-based sizes via CSS variables */
+* {
+  --text-scale: var(--font-size-multiplier, 1);
+}
+
+/* High Contrast Mode */
+html.high-contrast {
+  --text-color: #FFFFFF;
+  --secondary-text-color: #FFFF00;
+  --primary-color: #FFD700;
+  --background-color: #000000;
+  --background-color2: #1a1a1a;
+  --background-inner-color: #0a0a0a;
+  --disabled-color: #808080;
 }

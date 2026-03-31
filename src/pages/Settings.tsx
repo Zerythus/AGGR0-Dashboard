@@ -5,10 +5,12 @@ import { faSteam } from "@fortawesome/free-brands-svg-icons";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "../services/supabaseClient";
 import { deleteUserAccount } from "../services/accountService";
+import { useAccessibility } from "../contexts/AccessibilityContext";
 import epicLogo from "/public/icons/epic-games.svg";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { settings, setFontSizeLevel, setHighContrast, resetAccessibility } = useAccessibility();
 
   const [activeTab, setActiveTab] = useState("general");
   const [syncedPlatforms, setSyncedPlatforms] = useState<{ [key: string]: boolean }>(() => {
@@ -98,6 +100,17 @@ export default function Settings() {
           } hover:underline hover:underline-offset-8 decoration-(--primary-color)`}
         >
           Account Management
+        </button>
+
+        <button
+          onClick={() => setActiveTab("Accessibility")}
+          className={`${
+            activeTab === "Accessibility"
+              ? "text-(--text-color) underline underline-offset-8 decoration-(--primary-color)"
+              : "text-(--secondary-text-color)"
+          } hover:underline hover:underline-offset-8 decoration-(--primary-color)`}
+        >
+          Accessibility
         </button>
       </div>
 
@@ -242,6 +255,104 @@ export default function Settings() {
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === "Accessibility" && (
+        <section className="mt-5 space-y-8">
+          {/* Font Size Control */}
+          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10">
+            <h3 className="text-xl font-bold text-(--text-color) mb-3">Text Size</h3>
+            <p className="text-lg text-(--secondary-text-color) mb-6">
+              Adjust the size of text throughout the application.
+            </p>
+
+            <div className="flex items-center gap-4 mb-6">
+              {/* Decrease Button */}
+              <button
+                onClick={() => setFontSizeLevel(settings.fontSizeLevel - 1)}
+                disabled={settings.fontSizeLevel === 2}
+                className="text-lg px-4 py-2 rounded-sm bg-(--primary-color) text-black hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              >
+                A−
+              </button>
+
+              {/* Size Display */}
+              <div className="flex-1">
+                <div className="bg-(--background-inner-color) rounded-sm p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-(--secondary-text-color) text-base">Text Preview</span>
+                    <span className="text-(--text-color) text-sm font-semibold">
+                      Level {settings.fontSizeLevel - 1}/3
+                    </span>
+                  </div>
+                  <p
+                    className="text-(--text-color)"
+                    style={{
+                      fontSize: `calc(18px * ${[0.9, 1, 1.1][settings.fontSizeLevel - 2]})`,
+                    }}
+                  >
+                    The quick brown fox jumps over the lazy dog
+                  </p>
+                </div>
+              </div>
+
+              {/* Increase Button */}
+              <button
+                onClick={() => setFontSizeLevel(settings.fontSizeLevel + 1)}
+                disabled={settings.fontSizeLevel === 4}
+                className="text-lg px-4 py-2 rounded-sm bg-(--primary-color) text-black hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              >
+                A+
+              </button>
+            </div>
+          </div>
+
+          {/* High Contrast Mode */}
+          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-(--text-color) text-lg font-semibold mb-2">High Contrast Mode</p>
+                <p className="text-(--secondary-text-color) text-xl">
+                  {settings.highContrast
+                    ? "Enabled - Using optimized colors for better visibility"
+                    : "Disabled - Using standard color scheme"}
+                </p>
+              </div>
+
+              {/* Toggle Switch */}
+              <button
+                onClick={() => setHighContrast(!settings.highContrast)}
+                className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
+                  settings.highContrast ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
+                }`}
+                role="switch"
+                aria-checked={settings.highContrast}
+              >
+                <div
+                  className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
+                    settings.highContrast ? "translate-x-8" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Reset Accessibility Settings */}
+          <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
+            <div>
+              <h3 className="text-xl font-bold text-(--text-color)">Reset Accessibility Settings</h3>
+              <p className="mt-3 text-lg text-(--text-color)">
+                Restore all accessibility settings to their default values.
+              </p>
+            </div>
+            <button
+              onClick={resetAccessibility}
+              className="text-lg bg-(--primary-color) my-auto text-black px-5 py-2 rounded-sm hover:opacity-90"
+            >
+              Reset
+            </button>
+          </div>
+        </section>
       )}
     </div>
   );
