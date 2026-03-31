@@ -12,23 +12,34 @@ type GameItem = {
   header_image?: string;
   image?: string;
   img_icon_url?: string;
+  platform?: "steam" | "epic";
+  image_url?: string;
 };
 
 function minToHours(minutes: number): number {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
 }
 
-function getGameImage(appid: number): string {
-    return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
+function getGameImage(game: GameItem): string {
+    if (game.platform === "epic") {
+        return game.image_url || "https://placeholdit.com/800x600/1f2c44/cdcdcd?text=Game+Image&font=&font_size=80";
+    }
+    return `https://cdn.akamai.steamstatic.com/steam/apps/${Number(game.appid)}/header.jpg`;
 }
 
-function getGameIconUrl(appid: number, img_icon_url: string): string {
-    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
+function getGameIconUrl(game: GameItem): string {
+    if (game.platform === "epic") {
+        return "/icons/epic-games.svg";
+    }
+    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${Number(game.appid)}/${game.img_icon_url || ""}.jpg`;
 }
 
-interface CostPerHourProps {}
+interface CostPerHourProps {
+  isSteamConnected: boolean;
+  isEpicConnected: boolean;
+}
 
-export default function CostPerHour({}: CostPerHourProps) {
+export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostPerHourProps) {
   const [games, setGames] = useState<GameItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(null);
@@ -41,20 +52,39 @@ export default function CostPerHour({}: CostPerHourProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch games from SteamData.json
+  // Fetch games from SteamData.json and/or EpicData.json
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch("/data/SteamData.json");
-        const data = await response.json();
-        const gameList: GameItem[] = data.steam?.games || [];
-        setGames(gameList);
+        const allGames: GameItem[] = [];
+
+        if (isSteamConnected) {
+          const steamResponse = await fetch("/data/SteamData.json");
+          const steamData = await steamResponse.json();
+          const steamGames = (steamData.steam?.games || []).map((game: GameItem) => ({
+            ...game,
+            platform: "steam"
+          }));
+          allGames.push(...steamGames);
+        }
+
+        if (isEpicConnected) {
+          const epicResponse = await fetch("/data/EpicData.json");
+          const epicData = await epicResponse.json();
+          const epicGames = (epicData.epic?.games || []).map((game: GameItem) => ({
+            ...game,
+            platform: "epic"
+          }));
+          allGames.push(...epicGames);
+        }
+
+        setGames(allGames);
       } catch (error) {
         console.error("Error fetching games:", error);
       }
     };
     fetchGames();
-  }, []);
+  }, [isSteamConnected, isEpicConnected]);
 
   const filteredGames = useMemo(() => {
     if (!searchTerm.trim()) return games.slice(0, 50);
@@ -114,7 +144,7 @@ export default function CostPerHour({}: CostPerHourProps) {
 
   const imageSrc =
     selectedGame
-      ? getGameImage(Number(selectedGame.appid))
+      ? getGameImage(selectedGame)
       : "https://placeholdit.com/800x600/1f2c44/cdcdcd?text=Game+Image&font=&font_size=80";
 
   return (
@@ -151,11 +181,7 @@ export default function CostPerHour({}: CostPerHourProps) {
                 >
                   <div className="h-6 w-6 overflow-hidden rounded-sm bg-slate-200">
                     <img
-                      src={
-                        game.header_image ||
-                        game.image ||
-                        getGameIconUrl(Number(game.appid), game.img_icon_url || "")
-                      }
+                      src={getGameIconUrl(game)}
                       alt={game.name}
                       className="h-full w-full object-cover"
                     />

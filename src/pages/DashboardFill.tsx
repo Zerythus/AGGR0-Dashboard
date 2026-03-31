@@ -86,7 +86,7 @@ export default function DashboardFill() {
                             <GamesOwnedChart onBarClick={handleBarClick} isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                         </div>
                         <div className='lg:col-span-1'>
-                            <CostPerHour />
+                            <CostPerHour isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                         </div>
                     </div>
 
@@ -100,7 +100,7 @@ export default function DashboardFill() {
                     </div>
 
                     {/* Most Played Games */}
-                    <TopGames />
+                    <TopGames isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
 
                     <div className='mb-10'>
                         {/* Just footer space here */}
