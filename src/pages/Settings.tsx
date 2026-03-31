@@ -5,10 +5,12 @@ import { faSteam } from "@fortawesome/free-brands-svg-icons";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "../services/supabaseClient";
 import { deleteUserAccount } from "../services/accountService";
+import { useAccessibility } from "../contexts/AccessibilityContext";
 import epicLogo from "/public/icons/epic-games.svg";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { settings, setFontSizeLevel, setHighContrast, resetAccessibility } = useAccessibility();
 
   const [activeTab, setActiveTab] = useState("general");
   const [syncedPlatforms, setSyncedPlatforms] = useState<{ [key: string]: boolean }>(() => {
@@ -99,13 +101,24 @@ export default function Settings() {
         >
           Account Management
         </button>
+
+        <button
+          onClick={() => setActiveTab("Accessibility")}
+          className={`${
+            activeTab === "Accessibility"
+              ? "text-(--text-color) underline underline-offset-8 decoration-(--primary-color)"
+              : "text-(--secondary-text-color)"
+          } hover:underline hover:underline-offset-8 decoration-(--primary-color)`}
+        >
+          Accessibility
+        </button>
       </div>
 
       {activeTab === "general" && (
         <section className="mt-5 bg-(--background-color) rounded-sm p-5">
           <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
 
-          <div className="mt-6 bg-(--background-inner-color) rounded-sm">
+          <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
             {platforms.map((platform, index) => (
               <div key={platform.name}>
                 <div className="flex items-center justify-between py-6 px-6">
@@ -168,7 +181,7 @@ export default function Settings() {
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Change your password</h3>
-              <p className="mt-3 text-lg text-(--text-color)">
+              <p className="mt-3 text-lg text-(--secondary-text-color)">
                 For security purposes, we recommend using a unique password that isn't used
                 for any other account.
               </p>
@@ -181,13 +194,10 @@ export default function Settings() {
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>
-              <div className="mt-3 text-lg text-(--text-color)">
-                <p>Delete your AGGR0 account.</p>
-                <p>
-                  This action is irreversible and will permanently remove all your data from
-                  our servers. Please proceed with caution.
-                </p>
-              </div>
+              <p className="mt-3 text-lg text-(--secondary-text-color)">
+                This action is irreversible and will permanently remove all your data from
+                our servers. Please proceed with caution.
+              </p>
             </div>
 
             <button
@@ -242,6 +252,101 @@ export default function Settings() {
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === "Accessibility" && (
+        <section className="mt-5 space-y-8">
+          {/* Font Size Control */}
+          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-bold text-(--text-color) mb-3">Text Size</h3>
+              <p className="text-lg text-(--secondary-text-color)">
+                Adjust the size of text throughout the application.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setFontSizeLevel(2)}
+                className={`text-sm px-6 py-2 rounded-sm font-semibold transition-opacity ${
+                  settings.fontSizeLevel === 2
+                    ? "bg-(--secondary-text-color) text-(--background-color)"
+                    : "bg-(--primary-color) text-black hover:opacity-90"
+                }`}
+              >
+                Small
+              </button>
+
+              <button
+                onClick={() => setFontSizeLevel(3)}
+                className={`text-base px-6 py-2 rounded-sm font-semibold transition-opacity ${
+                  settings.fontSizeLevel === 3
+                    ? "bg-(--secondary-text-color) text-(--background-color)"
+                    : "bg-(--primary-color) text-black hover:opacity-90"
+                }`}
+              >
+                Medium
+              </button>
+
+              <button
+                onClick={() => setFontSizeLevel(4)}
+                className={`text-lg px-6 py-2 rounded-sm font-semibold transition-opacity ${
+                  settings.fontSizeLevel === 4
+                    ? "bg-(--secondary-text-color) text-(--background-color)"
+                    : "bg-(--primary-color) text-black hover:opacity-90"
+                }`}
+              >
+                Large
+              </button>
+            </div>
+          </div>
+
+          {/* High Contrast Mode */}
+          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-(--text-color) text-lg font-semibold mb-2">High Contrast Mode</p>
+                <p className="text-(--secondary-text-color) text-lg">
+                  {settings.highContrast
+                    ? "Enabled - Using optimized colors for better visibility"
+                    : "Disabled - Using standard color scheme"}
+                </p>
+              </div>
+
+              {/* Toggle Switch */}
+              <button
+                onClick={() => setHighContrast(!settings.highContrast)}
+                className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
+                  settings.highContrast ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
+                }`}
+                role="switch"
+                aria-checked={settings.highContrast}
+              >
+                <div
+                  className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
+                    settings.highContrast ? "translate-x-8" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Reset Accessibility Settings */}
+          <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
+            <div>
+              <h3 className="text-xl font-bold text-(--text-color)">Reset Accessibility Settings</h3>
+              <p className="mt-3 text-lg text-(--secondary-text-color)">
+                Restore all accessibility settings to their default values.
+              </p>
+            </div>
+            <button
+              onClick={resetAccessibility}
+              className="text-lg bg-(--primary-color) my-auto text-black px-5 py-2 rounded-sm hover:opacity-90"
+            >
+              Reset
+            </button>
+          </div>
+        </section>
       )}
     </div>
   );

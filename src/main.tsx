@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import AppLayout from "./layout/AppLayout";
+import { AccessibilityProvider } from "./contexts/AccessibilityContext";
 
 import Home from "./pages/Home";
 import CreateAccount from "./pages/CreateAccount";
@@ -18,22 +19,24 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route>
-          <Route path="" element={<Home />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/create-account" element={<CreateAccount />} />
-        </Route>
+    <AccessibilityProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route>
+            <Route path="" element={<Home />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/create-account" element={<CreateAccount />} />
+          </Route>
 
-        <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/dashboardFill" element={<DashboardFill />} /> {/* TEST ONLY - DELETE LATER */}
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/dashboardFill" element={<DashboardFill />} /> {/* TEST ONLY - DELETE LATER */}
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AccessibilityProvider>
   </React.StrictMode>
 );

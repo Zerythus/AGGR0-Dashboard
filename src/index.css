@@ -52,10 +52,10 @@
   --primary-color: #29BDFF;
   --hover-primary-color: #27A7E0;
   --pressed-primary-color: #0284C7;
-  --disabled-color: #E8EBEF;
+  --disabled-color: #e0e0e0;
 
-  --text-color: #E5E7EB;
-  --secondary-text-color: #94A3B8;
+  --text-color: #e0e0e0;
+  --secondary-text-color: #c0c0c0;
 
   --textfield-height: 55px;
   --textfield-width: 100%; 
@@ -63,6 +63,9 @@
   --textfield-border-radius: 5px;
 
   --font-size-reg: 18px;
+  
+  /* Accessibility: Font size multiplier (default 1 = no scaling) */
+  --font-size-multiplier: 1;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -107,4 +110,77 @@ h1 {
 
 button {
   cursor: pointer;
+}
+
+/* Font Size Scaling (Accessibility) */
+/* Override Tailwind font-size utility classes with scaling */
+/* Using direct class selectors to target exact Tailwind classes */
+
+.text-xs {
+  font-size: calc(0.75rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-sm {
+  font-size: calc(0.875rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-base {
+  font-size: calc(1rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-lg {
+  font-size: calc(1.125rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-xl {
+  font-size: calc(1.25rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-2xl {
+  font-size: calc(1.5rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-3xl {
+  font-size: calc(1.875rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-4xl {
+  font-size: calc(2.25rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-5xl {
+  font-size: calc(3rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-6xl {
+  font-size: calc(3.75rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-7xl {
+  font-size: calc(4.5rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-8xl {
+  font-size: calc(6rem * var(--font-size-multiplier, 1)) !important;
+}
+
+.text-9xl {
+  font-size: calc(8rem * var(--font-size-multiplier, 1)) !important;
+}
+
+/* Also apply to px-based sizes via CSS variables */
+* {
+  --text-scale: var(--font-size-multiplier, 1);
+}
+
+/* High Contrast Mode */
+html.high-contrast {
+  --text-color: #FFFFFF;
+  --secondary-text-color: #FFFFFF;
+  --primary-color: #1E90FF;
+  --hover-primary-color: #369aff;
+  --pressed-primary-color: #0066FF;
+  --background-color: #000000;
+  --background-color2: #848484;
+  --disabled-color: #FFFFFF;
 }
