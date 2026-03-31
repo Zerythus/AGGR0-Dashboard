@@ -4,12 +4,14 @@ import { useId, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/services/supabaseClient";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 
 export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
   const emailId = useId();
   const passwordId = useId();
   const navigate = useNavigate();
+  const { settings } = useAccessibility();
 
   const [ email, setEmail ] = useState("");
   const [ password, setPassword ] = useState("");
@@ -22,23 +24,13 @@ export default function Home() {
         password
     });
 
-        if (error) {
-            console.error(error.message);
-            return;
-        }
+    if (error) {
+        setErrorMessage(error.message);
+        return;
+    }
 
-        if (!email.trim()){
-            setErrorMessage("Email not found.");
-            return;
-        }
-
-        if (!password) {
-            setErrorMessage("Invalid credentials.");
-            return;
-        }
-
-        navigate("/dashboard");
-    };
+    navigate("/dashboard");
+  };
 
   return (
       <div className="grid h-full w-full grid-cols-1 md:grid-cols-[1.4fr_1fr]">
@@ -110,7 +102,11 @@ export default function Home() {
             </div>
 
             {errorMessage && (
-                <div className="rounded-sm bg-red-500/20 border border-red-500/50 px-4 py-3 text-red-400 text-sm">
+                <div className={`rounded-sm px-4 py-3 text-sm ${
+                  settings.highContrast
+                    ? "bg-red-500/20 border border-red-500 text-white"
+                    : "bg-red-500/20 border border-red-500/50 text-red-400"
+                }`}>
                     {errorMessage}
                 </div>
             )}
