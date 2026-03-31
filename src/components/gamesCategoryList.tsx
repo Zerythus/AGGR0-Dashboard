@@ -25,6 +25,7 @@ export default function GamesCategoryList({
     onClose,
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('nameAZ');
     const itemsPerPage = 10;
     const modalRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +33,22 @@ export default function GamesCategoryList({
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedCategory]);
+
+    const sortGames = (games: Game[]) => {
+        const sorted = [...games];
+        switch (sortBy) {
+            case 'nameAZ':
+                return sorted.sort((a, b) => a.name.localeCompare(b.name));
+            case 'nameZA':
+                return sorted.sort((a, b) => b.name.localeCompare(a.name));
+            case 'hoursLow':
+                return sorted.sort((a, b) => a.playtime_forever - b.playtime_forever);
+            case 'hoursHigh':
+                return sorted.sort((a, b) => b.playtime_forever - a.playtime_forever);
+            default:
+                return sorted;
+        }
+    };
 
     useEffect(() => {
         function handleEscKey(e: KeyboardEvent) {
@@ -54,16 +71,17 @@ export default function GamesCategoryList({
                 document.removeEventListener("mousedown", handleClickOutside);
             };
         }
-    }, [selectedCategory, onClose]);
+    }, [selectedCategory, onClose, sortBy]);
 
     if (!selectedCategory) {
         return null;
     }
 
-    const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
+    const sortedGames = sortGames(filteredGames);
+    const totalPages = Math.ceil(sortedGames.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedGames = filteredGames.slice(startIndex, endIndex);
+    const paginatedGames = sortedGames.slice(startIndex, endIndex);
 
 const minutesToHours = (minutes: number) => {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
@@ -86,8 +104,8 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                     ref={modalRef}
                     className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-4xl h-50vh flex flex-col"
                 >
-                    <div className='flex justify-between'>
-                        <div className="flex justify-between items-center gap-1 p-5">
+                    <div className='flex justify-between items-center p-5'>
+                        <div className="flex items-center gap-1">
                             <h4 className="text-xl font-semibold text-(--text-color)">
                                 Games in 
                             </h4>
@@ -98,6 +116,24 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                                 category
                             </h4> 
                             
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <span className="text-(--secondary-text-color) ml-3">
+                                Sort by:
+                            </span>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => {
+                                    setSortBy(e.target.value as 'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh');
+                                }}
+                                className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat"
+                                style={{ backgroundImage: 'url("/icons/chevron-down.svg")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
+                            >
+                                <option value="nameAZ">A to Z (Alphabetical)</option>
+                                <option value="nameZA">Z to A (Alphabetical)</option>
+                                <option value="hoursLow">Low to High Hours</option>
+                                <option value="hoursHigh">High to Low Hours</option>
+                            </select>
                         </div>
                         <FontAwesomeIcon 
                             icon={faRectangleXmark} 

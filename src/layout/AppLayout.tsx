@@ -35,7 +35,7 @@ export default function AppLayout() {
         <div className="flex items-center justify-between border-b border-white/10">
           {/* placeholder logo */}
           <motion.img 
-            src="/public/logo/aggr0-logo.png" 
+            src="/logo/aggr0-logo.png" 
             alt="Logo" 
             className="h-10 mx-5 my-3 cursor-pointer" 
             whileHover={{ scale: 1.05 }}

@@ -25,7 +25,7 @@ export default function MetricCard({ label, value, unit, dataFile, metric }: Met
         return r.json();
       })
       .then((jsonData) => {
-        const games = jsonData.response.games;
+        const games = jsonData.steam.games;
 
         switch (metric) {
           case 'totalHours': {

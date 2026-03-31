@@ -8,7 +8,7 @@ type UserMenuProps = {
 
 export default function UserMenu({
   username,
-  chevronSrc = "/public/icons/chevron-down.svg",
+  chevronSrc = "/icons/chevron-down.svg",
   onAccountSettings,
   onLogout,
 }: UserMenuProps) {
