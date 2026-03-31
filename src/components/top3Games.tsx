@@ -49,7 +49,7 @@ export default function TopGames() {
         <div className="mt-5 bg-(--background-color) p-5 rounded-sm outline-2 outline-(--background-color2)">
             <div className="mb-4">
                 <h3 className="text-2xl font-semibold mb-2">Most Played Games</h3>
-                <p className='text-base text-gray-300'>
+                <p className='text-base text-(--secondary-text-color)'>
                     Your top 3 most played games based on total playtime, and when you last played them while connected online in your chosen platform.
                 </p>
             </div>
@@ -70,16 +70,16 @@ export default function TopGames() {
                             <h3 className="text-lg font-semibold text-(--primary-color)">{game.name}</h3>
 
                             <div className="flex justify-between items-center">
-                                <p className="text-base text-(--disabled-color)">Playtime:</p> 
-                                <p className="text-base text-(--disabled-color)"> {minToHours(game.playtime_forever)} hours</p>
+                                <p className="text-base text-(--secondary-text-color)">Playtime:</p> 
+                                <p className="text-base text-(--text-color)"> {minToHours(game.playtime_forever)} hours</p>
                             </div>
                             <div className="flex justify-between items-center">
-                                <p className="text-base text-(--disabled-color)">Last Played:</p> 
-                                <p className="text-base text-(--disabled-color)"> {epochToDate(game.rtime_last_played)}</p>
+                                <p className="text-base text-(--secondary-text-color)">Last Played:</p> 
+                                <p className="text-base text-(--text-color)"> {epochToDate(game.rtime_last_played)}</p>
                             </div>
                             <div className="flex justify-between items-center">
-                                <p>Achievements: </p>
-                                <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
+                                <p className="text-base text-(--secondary-text-color)">Achievements:</p>
+                                <p className="text-base text-(--text-color)"> {game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
                             </div>
                         </div>
                     </div>

@@ -181,7 +181,7 @@ export default function Settings() {
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Change your password</h3>
-              <p className="mt-3 text-lg text-(--text-color)">
+              <p className="mt-3 text-lg text-(--secondary-text-color)">
                 For security purposes, we recommend using a unique password that isn't used
                 for any other account.
               </p>
@@ -194,13 +194,10 @@ export default function Settings() {
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>
-              <div className="mt-3 text-lg text-(--text-color)">
-                <p>Delete your AGGR0 account.</p>
-                <p>
-                  This action is irreversible and will permanently remove all your data from
-                  our servers. Please proceed with caution.
-                </p>
-              </div>
+              <p className="mt-3 text-lg text-(--secondary-text-color)">
+                This action is irreversible and will permanently remove all your data from
+                our servers. Please proceed with caution.
+              </p>
             </div>
 
             <button
@@ -287,6 +284,7 @@ export default function Settings() {
                   </div>
                   <p
                     className="text-(--text-color)"
+                    data-no-scale="true"
                     style={{
                       fontSize: `calc(18px * ${[0.9, 1, 1.1][settings.fontSizeLevel - 2]})`,
                     }}
@@ -312,7 +310,7 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-(--text-color) text-lg font-semibold mb-2">High Contrast Mode</p>
-                <p className="text-(--secondary-text-color) text-xl">
+                <p className="text-(--secondary-text-color) text-lg">
                   {settings.highContrast
                     ? "Enabled - Using optimized colors for better visibility"
                     : "Disabled - Using standard color scheme"}
@@ -341,7 +339,7 @@ export default function Settings() {
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Reset Accessibility Settings</h3>
-              <p className="mt-3 text-lg text-(--text-color)">
+              <p className="mt-3 text-lg text-(--secondary-text-color)">
                 Restore all accessibility settings to their default values.
               </p>
             </div>

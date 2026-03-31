@@ -82,7 +82,7 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-semibold text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
             </div>
-            <p className='text-base text-gray-300'>
+            <p className='text-base text-(--secondary-text-color)'>
                 This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in.
             </p>
             <ResponsiveContainer 

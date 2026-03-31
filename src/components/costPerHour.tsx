@@ -120,9 +120,8 @@ export default function CostPerHour() {
 
     <div className="flex items-center justify-between mb-4">
         <h3 className="text-2xl font-semibold text-(--disabled-color)">Cost per hour</h3>  
-        {/* <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/> */}
     </div>
-    <p className='text-base text-gray-300'>
+    <p className='text-base text-(--secondary-text-color)'>
       Cost per hour calculates how much money you've spent for each hour of gameplay on a specific game.
     </p>
 

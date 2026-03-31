@@ -104,7 +104,9 @@ function applyAccessibilitySettings(settings: AccessibilitySettings) {
     root.classList.add("high-contrast");
     // Set high contrast CSS variables
     root.style.setProperty("--text-color", "#FFFFFF");
-    root.style.setProperty("--primary-color", "#FFD700");
+    root.style.setProperty("--primary-color", "#00BFFF");
+    root.style.setProperty("--hover-primary-color", "#1E90FF");
+    root.style.setProperty("--pressed-primary-color", "#0066FF");
     root.style.setProperty("--background-color", "#000000");
     root.style.setProperty("--background-color2", "#1a1a1a");
   } else {
@@ -112,6 +114,8 @@ function applyAccessibilitySettings(settings: AccessibilitySettings) {
     // Reset to original colors
     root.style.setProperty("--text-color", "#E5E7EB");
     root.style.setProperty("--primary-color", "#29BDFF");
+    root.style.setProperty("--hover-primary-color", "#27A7E0");
+    root.style.setProperty("--pressed-primary-color", "#0284C7");
     root.style.setProperty("--background-color", "#182134");
     root.style.setProperty("--background-color2", "#192B45");
   }
@@ -128,6 +132,9 @@ function applyInlineStyleScaling(multiplier: number) {
   allElements.forEach((element) => {
     const el = element as HTMLElement;
     const styleAttr = el.getAttribute("style");
+
+    // Skip elements marked with data-no-scale
+    if (el.getAttribute("data-no-scale") === "true") return;
 
     if (!styleAttr) return;
 

@@ -52,10 +52,10 @@
   --primary-color: #29BDFF;
   --hover-primary-color: #27A7E0;
   --pressed-primary-color: #0284C7;
-  --disabled-color: #E8EBEF;
+  --disabled-color: #e0e0e0;
 
-  --text-color: #E5E7EB;
-  --secondary-text-color: #94A3B8;
+  --text-color: #e0e0e0;
+  --secondary-text-color: #c0c0c0;
 
   --textfield-height: 55px;
   --textfield-width: 100%; 
@@ -126,10 +126,11 @@ html {
 /* High Contrast Mode */
 html.high-contrast {
   --text-color: #FFFFFF;
-  --secondary-text-color: #FFFF00;
-  --primary-color: #FFD700;
+  --secondary-text-color: #FFFFFF;
+  --primary-color: #00BFFF;
+  --hover-primary-color: #1E90FF;
+  --pressed-primary-color: #0066FF;
   --background-color: #000000;
-  --background-color2: #1a1a1a;
-  --background-inner-color: #0a0a0a;
-  --disabled-color: #808080;
+  --background-color2: #848484;
+  --disabled-color: #FFFFFF;
 }
