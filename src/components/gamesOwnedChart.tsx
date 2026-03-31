@@ -7,6 +7,7 @@ interface Game {
     name: string;
     playtime_forever: number;
     rtime_last_played: number;
+    platform?: "steam" | "epic";
 }
 
 interface GamesOwnedChartProps {
@@ -51,7 +52,10 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     try {
                         const steamResponse = await fetch('data/SteamData.json');
                         const steamData = await steamResponse.json();
-                        const steamGames: Game[] = steamData.steam?.games || [];
+                        const steamGames: Game[] = (steamData.steam?.games || []).map((game: Game) => ({
+                            ...game,
+                            platform: "steam"
+                        }));
                         allGamesData = [...allGamesData, ...steamGames];
                     } catch (error) {
                         console.error('Error loading Steam data:', error);
@@ -63,7 +67,10 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     try {
                         const epicResponse = await fetch('data/EpicData.json');
                         const epicData = await epicResponse.json();
-                        const epicGames: Game[] = epicData.epic?.games || [];
+                        const epicGames: Game[] = (epicData.epic?.games || []).map((game: Game) => ({
+                            ...game,
+                            platform: "epic"
+                        }));
                         allGamesData = [...allGamesData, ...epicGames];
                     } catch (error) {
                         console.error('Error loading Epic data:', error);
