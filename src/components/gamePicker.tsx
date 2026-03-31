@@ -230,28 +230,34 @@ export default function GamePicker() {
 
             {/* Game Picker Modal */}
             {pickerOpen && (
-                <div className ="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                    
-                    <FontAwesomeIcon 
-                        icon={faRectangleXmark} 
-                        style={{color: "#29bdff",}}
-                        className="absolute top-4 right-4 text-4xl cursor-pointer hover:opacity-80"
-                        onClick={() => setPickerOpen(false)} 
-                    />
-
+                <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
                     <div 
-                        className="bg-white rounded-sm max-w-200 max-h-[80vh] overflow-y-auto"
+                        className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl h-[80vh] flex flex-col relative"
                         ref={modalRef}
                         >
-                        <div className="sticky top-0 z-10 bg-white px-4 py-2 flex justify-between items-center border-b">
-                            <SearchFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} /> 
+                        <div className="sticky z-10 bg-(--background-color) px-5 py-5 mt-3 flex justify-between items-center border-b border-white/10 rounded-sm">
+                            <SearchFilter 
+                                searchTerm={searchTerm} 
+                                setSearchTerm={setSearchTerm}
+                                onClear={() => setSearchTerm("")}
+                            />
                         </div>
+                        <FontAwesomeIcon 
+                            icon={faRectangleXmark} 
+                            style={{color: "#29bdff",}}
+                            className="absolute top-2 right-5 text-4xl cursor-pointer hover:opacity-80 z-20"
+                            onClick={() => setPickerOpen(false)} 
+                        />
 
-                        <ul className="mx-4 mb-4">
+                        <div className="bg-(--background-inner-color) flex-1 p-4 overflow-y-auto flex flex-col rounded-sm">
+                            <ul className="flex-1 space-y-2">
                             {filteredGames.map((game) => (
-                                <li key={game.appid}>
+                                <li
+                                    key={game.appid}
+                                    className="text-(--text-color) py-2 px-2"
+                                >
                                     <button onClick={() => selectGame(game.appid)} 
-                                        className="w-full text-left px-3 py-2 rounded-sm hover:bg-gray-200 text-(--background-color)"
+                                        className="w-full text-left px-3 py-3 rounded-sm hover:bg-white/10 text-(--text-color)"
                                         >
                                         <img src={getGameIconUrl(game.appid, game.img_icon_url)} alt={game.name} 
                                             className="w-6 h-6 inline mr-2" 
@@ -260,7 +266,8 @@ export default function GamePicker() {
                                     </button>
                                 </li>
                             ))}
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             )}

@@ -6,6 +6,8 @@ type Game = {
     name: string;
     playtime_forever: number; //Hours played
     rtime_last_played: number; //Epoch time of last played date
+    total_achievements?: number;
+    unlocked_achievements?: number;
 }
 
 function minToHours(minutes: number): number {
@@ -74,6 +76,10 @@ export default function TopGames() {
                             <div className="flex justify-between items-center">
                                 <p className="text-base text-(--disabled-color)">Last Played:</p> 
                                 <p className="text-base text-(--disabled-color)"> {epochToDate(game.rtime_last_played)}</p>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <p>Achievements: </p>
+                                <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
                             </div>
                         </div>
                     </div>
