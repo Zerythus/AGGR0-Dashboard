@@ -248,8 +248,8 @@ export default function GamePicker() {
                             onClick={() => setPickerOpen(false)} 
                         />
 
-                        <div className="bg-(--background-inner-color) flex-1 p-4 overflow-y-auto flex flex-col rounded-sm">
-                            <ul className="flex-1 space-y-2">
+                        <div className="bg-(--background-inner-color) flex-1 p-2 overflow-y-auto flex flex-col rounded-sm">
+                            <ul className="flex-1">
                             {filteredGames.map((game) => (
                                 <li
                                     key={game.appid}
