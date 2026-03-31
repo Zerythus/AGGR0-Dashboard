@@ -8,6 +8,8 @@ type Game = {
     rtime_last_played: number; //Epoch time of last played date
     total_achievements?: number;
     unlocked_achievements?: number;
+    platform?: "steam" | "epic";
+    image_url?: string;
 }
 
 function minToHours(minutes: number): number {
@@ -22,24 +24,56 @@ function epochToDate(epoch: number): string {
     return date.toLocaleDateString(undefined, {year: "numeric", month: "short", day: "2-digit"}); // Format as local date string
 }
 
-function getGameHeaderUrl(appid: number): string {
-    return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
+function getGameHeaderUrl(game: Game): string {
+    if (game.platform === "epic" && game.image_url) {
+        return game.image_url;
+    }
+    return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
-export default function Top3Games() {
+interface Top3GamesProps {
+    isSteamConnected: boolean;
+    isEpicConnected: boolean;
+}
+
+export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3GamesProps) {
     const [games, setGames] = useState<Game[]>([]);
     
     useEffect(() => {
-        fetch("/data/SteamData.json")
-            .then((r) => r.json())
-            .then((json) => {
-                const allGames: Game[] = json.steam.games;
+        const fetchGames = async () => {
+            try {
+                const allGames: Game[] = [];
+
+                if (isSteamConnected) {
+                    const steamResponse = await fetch("/data/SteamData.json");
+                    const steamData = await steamResponse.json();
+                    const steamGames = (steamData.steam?.games || []).map((game: Game) => ({
+                        ...game,
+                        platform: "steam"
+                    }));
+                    allGames.push(...steamGames);
+                }
+
+                if (isEpicConnected) {
+                    const epicResponse = await fetch("/data/EpicData.json");
+                    const epicData = await epicResponse.json();
+                    const epicGames = (epicData.epic?.games || []).map((game: Game) => ({
+                        ...game,
+                        platform: "epic"
+                    }));
+                    allGames.push(...epicGames);
+                }
+
                 const top3 = allGames
                     .sort((a, b) => b.playtime_forever - a.playtime_forever)
                     .slice(0, 3);
                 setGames(top3);
-            })
-    }, []);
+            } catch (error) {
+                console.error("Error fetching games:", error);
+            }
+        };
+        fetchGames();
+    }, [isSteamConnected, isEpicConnected]);
 
     if (games.length === 0) {
         return <p className="text-center text-gray-500">No games played yet.</p>;
@@ -61,13 +95,13 @@ export default function Top3Games() {
                         style={{boxShadow: `0 -1px 5px -1px var(--primary-color)`}}
                         >
                         <motion.img 
-                            src={getGameHeaderUrl(game.appid)} alt={game.name} 
+                            src={getGameHeaderUrl(game)} alt={game.name} 
                             className="w-full h-50 object-cover" 
                             whileHover={{ scale: 1.05 }}
                             transition={{ duration: 0.2 }}
                             />
                         <div className="p-4">
-                            <h3 className="text-lg font-semibold text-(--primary-color)">{game.name}</h3>
+                            <h3 className="text-lg font-semibold mb-2 text-(--primary-color)">{game.name}</h3>
 
                             <div className="flex justify-between items-center">
                                 <p className="text-base text-(--secondary-text-color)">Playtime:</p> 
@@ -80,6 +114,10 @@ export default function Top3Games() {
                             <div className="flex justify-between items-center">
                                 <p className="text-base text-(--secondary-text-color)">Achievements:</p>
                                 <p className="text-base text-(--text-color)"> {game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
+                            </div>
+                            <div className="flex justify-between items-center mt-5">
+                                <p className="text-base text-(--secondary-text-color)">Gaming Platform:</p>
+                                <p className="text-base text-(--text-color)"> {game.platform === "epic" ? "Epic Games" : "Steam"}</p>
                             </div>
                         </div>
                     </div>
