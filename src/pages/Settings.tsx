@@ -118,7 +118,7 @@ export default function Settings() {
         <section className="mt-5 bg-(--background-color) rounded-sm p-5">
           <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
 
-          <div className="mt-6 bg-(--background-inner-color) rounded-sm">
+          <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
             {platforms.map((platform, index) => (
               <div key={platform.name}>
                 <div className="flex items-center justify-between py-6 px-6">
@@ -257,50 +257,46 @@ export default function Settings() {
       {activeTab === "Accessibility" && (
         <section className="mt-5 space-y-8">
           {/* Font Size Control */}
-          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10">
-            <h3 className="text-xl font-bold text-(--text-color) mb-3">Text Size</h3>
-            <p className="text-lg text-(--secondary-text-color) mb-6">
-              Adjust the size of text throughout the application.
-            </p>
+          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-bold text-(--text-color) mb-3">Text Size</h3>
+              <p className="text-lg text-(--secondary-text-color)">
+                Adjust the size of text throughout the application.
+              </p>
+            </div>
 
-            <div className="flex items-center gap-4 mb-6">
-              {/* Decrease Button */}
+            <div className="flex gap-3">
               <button
-                onClick={() => setFontSizeLevel(settings.fontSizeLevel - 1)}
-                disabled={settings.fontSizeLevel === 2}
-                className="text-lg px-4 py-2 rounded-sm bg-(--primary-color) text-black hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                onClick={() => setFontSizeLevel(2)}
+                className={`text-sm px-6 py-2 rounded-sm font-semibold transition-opacity ${
+                  settings.fontSizeLevel === 2
+                    ? "bg-(--secondary-text-color) text-(--background-color)"
+                    : "bg-(--primary-color) text-black hover:opacity-90"
+                }`}
               >
-                A−
+                Small
               </button>
 
-              {/* Size Display */}
-              <div className="flex-1">
-                <div className="bg-(--background-inner-color) rounded-sm p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-(--secondary-text-color) text-base">Text Preview</span>
-                    <span className="text-(--text-color) text-sm font-semibold">
-                      Level {settings.fontSizeLevel - 1}/3
-                    </span>
-                  </div>
-                  <p
-                    className="text-(--text-color)"
-                    data-no-scale="true"
-                    style={{
-                      fontSize: `calc(18px * ${[0.9, 1, 1.1][settings.fontSizeLevel - 2]})`,
-                    }}
-                  >
-                    The quick brown fox jumps over the lazy dog
-                  </p>
-                </div>
-              </div>
-
-              {/* Increase Button */}
               <button
-                onClick={() => setFontSizeLevel(settings.fontSizeLevel + 1)}
-                disabled={settings.fontSizeLevel === 4}
-                className="text-lg px-4 py-2 rounded-sm bg-(--primary-color) text-black hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                onClick={() => setFontSizeLevel(3)}
+                className={`text-base px-6 py-2 rounded-sm font-semibold transition-opacity ${
+                  settings.fontSizeLevel === 3
+                    ? "bg-(--secondary-text-color) text-(--background-color)"
+                    : "bg-(--primary-color) text-black hover:opacity-90"
+                }`}
               >
-                A+
+                Medium
+              </button>
+
+              <button
+                onClick={() => setFontSizeLevel(4)}
+                className={`text-lg px-6 py-2 rounded-sm font-semibold transition-opacity ${
+                  settings.fontSizeLevel === 4
+                    ? "bg-(--secondary-text-color) text-(--background-color)"
+                    : "bg-(--primary-color) text-black hover:opacity-90"
+                }`}
+              >
+                Large
               </button>
             </div>
           </div>

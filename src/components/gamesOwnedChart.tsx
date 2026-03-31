@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useAccessibility } from '../contexts/AccessibilityContext';
 
 interface Game {
     appid: number;
@@ -26,9 +27,18 @@ const PLAYTIME_CATEGORIES = [
 ];
 
 export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
+    const { settings } = useAccessibility();
     const dataUrl = `data/SampleData.json`;
     const [playtimeCategoryData, setPlaytimeCategoryData] = useState<{ category: string; count: number; }[]>([]);
     const [allGames, setAllGames] = useState<Game[]>([]);
+
+    // Calculate chart height based on font size level
+    const chartHeightMap: { [key: number]: number } = {
+        2: 500,  // Small
+        3: 550,  // Medium (default)
+        4: 600,  // Large
+    };
+    const chartHeight = chartHeightMap[settings.fontSizeLevel] || 600;
 
     useEffect(() => {
         fetch(dataUrl)
@@ -87,11 +97,11 @@ export default function GamesOwnedChart({ onBarClick }: GamesOwnedChartProps) {
             </p>
             <ResponsiveContainer 
                 width="100%" 
-                height={550}
+                height={chartHeight}
             >
                 <BarChart
                     width={1000}
-                    height={550}
+                    height={chartHeight}
                     data={playtimeCategoryData}
                     margin={{ top: 20, right: 0, left: 10, bottom: 20 }}
                 >
