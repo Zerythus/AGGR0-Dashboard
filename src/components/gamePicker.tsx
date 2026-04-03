@@ -1,6 +1,6 @@
 // Steam achievements are edited into the JSON file directly (they do not depict real count of achievements)
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "../services/supabaseClient";
 import SearchFilter from "./searchFilter";
@@ -9,44 +9,55 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleMinus } from "@fortawesome/free-solid-svg-icons/faCircleMinus";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
 
+type Platform = "steam" | "epic";
+
 type Game = {
     appid: number;
     name: string;
-    playtime_forever: number; //Hours played
-    rtime_last_played: number; //Epoch time of last played date
-    img_icon_url: string; //game icon url
+    playtime_forever: number;
+    rtime_last_played: number;
+    img_icon_url: string;
     total_achievements?: number;
     unlocked_achievements?: number;
-    platform?: "steam" | "epic"; //Track which platform the game came from
-    image_url?: string; //Direct image URL for Epic games
-}
+    platform?: Platform;
+    image_url?: string;
+};
+
+type MonitorRow = {
+    app_id: number;
+    platform: Platform;
+    slot_index: number;
+};
 
 function minToHours(minutes: number): number {
-    return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
+    return Math.round((minutes / 60) * 10) / 10;
 }
 
 function epochToDate(epoch: number): string {
-    const date = new Date(epoch * 1000); // Convert seconds to milliseconds
+    const date = new Date(epoch * 1000);
     if (epoch === 0) {
         return "Never Played";
     }
-    return date.toLocaleDateString(undefined, {year: "numeric", month: "short", day: "2-digit"}); // Format as local date string
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+    });
 }
 
-function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" | "epic"): string {
+function getGameIconUrl(appid: number, img_icon_url: string, platform?: Platform): string {
     if (platform === "epic") {
         return "/icons/epic-games.svg";
     }
-    // Default to Steam CDN for steam games
 
-    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`; // Do not change this url for Steam
+    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
 }
 
 function getGameHeaderUrl(game: Game): string {
     if (game.platform === "epic" && game.image_url) {
         return game.image_url;
     }
-    // Default to Steam CDN for steam games
+
     return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
@@ -57,18 +68,44 @@ interface GamePickerProps {
 
 export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePickerProps) {
     const [games, setGames] = useState<Game[]>([]);
-    const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]); // 3 null slots for selected games
+    const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]);
 
     const [pickerOpen, setPickerOpen] = useState(false);
     const [activeSlot, setActiveSlot] = useState<number | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-    const [searchTerm, setSearchTerm] = useState(""); // Search functionality for game picker
     const modalRef = useRef<HTMLDivElement | null>(null);
-
 
     const filteredGames = games.filter((game) =>
         game.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const gameKey = (appid: number, platform?: Platform) => `${platform ?? "steam"}-${appid}`;
+
+    const gameMap = useMemo(() => {
+        return new Map<string, Game>(
+            games.map((game) => [gameKey(game.appid, game.platform), game])
+        );
+    }, [games]);
+
+    useEffect(() => {
+        async function getCurrentUser() {
+            const {
+                data: { user },
+                error,
+            } = await supabase.auth.getUser();
+
+            if (error) {
+                console.error("Error getting current user:", error.message);
+                return;
+            }
+
+            setCurrentUserId(user?.id ?? null);
+        }
+
+        getCurrentUser();
+    }, []);
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -80,7 +117,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                     const json = await response.json();
                     const steamGames = json.steam.games.map((game: Game) => ({
                         ...game,
-                        platform: "steam" as const
+                        platform: "steam" as const,
                     }));
                     allGames.push(...steamGames);
                 } catch (error) {
@@ -94,7 +131,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                     const json = await response.json();
                     const epicGames = json.epic.games.map((game: Game) => ({
                         ...game,
-                        platform: "epic" as const
+                        platform: "epic" as const,
                     }));
                     allGames.push(...epicGames);
                 } catch (error) {
@@ -108,102 +145,138 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         fetchGames();
     }, [isSteamConnected, isEpicConnected]);
 
-    // Fetch selected games - persists even after refreshing
     useEffect(() => {
         async function fetchSelectedGames() {
+            if (!currentUserId) return;
+
             const { data, error } = await supabase
                 .from("user_monitor_games")
-                .select("app_id")
-                .order("created_at", { ascending: true });
+                .select("app_id, platform, slot_index")
+                .eq("user_id", currentUserId)
+                .order("slot_index", { ascending: true });
+
             if (error) {
                 console.error("Error fetching selected games:", error.message);
                 return;
             }
-            if (data && data.length > 0 && games.length > 0) {
-                // Map appid in json to app_id in Supabase
-                const selectedGames = data
-                    .slice(0, 3)
-                    .map((row: { app_id: number }) => games.find(g => g.appid === row.app_id) || null);
 
-                while (selectedGames.length < 3) selectedGames.push(null); // Up to 3, but 1st slot will always be filled first
-                // if slot 1 is empty, games in slot 2 and 3 will shift left to fill empty slot
-                setSlots(selectedGames);
-            }
+            const nextSlots: (Game | null)[] = [null, null, null];
+
+            (data as MonitorRow[]).forEach((row) => {
+                if (row.slot_index >= 0 && row.slot_index <= 2) {
+                    const matchedGame = gameMap.get(gameKey(row.app_id, row.platform)) || null;
+                    nextSlots[row.slot_index] = matchedGame;
+                }
+            });
+
+            setSlots(nextSlots);
         }
+
         fetchSelectedGames();
-    }, [games]);
+    }, [currentUserId, gameMap]);
 
     useEffect(() => {
         if (!pickerOpen) return;
 
         function handleKeyDown(e: KeyboardEvent) {
-        if (e.key === "Escape") {
-            setPickerOpen(false);
-        }
+            if (e.key === "Escape") {
+                setPickerOpen(false);
+            }
         }
 
         function handleMouseDown(e: MouseEvent) {
-        if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-            setPickerOpen(false);
-        }
+            if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+                setPickerOpen(false);
+            }
         }
 
         document.addEventListener("keydown", handleKeyDown);
         document.addEventListener("mousedown", handleMouseDown);
 
         return () => {
-        document.removeEventListener("keydown", handleKeyDown);
-        document.removeEventListener("mousedown", handleMouseDown);
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("mousedown", handleMouseDown);
         };
     }, [pickerOpen]);
-
-    const gameMap = new Map(games.map((game) => [game.appid, game]));
 
     function togglePicker(slotIndex: number) {
         setActiveSlot(slotIndex);
         setPickerOpen(true);
     }
 
+    async function rewriteMonitorGames(nextSlots: (Game | null)[]) {
+        if (!currentUserId) return;
 
-    // Add game
-    async function addSelectedGame(appid: number) {
-        const { error } = await supabase
-            .from("user_monitor_games")
-            .insert([{ app_id: appid }]);
-        if (error) {
-            console.error("Error adding selected game:", error.message);
-        }
-    }
-
-    // Remove game
-    async function removeSelectedGame(appid: number) {
-        const { error } = await supabase
+        const { error: deleteError } = await supabase
             .from("user_monitor_games")
             .delete()
-            .eq("app_id", appid);
-        if (error) {
-            console.error("Error removing selected game:", error.message);
+            .eq("user_id", currentUserId);
+
+        if (deleteError) {
+            console.error("Error rewriting monitor games:", deleteError.message);
+            return;
+        }
+
+        const rows = nextSlots
+            .map((game, index) => {
+                if (!game?.platform) return null;
+
+                return {
+                    user_id: currentUserId,
+                    app_id: game.appid,
+                    platform: game.platform,
+                    slot_index: index,
+                };
+            })
+            .filter((row): row is {
+                user_id: string;
+                app_id: number;
+                platform: Platform;
+                slot_index: number;
+            } => row !== null);
+
+        if (rows.length === 0) return;
+
+        const { error: insertError } = await supabase
+            .from("user_monitor_games")
+            .insert(rows);
+
+        if (insertError) {
+            console.error("Error saving monitor games:", insertError.message);
         }
     }
 
-    async function selectGame(appid: number) {
-        if (activeSlot === null) return;
+    async function selectGame(game: Game) {
+        if (activeSlot === null || !game.platform) return;
 
-        const newSlots = [...slots];
-        newSlots[activeSlot] = gameMap.get(appid) || null;
-        setSlots(newSlots);
+        const nextSlots = [...slots];
+
+        for (let i = 0; i < nextSlots.length; i++) {
+            const slotGame = nextSlots[i];
+            if (
+                slotGame &&
+                slotGame.appid === game.appid &&
+                slotGame.platform === game.platform
+            ) {
+                nextSlots[i] = null;
+            }
+        }
+
+        nextSlots[activeSlot] = game;
+
+        setSlots(nextSlots);
         setPickerOpen(false);
-        await addSelectedGame(appid);
+        setActiveSlot(null);
+
+        await rewriteMonitorGames(nextSlots);
     }
 
     async function clearSlot(slotIndex: number) {
-        const game = slots[slotIndex];
-        const newSlots = [...slots];
-        newSlots[slotIndex] = null;
-        setSlots(newSlots);
-        if (game) {
-            await removeSelectedGame(game.appid);
-        }
+        const nextSlots = [...slots];
+        nextSlots[slotIndex] = null;
+
+        setSlots(nextSlots);
+        await rewriteMonitorGames(nextSlots);
     }
 
     return (
@@ -214,30 +287,31 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             <p className="text-base text-(--secondary-text-color)">
                 Select up to three games to monitor their playtime, last played date, and achievements at a glance. Your selections will be saved for future visits.
             </p>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mx-auto mt-5">
                 {slots.map((game, index) => (
                     <div key={index}>
                         {game ? (
-                            <div 
+                            <div
                                 className="rounded-sm overflow-hidden"
-                                style={{boxShadow: `0 -1px 5px -1px var(--primary-color)`}}
+                                style={{ boxShadow: `0 -1px 5px -1px var(--primary-color)` }}
                             >
                                 <div className="relative">
-                                    <motion.img 
-                                        src={getGameHeaderUrl(game)} 
-                                        alt={game.name} 
-                                        className="w-full h-50 object-cover rounded-sm" 
+                                    <motion.img
+                                        src={getGameHeaderUrl(game)}
+                                        alt={game.name}
+                                        className="w-full h-50 object-cover rounded-sm"
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.2 }}
                                     />
-                                    <FontAwesomeIcon 
-                                        icon={faCircleMinus} 
-                                        style={{color: "rgb(255, 0, 0)",}} 
+                                    <FontAwesomeIcon
+                                        icon={faCircleMinus}
+                                        style={{ color: "rgb(255, 0, 0)" }}
                                         onClick={() => clearSlot(index)}
                                         className="absolute top-2 right-2 text-2xl hover:opacity-80 cursor-pointer"
                                     />
-
                                 </div>
+
                                 <div className="p-4 rounded-b-sm">
                                     <h3 className="text-lg font-semibold mb-2 text-(--primary-color)">{game.name}</h3>
 
@@ -260,7 +334,6 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         <p>Gaming Platform: </p>
                                         <p>{game.platform === "epic" ? "Epic Games" : "Steam"}</p>
                                     </div>
-
                                 </div>
                             </div>
                         ) : (
@@ -268,7 +341,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                 <button
                                     onClick={() => togglePicker(index)}
                                     className="card-body w-full min-h-40 flex flex-col items-center justify-center text-xl text-primary hover:text-black"
-                                    >
+                                >
                                     <div className="text-2xl font-semibold">+</div>
                                     <div className="text-base">Add Game</div>
                                 </button>
@@ -278,44 +351,50 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                 ))}
             </div>
 
-            {/* Game Picker Modal */}
             {pickerOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                    <div 
+                    <div
                         className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl h-[80vh] flex flex-col relative"
                         ref={modalRef}
-                        >
+                    >
                         <div className="sticky z-10 bg-(--background-color) px-5 py-5 mt-3 flex justify-between items-center border-b border-white/10 rounded-sm">
-                            <SearchFilter 
-                                searchTerm={searchTerm} 
+                            <SearchFilter
+                                searchTerm={searchTerm}
                                 setSearchTerm={setSearchTerm}
                                 onClear={() => setSearchTerm("")}
                             />
                         </div>
-                        <FontAwesomeIcon 
-                            icon={faRectangleXmark} 
-                            style={{color: "#29bdff",}}
+
+                        <FontAwesomeIcon
+                            icon={faRectangleXmark}
+                            style={{ color: "#29bdff" }}
                             className="absolute top-2 right-5 text-4xl cursor-pointer hover:opacity-80 z-20"
-                            onClick={() => setPickerOpen(false)} 
+                            onClick={() => {
+                                setPickerOpen(false);
+                                setActiveSlot(null);
+                            }}
                         />
 
                         <div className="bg-(--background-inner-color) flex-1 p-2 overflow-y-auto flex flex-col rounded-sm">
                             <ul className="flex-1">
-                            {filteredGames.map((game) => (
-                                <li
-                                    key={game.appid}
-                                    className="text-(--text-color) py-2 px-2"
-                                >
-                                    <button onClick={() => selectGame(game.appid)} 
-                                        className="w-full text-left px-3 py-3 rounded-sm hover:bg-white/10 text-(--text-color)"
+                                {filteredGames.map((game) => (
+                                    <li
+                                        key={`${game.platform}-${game.appid}`}
+                                        className="text-(--text-color) py-2 px-2"
+                                    >
+                                        <button
+                                            onClick={() => selectGame(game)}
+                                            className="w-full text-left px-3 py-3 rounded-sm hover:bg-white/10 text-(--text-color)"
                                         >
-                                        <img src={getGameIconUrl(game.appid, game.img_icon_url, game.platform)} alt={game.name} 
-                                            className="w-6 h-6 inline mr-2" 
-                                        />
-                                        {game.name}
-                                    </button>
-                                </li>
-                            ))}
+                                            <img
+                                                src={getGameIconUrl(game.appid, game.img_icon_url, game.platform)}
+                                                alt={game.name}
+                                                className="w-6 h-6 inline mr-2"
+                                            />
+                                            {game.name}
+                                        </button>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
                     </div>
