@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 export default function AppLayout() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,10 +25,17 @@ export default function AppLayout() {
         const currentCount = parseInt(localStorage.getItem('loginCount') || '0', 10);
         localStorage.setItem('loginCount', String(currentCount + 1));
       }
+
+      setIsAuthChecked(true);
     };
 
     fetchUser();
   }, [navigate]);
+
+  // Prevent rendering until auth is verified
+  if (!isAuthChecked) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
