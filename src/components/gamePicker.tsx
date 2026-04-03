@@ -14,13 +14,13 @@ type Platform = "steam" | "epic";
 type Game = {
     appid: number;
     name: string;
-    playtime_forever: number; //Hours played
-    rtime_last_played: number; //Epoch time of last played date
-    img_icon_url: string; //game icon url
+    playtime_forever: number;
+    rtime_last_played: number;
+    img_icon_url: string;
     total_achievements?: number;
     unlocked_achievements?: number;
-    platform?: Platform; //Track which platform the game came from
-    image_url?: string; //Direct image URL for Epic games
+    platform?: Platform;
+    image_url?: string;
 };
 
 type MonitorRow = {
@@ -30,21 +30,26 @@ type MonitorRow = {
 };
 
 function minToHours(minutes: number): number {
-    return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
+    return Math.round((minutes / 60) * 10) / 10;
 }
 
 function epochToDate(epoch: number): string {
-    const date = new Date(epoch * 1000); // Convert seconds to milliseconds
+    const date = new Date(epoch * 1000);
     if (epoch === 0) {
         return "Never Played";
     }
-    return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" }); // Format as local date string
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+    });
 }
 
 function getGameIconUrl(appid: number, img_icon_url: string, platform?: Platform): string {
     if (platform === "epic") {
         return "/icons/epic-games.svg";
     }
+
     return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
 }
 
@@ -52,6 +57,7 @@ function getGameHeaderUrl(game: Game): string {
     if (game.platform === "epic" && game.image_url) {
         return game.image_url;
     }
+
     return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
@@ -65,8 +71,6 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]);
 
     const [pickerOpen, setPickerOpen] = useState(false);
-    const [activeSlot, setActiveSlot] = useState<number | null>(null);
-
     const [searchTerm, setSearchTerm] = useState("");
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -79,7 +83,9 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     const gameKey = (appid: number, platform?: Platform) => `${platform ?? "steam"}-${appid}`;
 
     const gameMap = useMemo(() => {
-        return new Map(games.map((game) => [gameKey(game.appid, game.platform), game]));
+        return new Map(
+            games.map((game) => [gameKey(game.appid, game.platform), game])
+        );
     }, [games]);
 
     useEffect(() => {
@@ -140,7 +146,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
 
     useEffect(() => {
         async function fetchSelectedGames() {
-            if (!currentUserId || games.length === 0) return;
+            if (!currentUserId || gameMap.size === 0) return;
 
             const { data, error } = await supabase
                 .from("user_monitor_games")
@@ -156,11 +162,9 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             const nextSlots: (Game | null)[] = [null, null, null];
 
             (data as MonitorRow[]).forEach((row) => {
-                const slot = row.slot_index;
-
-                if (slot >= 0 && slot <= 2) {
+                if (row.slot_index >= 0 && row.slot_index <= 2) {
                     const matchedGame = gameMap.get(gameKey(row.app_id, row.platform)) || null;
-                    nextSlots[slot] = matchedGame;
+                    nextSlots[row.slot_index] = matchedGame;
                 }
             });
 
@@ -168,7 +172,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         }
 
         fetchSelectedGames();
-    }, [currentUserId, gameMap, games.length]);
+    }, [currentUserId, gameMap]);
 
     useEffect(() => {
         if (!pickerOpen) return;
@@ -194,88 +198,80 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         };
     }, [pickerOpen]);
 
-    function togglePicker(slotIndex: number) {
-        setActiveSlot(slotIndex);
+    function togglePicker() {
         setPickerOpen(true);
     }
 
-    async function saveSelectedGame(game: Game, slotIndex: number) {
-        if (!currentUserId || !game.platform) return;
+    async function rewriteMonitorGames(nextGames: Game[]) {
+        if (!currentUserId) return;
 
-        const { error: deleteSlotError } = await supabase
+        const { error: deleteError } = await supabase
             .from("user_monitor_games")
             .delete()
-            .eq("user_id", currentUserId)
-            .eq("platform", game.platform)
-            .eq("slot_index", slotIndex);
+            .eq("user_id", currentUserId);
 
-        if (deleteSlotError) {
-            console.error("Error clearing slot:", deleteSlotError.message);
+        if (deleteError) {
+            console.error("Error rewriting monitor games:", deleteError.message);
             return;
         }
 
-        const { error: deleteGameError } = await supabase
+        if (nextGames.length === 0) return;
+
+        const rows = nextGames.map((game, index) => ({
+            user_id: currentUserId,
+            app_id: game.appid,
+            platform: game.platform,
+            slot_index: index,
+        }));
+
+        const { error: insertError } = await supabase
             .from("user_monitor_games")
-            .delete()
-            .eq("user_id", currentUserId)
-            .eq("platform", game.platform)
-            .eq("app_id", game.appid);
-
-        if (deleteGameError) {
-            console.error("Error clearing duplicate game:", deleteGameError.message);
-            return;
-        }
-
-        const { error: insertError } = await supabase.from("user_monitor_games").insert([
-            {
-                user_id: currentUserId,
-                app_id: game.appid,
-                platform: game.platform,
-                slot_index: slotIndex,
-            },
-        ]);
+            .insert(rows);
 
         if (insertError) {
-            console.error("Error saving selected game:", insertError.message);
-        }
-    }
-
-    async function removeSelectedGame(game: Game, slotIndex: number) {
-        if (!currentUserId || !game.platform) return;
-
-        const { error } = await supabase
-            .from("user_monitor_games")
-            .delete()
-            .eq("user_id", currentUserId)
-            .eq("platform", game.platform)
-            .eq("app_id", game.appid)
-            .eq("slot_index", slotIndex);
-
-        if (error) {
-            console.error("Error removing selected game:", error.message);
+            console.error("Error saving monitor games:", insertError.message);
         }
     }
 
     async function selectGame(game: Game) {
-        if (activeSlot === null) return;
+        if (!game.platform) return;
 
-        const newSlots = [...slots];
-        newSlots[activeSlot] = game;
-        setSlots(newSlots);
+        const currentGames = slots.filter((slot): slot is Game => slot !== null);
+        const withoutDuplicate = currentGames.filter(
+            (g) => !(g.appid === game.appid && g.platform === game.platform)
+        );
+
+        const latestThree = [game, ...withoutDuplicate].slice(0, 3);
+        const nextSlots: (Game | null)[] = [
+            latestThree[0] || null,
+            latestThree[1] || null,
+            latestThree[2] || null,
+        ];
+
+        setSlots(nextSlots);
         setPickerOpen(false);
 
-        await saveSelectedGame(game, activeSlot);
+        await rewriteMonitorGames(latestThree);
     }
 
     async function clearSlot(slotIndex: number) {
-        const game = slots[slotIndex];
-        const newSlots = [...slots];
-        newSlots[slotIndex] = null;
-        setSlots(newSlots);
+        const currentGames = slots.filter((slot): slot is Game => slot !== null);
+        const gameToRemove = slots[slotIndex];
 
-        if (game) {
-            await removeSelectedGame(game, slotIndex);
-        }
+        if (!gameToRemove) return;
+
+        const nextGames = currentGames.filter(
+            (g) => !(g.appid === gameToRemove.appid && g.platform === gameToRemove.platform)
+        );
+
+        const nextSlots: (Game | null)[] = [
+            nextGames[0] || null,
+            nextGames[1] || null,
+            nextGames[2] || null,
+        ];
+
+        setSlots(nextSlots);
+        await rewriteMonitorGames(nextGames);
     }
 
     return (
@@ -338,7 +334,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                         ) : (
                             <div className="card outline-2 outline-dashed outline-(--primary-color) text-(--disabled-color) bg-(--background-color2) hover:bg-(--hover-primary-color) hover:outline-0 hover:text-(--disabled-color) active:bg-(--pressed-primary-color) rounded-sm">
                                 <button
-                                    onClick={() => togglePicker(index)}
+                                    onClick={togglePicker}
                                     className="card-body w-full min-h-40 flex flex-col items-center justify-center text-xl text-primary hover:text-black"
                                 >
                                     <div className="text-2xl font-semibold">+</div>
