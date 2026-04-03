@@ -26,7 +26,8 @@ export default function GamesCategoryList({
     onClose,
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
-    const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('nameAZ');
+    const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('hoursHigh');
+    const [filterBy, setFilterBy] = useState<'all' | 'steam' | 'epic'>('all');
     const itemsPerPage = 10;
     const modalRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,18 @@ export default function GamesCategoryList({
                 return sorted.sort((a, b) => b.playtime_forever - a.playtime_forever);
             default:
                 return sorted;
+        }
+    };
+
+    const filterGames = (games: Game[]) => {
+        switch (filterBy) {
+            case 'steam':
+                return games.filter(game => game.platform === "steam");
+            case 'epic':
+                return games.filter(game => game.platform === "epic");
+            case 'all':
+            default:
+                return games;
         }
     };
 
@@ -78,11 +91,12 @@ export default function GamesCategoryList({
         return null;
     }
 
-    const sortedGames = sortGames(filteredGames);
-    const totalPages = Math.ceil(sortedGames.length / itemsPerPage);
+    const gamesByPlatform = filterGames(filteredGames);
+    const finalSortedGames = sortGames(gamesByPlatform);
+    const totalPages = Math.ceil(finalSortedGames.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedGames = sortedGames.slice(startIndex, endIndex);
+    const paginatedGames = finalSortedGames.slice(startIndex, endIndex);
 
 const minutesToHours = (minutes: number) => {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
@@ -142,6 +156,25 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                 <option value="hoursHigh">High to Low Hours</option>
                             </select>
                         </div>
+
+                        <div className="flex items-center gap-1">
+                            <span className="text-(--secondary-text-color) ml-3">
+                                Filter by:
+                            </span>
+                            <select
+                                value={filterBy}
+                                onChange={(e) => {
+                                    setFilterBy(e.target.value as 'all' | 'steam' | 'epic');
+                                }}
+                                className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat"
+                                style={{ backgroundImage: 'url("/icons/chevron-down.svg")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
+                            >
+                                <option value="all">All Games</option>
+                                <option value="steam">Steam Games</option>
+                                <option value="epic">Epic Games</option>
+                            </select>
+                        </div>
+
                         <FontAwesomeIcon 
                             icon={faRectangleXmark} 
                             style={{color: "#29bdff",}}
@@ -159,7 +192,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                 >
                                     <div className="flex justify-between items-center">
                                         <div className="flex gap-5 items-start">
-                                            <div className="h-6 w-6 overflow-hidden rounded-sm bg-slate-200">
+                                            <div className="rounded-sm">
                                                 <img
                                                     src={
                                                         game.platform === "epic"
@@ -167,7 +200,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                                             : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
                                                     }
                                                     alt={game.name}
-                                                    className="h-full w-full object-cover"
+                                                    className="w-6 h-6 inline mr-2"
                                                 />
                                             </div>
                                             <span className="font-medium">{game.name}</span>
