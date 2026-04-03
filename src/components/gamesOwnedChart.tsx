@@ -139,6 +139,12 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     data={playtimeCategoryData}
                     margin={{ top: 20, right: 0, left: 10, bottom: 20 }}
                 >
+                    <defs>
+                        <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="var(--primary-color)" />
+                            <stop offset="100%" stopColor="white" />
+                        </linearGradient>
+                    </defs>
                     <XAxis 
                         dataKey="category" 
                         stroke="white"
@@ -175,7 +181,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     <Bar 
                         dataKey="count" 
                         name="Games Count" 
-                        fill="var(--primary-color)" 
+                        fill="url(#colorGradient)" 
                         radius={[5, 5, 0, 0]} 
                         activeBar={{ fill: "var(--hover-primary-color)", stroke: "var(--text-color)", strokeWidth: 3, cursor: "pointer" }}
                         onClick={(data) => handleBarClick(data)}
