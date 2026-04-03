@@ -71,6 +71,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]);
 
     const [pickerOpen, setPickerOpen] = useState(false);
+    const [activeSlot, setActiveSlot] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -83,7 +84,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     const gameKey = (appid: number, platform?: Platform) => `${platform ?? "steam"}-${appid}`;
 
     const gameMap = useMemo(() => {
-        return new Map(
+        return new Map<string, Game>(
             games.map((game) => [gameKey(game.appid, game.platform), game])
         );
     }, [games]);
@@ -146,7 +147,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
 
     useEffect(() => {
         async function fetchSelectedGames() {
-            if (!currentUserId || gameMap.size === 0) return;
+            if (!currentUserId) return;
 
             const { data, error } = await supabase
                 .from("user_monitor_games")
@@ -198,11 +199,12 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         };
     }, [pickerOpen]);
 
-    function togglePicker() {
+    function togglePicker(slotIndex: number) {
+        setActiveSlot(slotIndex);
         setPickerOpen(true);
     }
 
-    async function rewriteMonitorGames(nextGames: Game[]) {
+    async function rewriteMonitorGames(nextSlots: (Game | null)[]) {
         if (!currentUserId) return;
 
         const { error: deleteError } = await supabase
@@ -215,14 +217,25 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             return;
         }
 
-        if (nextGames.length === 0) return;
+        const rows = nextSlots
+            .map((game, index) => {
+                if (!game?.platform) return null;
 
-        const rows = nextGames.map((game, index) => ({
-            user_id: currentUserId,
-            app_id: game.appid,
-            platform: game.platform,
-            slot_index: index,
-        }));
+                return {
+                    user_id: currentUserId,
+                    app_id: game.appid,
+                    platform: game.platform,
+                    slot_index: index,
+                };
+            })
+            .filter((row): row is {
+                user_id: string;
+                app_id: number;
+                platform: Platform;
+                slot_index: number;
+            } => row !== null);
+
+        if (rows.length === 0) return;
 
         const { error: insertError } = await supabase
             .from("user_monitor_games")
@@ -234,44 +247,36 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     }
 
     async function selectGame(game: Game) {
-        if (!game.platform) return;
+        if (activeSlot === null || !game.platform) return;
 
-        const currentGames = slots.filter((slot): slot is Game => slot !== null);
-        const withoutDuplicate = currentGames.filter(
-            (g) => !(g.appid === game.appid && g.platform === game.platform)
-        );
+        const nextSlots = [...slots];
 
-        const latestThree = [game, ...withoutDuplicate].slice(0, 3);
-        const nextSlots: (Game | null)[] = [
-            latestThree[0] || null,
-            latestThree[1] || null,
-            latestThree[2] || null,
-        ];
+        for (let i = 0; i < nextSlots.length; i++) {
+            const slotGame = nextSlots[i];
+            if (
+                slotGame &&
+                slotGame.appid === game.appid &&
+                slotGame.platform === game.platform
+            ) {
+                nextSlots[i] = null;
+            }
+        }
+
+        nextSlots[activeSlot] = game;
 
         setSlots(nextSlots);
         setPickerOpen(false);
+        setActiveSlot(null);
 
-        await rewriteMonitorGames(latestThree);
+        await rewriteMonitorGames(nextSlots);
     }
 
     async function clearSlot(slotIndex: number) {
-        const currentGames = slots.filter((slot): slot is Game => slot !== null);
-        const gameToRemove = slots[slotIndex];
-
-        if (!gameToRemove) return;
-
-        const nextGames = currentGames.filter(
-            (g) => !(g.appid === gameToRemove.appid && g.platform === gameToRemove.platform)
-        );
-
-        const nextSlots: (Game | null)[] = [
-            nextGames[0] || null,
-            nextGames[1] || null,
-            nextGames[2] || null,
-        ];
+        const nextSlots = [...slots];
+        nextSlots[slotIndex] = null;
 
         setSlots(nextSlots);
-        await rewriteMonitorGames(nextGames);
+        await rewriteMonitorGames(nextSlots);
     }
 
     return (
@@ -334,7 +339,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                         ) : (
                             <div className="card outline-2 outline-dashed outline-(--primary-color) text-(--disabled-color) bg-(--background-color2) hover:bg-(--hover-primary-color) hover:outline-0 hover:text-(--disabled-color) active:bg-(--pressed-primary-color) rounded-sm">
                                 <button
-                                    onClick={togglePicker}
+                                    onClick={() => togglePicker(index)}
                                     className="card-body w-full min-h-40 flex flex-col items-center justify-center text-xl text-primary hover:text-black"
                                 >
                                     <div className="text-2xl font-semibold">+</div>
@@ -364,7 +369,10 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                             icon={faRectangleXmark}
                             style={{ color: "#29bdff" }}
                             className="absolute top-2 right-5 text-4xl cursor-pointer hover:opacity-80 z-20"
-                            onClick={() => setPickerOpen(false)}
+                            onClick={() => {
+                                setPickerOpen(false);
+                                setActiveSlot(null);
+                            }}
                         />
 
                         <div className="bg-(--background-inner-color) flex-1 p-2 overflow-y-auto flex flex-col rounded-sm">
