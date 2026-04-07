@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
+import { useAccessibility } from "../contexts/AccessibilityContext";
 
 import { useState, useEffect, useRef } from 'react';
 
@@ -30,6 +31,7 @@ export default function GamesCategoryList({
     const [filterBy, setFilterBy] = useState<'all' | 'steam' | 'epic'>('all');
     const itemsPerPage = 10;
     const modalRef = useRef<HTMLDivElement>(null);
+    const { settings } = useAccessibility();
 
     // Reset to page 1 when category changes
     useEffect(() => {
@@ -123,7 +125,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
             <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
                 <div 
                     ref={modalRef}
-                    className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-4xl h-50vh flex flex-col"
+                    className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-5xl h-50vh flex flex-col"
                 >
                     <div className='flex justify-between items-center p-5'>
                         <div className="flex items-center gap-1">
@@ -203,7 +205,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                                     className="w-6 h-6 inline mr-2"
                                                 />
                                             </div>
-                                            <span className="font-medium">{game.name}</span>
+                                            <p className="font-medium">{game.name}</p>
                                         </div>
                                         <div>
                                             <span className="text-(--secondary-text-color)">

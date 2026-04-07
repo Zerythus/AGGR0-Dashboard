@@ -62,8 +62,6 @@
   --textfield-padding: 15px;
   --textfield-border-radius: 5px;
 
-  --font-size-reg: 18px;
-  
   /* Accessibility: Font size multiplier (default 1 = no scaling) */
   --font-size-multiplier: 1;
 
