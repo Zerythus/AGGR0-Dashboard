@@ -96,6 +96,8 @@ export default function DashboardFill() {
                             selectedCategory={selectedCategory}
                             filteredGames={filteredGames}
                             onClose={handleCloseList}
+                            isSteamConnected={isSteamConnected}
+                            isEpicConnected={isEpicConnected}
                         />
                     </div>
 

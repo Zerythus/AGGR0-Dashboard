@@ -11,7 +11,7 @@ export default function SearchFilter ({searchTerm, setSearchTerm, onFocus, onCha
             }
         };
         return (
-            <div className="flex items-center rounded-sm border border-slate-400/70 bg-white px-5 w-full mt-5">
+            <div className="flex items-center rounded-sm border border-slate-400/70 bg-white px-5 w-full">
                 <FontAwesomeIcon icon={faSearch} className="mr-4 h-10 w-10 text-slate-900" strokeWidth={2.2} />
                 
                 <input

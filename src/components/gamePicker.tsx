@@ -303,17 +303,11 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.2 }}
                                     />
-                                    {/* <FontAwesomeIcon
-                                        icon={faCircleMinus}
-                                        style={{ color: "rgb(255, 0, 0)" }}
-                                        onClick={() => clearSlot(index)}
-                                        className="absolute top-2 right-2 text-2xl hover:opacity-80 cursor-pointer shadow-sm shadow-white rounded-full"
-                                    /> */}
                                     <img
                                         src="/icons/bin.png"
                                         alt="Delete Game"
                                         onClick={() => clearSlot(index)}
-                                        className="absolute top-2 right-2 h-7 w-7 hover:opacity-80 cursor-pointer shadow-sm shadow-white rounded-full"
+                                        className="absolute top-2 right-2 h-7 w-7 hover:opacity-80 cursor-pointer shadow shadow-white rounded-full"
                                     />
                                 </div>
 
@@ -357,13 +351,13 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             </div>
 
             {pickerOpen && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                     <div
                         className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl h-[80vh] flex flex-col relative"
                         ref={modalRef}
                     >
                         <div className="flex justify-between items-center p-5">
-                            <div className="sticky z-10 bg-(--background-color) px-5 py-5 mt-3 flex justify-between items-center border-b border-white/10 rounded-sm">
+                            <div className="sticky z-10 bg-(--background-color) flex px-2 justify-between items-center w-full">
                                 <SearchFilter
                                     searchTerm={searchTerm}
                                     setSearchTerm={setSearchTerm}

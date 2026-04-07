@@ -19,19 +19,22 @@ interface GamesCategoryListProps {
     selectedCategory: string | null;
     filteredGames: Game[];
     onClose: () => void;
+    isSteamConnected?: boolean;
+    isEpicConnected?: boolean;
 }
 
 export default function GamesCategoryList({
     selectedCategory,
     filteredGames,
     onClose,
+    isSteamConnected = true,
+    isEpicConnected = true,
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('hoursHigh');
     const [filterBy, setFilterBy] = useState<'all' | 'steam' | 'epic'>('all');
     const itemsPerPage = 10;
     const modalRef = useRef<HTMLDivElement>(null);
-    const { settings } = useAccessibility();
 
     // Reset to page 1 when category changes
     useEffect(() => {
@@ -168,12 +171,12 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                 onChange={(e) => {
                                     setFilterBy(e.target.value as 'all' | 'steam' | 'epic');
                                 }}
-                                className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat"
+                                className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat disabled:opacity-50 disabled:cursor-not-allowed"
                                 style={{ backgroundImage: 'url("/icons/chevron-down.svg")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
                             >
                                 <option value="all">All Games</option>
-                                <option value="steam">Steam Games</option>
-                                <option value="epic">Epic Games</option>
+                                <option value="steam" disabled={!isSteamConnected}>Steam Games</option>
+                                <option value="epic" disabled={!isEpicConnected}>Epic Games</option>
                             </select>
                         </div>
 

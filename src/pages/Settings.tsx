@@ -103,7 +103,7 @@ export default function Settings() {
       icon: faSteam,
     },
     {
-      name: "Epic Games [Mock Data]",
+      name: "Epic Games",
       icon: epicLogo,
     },
   ];
@@ -157,6 +157,9 @@ export default function Settings() {
       {activeTab === "general" && (
         <section className="mt-5 bg-(--background-color) rounded-sm p-5">
           <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
+          <p>
+            Note: Epic Games is currently using mock data.
+          </p>
 
           <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
             {platforms.map((platform, index) => (
