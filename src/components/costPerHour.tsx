@@ -157,7 +157,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
       Cost per hour calculates how much money you've spent for each hour of gameplay on a specific game.
     </p>
 
-      <div ref={wrapperRef} className="relative mb-6">
+      <div ref={wrapperRef} className="relative py-5">
         <SearchFilter 
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm}
