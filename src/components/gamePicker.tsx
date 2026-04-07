@@ -6,7 +6,6 @@ import { supabase } from "../services/supabaseClient";
 import SearchFilter from "./searchFilter";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleMinus } from "@fortawesome/free-solid-svg-icons/faCircleMinus";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
 
 type Platform = "steam" | "epic";
@@ -304,11 +303,17 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.2 }}
                                     />
-                                    <FontAwesomeIcon
+                                    {/* <FontAwesomeIcon
                                         icon={faCircleMinus}
                                         style={{ color: "rgb(255, 0, 0)" }}
                                         onClick={() => clearSlot(index)}
-                                        className="absolute top-2 right-2 text-2xl hover:opacity-80 cursor-pointer"
+                                        className="absolute top-2 right-2 text-2xl hover:opacity-80 cursor-pointer shadow-sm shadow-white rounded-full"
+                                    /> */}
+                                    <img
+                                        src="/icons/bin.png"
+                                        alt="Delete Game"
+                                        onClick={() => clearSlot(index)}
+                                        className="absolute top-2 right-2 h-7 w-7 hover:opacity-80 cursor-pointer shadow-sm shadow-white rounded-full"
                                     />
                                 </div>
 
