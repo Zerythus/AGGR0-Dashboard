@@ -1,10 +1,11 @@
 // LOGIN LANDING PAGE
 import HomeHero from "@/components/homeHero";
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/services/supabaseClient";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { getRememberedCredentials, saveRememberedCredentials } from "@/utils/rememberMeHelper";
 
 export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,10 +16,24 @@ export default function Home() {
 
   const [ email, setEmail ] = useState("");
   const [ password, setPassword ] = useState("");
+  const [ rememberMe, setRememberMe ] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    const credentials = getRememberedCredentials();
+    if (credentials) {
+      setEmail(credentials.email);
+      setPassword(credentials.password);
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleLogin = async () => {
+    if (rememberMe) {
+      saveRememberedCredentials(email, password);
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -91,14 +106,12 @@ export default function Home() {
                 <label className="flex items-center gap-3">
                 <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="h-4 w-4 rounded border-white/30 bg-transparent text-[#2EB8FF] focus:ring-[#2EB8FF]"
                 />
                 Remember me
                 </label>
-
-                <a href="#" className="hover:text-white">
-                Forgot password?
-                </a>
             </div>
 
             {errorMessage && (

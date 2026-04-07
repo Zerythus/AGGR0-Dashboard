@@ -357,23 +357,25 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                         className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl h-[80vh] flex flex-col relative"
                         ref={modalRef}
                     >
-                        <div className="sticky z-10 bg-(--background-color) px-5 py-5 mt-3 flex justify-between items-center border-b border-white/10 rounded-sm">
-                            <SearchFilter
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
-                                onClear={() => setSearchTerm("")}
+                        <div className="flex justify-between items-center p-5">
+                            <div className="sticky z-10 bg-(--background-color) px-5 py-5 mt-3 flex justify-between items-center border-b border-white/10 rounded-sm">
+                                <SearchFilter
+                                    searchTerm={searchTerm}
+                                    setSearchTerm={setSearchTerm}
+                                    onClear={() => setSearchTerm("")}
+                                />
+                            </div>
+
+                            <FontAwesomeIcon
+                                icon={faRectangleXmark}
+                                style={{ color: "#29bdff" }}
+                                className="text-4xl cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                    setPickerOpen(false);
+                                    setActiveSlot(null);
+                                }}
                             />
                         </div>
-
-                        <FontAwesomeIcon
-                            icon={faRectangleXmark}
-                            style={{ color: "#29bdff" }}
-                            className="absolute top-2 right-5 text-4xl cursor-pointer hover:opacity-80 z-20"
-                            onClick={() => {
-                                setPickerOpen(false);
-                                setActiveSlot(null);
-                            }}
-                        />
 
                         <div className="bg-(--background-inner-color) flex-1 p-2 overflow-y-auto flex flex-col rounded-sm">
                             <ul className="flex-1">
