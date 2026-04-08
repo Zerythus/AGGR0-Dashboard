@@ -40,28 +40,16 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to delete Steam profile' });
     }
 
-    // Try to delete from profiles table if it exists (standard Supabase table)
-    const { error: deleteProfilesTableError } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-
-    // PGRST116 means table doesn't exist or no rows found - that's fine
-    if (deleteProfilesTableError && deleteProfilesTableError.code !== 'PGRST116' && deleteProfilesTableError.code !== 'PGRST204') {
-      console.error('Warning: Error deleting from profiles table:', deleteProfilesTableError);
-      // Don't fail on this, continue with metadata cleanup
-    }
-
     // Get current metadata and remove only Steam-related fields
-    const { data: { user: currentUser }, error: fetchError } = await supabase.auth.admin.getUser(userId);
+    const { data: { user: currentUser }, error: fetchError } = await supabase.auth.admin.getUserById(userId);
     
-    if (fetchError) {
+    if (fetchError || !currentUser) {
       console.error('Error fetching current user:', fetchError);
       return res.status(500).json({ error: 'Failed to fetch user data' });
     }
 
     // Build new metadata without Steam fields
-    const newMetadata = { ...currentUser?.user_metadata || {} };
+    const newMetadata = { ...currentUser.user_metadata || {} };
     delete newMetadata.steam_id;
     delete newMetadata.steam_username;
     delete newMetadata.avatar_url;
