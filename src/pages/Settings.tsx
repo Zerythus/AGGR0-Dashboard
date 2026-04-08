@@ -459,8 +459,7 @@ export default function Settings() {
                   {platform.name === "Steam" && syncedPlatforms[platform.name] && steamUsername && (
                     <div className="flex items-center justify-between py-4 px-6 bg-(--background-inner-color) border-t border-(--disabled-color)">
                       <div>
-                        <p className="text-lg text-(--text-color)">Use Steam username as display name</p>
-                        <p className="text-sm text-(--secondary-text-color)">Currently: {steamUsername}</p>
+                        <p className="text-lg text-(--text-color)">Use Steam username as display name. </p>
                       </div>
                       <button
                         onClick={() => handleToggleSteamUsername(!useSteamUsername)}
@@ -495,18 +494,18 @@ export default function Settings() {
                 <label className="text-(--text-color) text-lg font-semibold mb-2 block">
                   Max Unplayed Games Value (CAD)
                 </label>
-                <p className="text-(--secondary-text-color) text-sm mb-3">
+                <p className="text-(--secondary-text-color) text-lg mb-3">
                   When your unplayed games value reaches this amount, it will turn yellow on the dashboard.
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="text-(--secondary-text-color) text-lg">$</span>
+                  <span className="text-(--secondary-text-color) text-lg">CAD $</span>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={maxUnplayedValue}
                     onChange={handleMaxUnplayedValueChange}
                     placeholder="500"
-                    className="px-4 py-2 rounded-sm bg-(--background-inner-color) text-(--text-color) border border-white/10 outline-none focus:border-white/30 w-32"
+                    className="px-4 py-2 rounded-sm bg-(--background-inner-color) text-(--text-color) border border-white/10 outline-none focus:border-white/30 w-10"
                   />
                 </div>
               </div>
