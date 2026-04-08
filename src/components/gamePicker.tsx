@@ -113,7 +113,22 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             case 'alphabeticalZA':
                 return sorted.sort((a, b) => b.name.localeCompare(a.name));
             case 'oldestFirst':
-                return sorted.sort((a, b) => (a.unlocktime || 0) - (b.unlocktime || 0));
+                return sorted.sort((a, b) => {
+                    // If both have unlock times, sort by unlock time
+                    if (a.unlocktime && b.unlocktime) {
+                        return a.unlocktime - b.unlocktime;
+                    }
+                    // If only a has unlock time, it comes first
+                    if (a.unlocktime && !b.unlocktime) {
+                        return -1;
+                    }
+                    // If only b has unlock time, it comes first
+                    if (b.unlocktime && !a.unlocktime) {
+                        return 1;
+                    }
+                    // If neither has unlock time, keep original order
+                    return 0;
+                });
             case 'newestFirst':
             default:
                 return sorted.sort((a, b) => (b.unlocktime || 0) - (a.unlocktime || 0));
