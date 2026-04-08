@@ -127,7 +127,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                 <h3 className="text-2xl font-semibold text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
             </div>
             <p className='text-base text-(--secondary-text-color)'>
-                This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in. <i>Click on any bar to see the specific games in that category.</i>
+                This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in. Click on any bar to see the specific games in that category.
             </p>
             <ResponsiveContainer 
                 width="100%" 

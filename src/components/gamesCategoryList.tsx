@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
-import { useAccessibility } from "../contexts/AccessibilityContext";
 
 import { useState, useEffect, useRef } from 'react';
 
