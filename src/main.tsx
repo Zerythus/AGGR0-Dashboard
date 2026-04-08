@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AuthCallback from "./pages/AuthCallback";
+import SettingsCallback from "./pages/SettingsCallback";
 
 import AppLayout from "./layout/AppLayout";
 import { AccessibilityProvider } from "./contexts/AccessibilityContext";
@@ -28,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/create-account" element={<CreateAccount />} />
-            <Route path="/auth-callback" element={<AuthCallback />} />
+            <Route path="/settings-callback" element={<SettingsCallback />} />
           </Route>
 
           <Route element={<AppLayout />}>

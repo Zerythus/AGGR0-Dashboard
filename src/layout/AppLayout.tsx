@@ -1,6 +1,8 @@
 import UserMenu from "@/components/userMenu";
 import { Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/services/supabaseClient";
+import { getSteamProfileData } from "@/services/steamProfileService";
+import { useSyncSteamMetadata } from "@/hooks/useSyncSteamMetadata";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -8,6 +10,9 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  
+  // Sync Steam metadata from user metadata to localStorage on app startup
+  useSyncSteamMetadata();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -19,10 +24,25 @@ export default function AppLayout() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Prioritize Steam username, then fall back to regular username, then email
-        const steamUsername = user.user_metadata?.steam_username;
-        const regularUsername = user.user_metadata?.username;
-        const displayName = steamUsername || regularUsername || user.email?.split('@')[0] || "User";
+        let displayName = "";
+        
+        // Check if user wants to use Steam username and has Steam linked
+        const useSteamUsername = user.user_metadata?.use_steam_username === true;
+        
+        if (useSteamUsername && user.user_metadata?.steam_id) {
+          // Fetch steam_username from steam_profiles table (source of truth)
+          const steamProfile = await getSteamProfileData(user.id);
+          if (steamProfile) {
+            displayName = steamProfile.steam_username;
+          }
+        }
+        
+        // Fallback to regular username or email
+        if (!displayName) {
+          const regularUsername = user.user_metadata?.username;
+          displayName = regularUsername || user.email?.split('@')[0] || "User";
+        }
+        
         setUsername(displayName);
         
         // Track login count

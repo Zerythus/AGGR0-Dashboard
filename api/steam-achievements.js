@@ -7,8 +7,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { steamId } = req.body;
-    const { steamAppId } = req.query;
+    // const { steamId } = req.body;
+    // const { steamAppId } = req.query;
+    const { steamId, steamAppId } = req.body;
 
     if (!steamId) {
       return res.status(400).json({ error: "Steam ID is required" });
