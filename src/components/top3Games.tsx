@@ -32,6 +32,35 @@ function getGameHeaderUrl(game: Game): string {
     return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
+async function fetchGameAchievements(game: Game, steamId: string | null): Promise<Game> {
+    if (game.platform !== "steam" || !steamId) {
+        return game;
+    }
+
+    try {
+        const response = await fetch("/api/steam-achievements", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ steamId, steamAppId: game.appid }),
+        });
+
+        if (!response.ok) {
+            return game;
+        }
+
+        const data = await response.json();
+
+        return {
+            ...game,
+            unlocked_achievements: data.response?.unlocked ?? undefined,
+            total_achievements: data.response?.total ?? undefined,
+        };
+    } catch (error) {
+        console.error(`Error fetching achievements for ${game.appid}:`, error);
+        return game;
+    }
+}
+
 interface Top3GamesProps {
     isSteamConnected: boolean;
     isEpicConnected: boolean;
@@ -117,7 +146,13 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                 const top3 = allGames
                     .sort((a, b) => b.playtime_forever - a.playtime_forever)
                     .slice(0, 3);
-                setGames(top3);
+                
+                // Fetch achievements for each top 3 game
+                const gamesWithAchievements = await Promise.all(
+                    top3.map(game => fetchGameAchievements(game, steamId))
+                );
+                
+                setGames(gamesWithAchievements);
             } catch (error) {
                 console.error('Error fetching games:', error);
             } finally {

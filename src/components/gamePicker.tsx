@@ -1,6 +1,6 @@
 // Steam achievements are edited into the JSON file directly (they do not depict real count of achievements)
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "../services/supabaseClient";
 import SearchFilter from "./searchFilter";
@@ -82,6 +82,38 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     );
 
     const gameKey = (appid: number, platform?: Platform) => `${platform ?? "steam"}-${appid}`;
+
+    const fetchGameAchievements = useCallback(
+        async (game: Game): Promise<Game> => {
+            if (game.platform !== "steam" || !steamId) {
+                return game;
+            }
+
+            try {
+                const response = await fetch("/api/steam-achievements", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ steamId, steamAppId: game.appid }),
+                });
+
+                if (!response.ok) {
+                    return game;
+                }
+
+                const data = await response.json();
+
+                return {
+                    ...game,
+                    unlocked_achievements: data.response?.unlocked ?? undefined,
+                    total_achievements: data.response?.total ?? undefined,
+                };
+            } catch (error) {
+                console.error(`Error fetching achievements for ${game.appid}:`, error);
+                return game;
+            }
+        },
+        [steamId]
+    );
 
     const gameMap = useMemo(() => {
         return new Map<string, Game>(
@@ -172,18 +204,24 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
 
             const nextSlots: (Game | null)[] = [null, null, null];
 
-            (data as MonitorRow[]).forEach((row) => {
+            for (const row of (data as MonitorRow[])) {
                 if (row.slot_index >= 0 && row.slot_index <= 2) {
-                    const matchedGame = gameMap.get(gameKey(row.app_id, row.platform)) || null;
+                    let matchedGame = gameMap.get(gameKey(row.app_id, row.platform)) || null;
+                    
+                    // If game found, fetch its achievements to restore them on page refresh
+                    if (matchedGame) {
+                        matchedGame = await fetchGameAchievements(matchedGame);
+                    }
+                    
                     nextSlots[row.slot_index] = matchedGame;
                 }
-            });
+            }
 
             setSlots(nextSlots);
         }
 
         fetchSelectedGames();
-    }, [currentUserId, gameMap]);
+    }, [currentUserId, gameMap, steamId, fetchGameAchievements]);
 
     useEffect(() => {
         if (!pickerOpen) return;
@@ -253,35 +291,6 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
 
         if (insertError) {
             console.error("Error saving monitor games:", insertError.message);
-        }
-    }
-
-    async function fetchGameAchievements(game: Game): Promise<Game> {
-        if (game.platform !== "steam" || !steamId) {
-            return game;
-        }
-
-        try {
-            const response = await fetch("/api/steam-achievements", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ steamId, steamAppId: game.appid }),
-            });
-
-            if (!response.ok) {
-                return game;
-            }
-
-            const data = await response.json();
-
-            return {
-                ...game,
-                unlocked_achievements: data.response?.unlocked ?? undefined,
-                total_achievements: data.response?.total ?? undefined,
-            };
-        } catch (error) {
-            console.error(`Error fetching achievements for ${game.appid}:`, error);
-            return game;
         }
     }
 
