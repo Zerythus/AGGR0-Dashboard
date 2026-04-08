@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../services/supabaseClient";
 import { motion } from "framer-motion";
 
 type Game = {
@@ -38,30 +39,79 @@ interface Top3GamesProps {
 
 export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3GamesProps) {
     const [games, setGames] = useState<Game[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [steamId, setSteamId] = useState<string | null>(null);
     
+    useEffect(() => {
+        const getCurrentSteamId = async () => {
+            if (!isSteamConnected) {
+                setSteamId(null);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+                if (userError || !user) {
+                    console.error("Failed to get user:", userError);
+                    setSteamId(null);
+                    setLoading(false);
+                    return;
+                }
+
+                const steam_id = user.user_metadata?.steam_id;
+                setSteamId(steam_id ?? null);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+                setSteamId(null);
+            }
+        };
+
+        getCurrentSteamId();
+    }, [isSteamConnected]);
+
     useEffect(() => {
         const fetchGames = async () => {
             try {
+                setLoading(true);
                 const allGames: Game[] = [];
 
-                if (isSteamConnected) {
-                    const steamResponse = await fetch("/data/SteamData.json");
-                    const steamData = await steamResponse.json();
-                    const steamGames = (steamData.steam?.games || []).map((game: Game) => ({
-                        ...game,
-                        platform: "steam"
-                    }));
-                    allGames.push(...steamGames);
+                if (isSteamConnected && steamId) {
+                    try {
+                        const steamResponse = await fetch('/api/steam-owned-games', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ steamId }),
+                        });
+
+                        if (!steamResponse.ok) {
+                            console.error('Failed to fetch Steam games:', steamResponse.statusText);
+                        } else {
+                            const steamData = await steamResponse.json();
+                            const steamGames = (steamData.response?.games || []).map((game: Game) => ({
+                                ...game,
+                                platform: "steam" as const
+                            }));
+                            allGames.push(...steamGames);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching Steam games:', error);
+                    }
                 }
 
                 if (isEpicConnected) {
-                    const epicResponse = await fetch("/data/EpicData.json");
-                    const epicData = await epicResponse.json();
-                    const epicGames = (epicData.epic?.games || []).map((game: Game) => ({
-                        ...game,
-                        platform: "epic"
-                    }));
-                    allGames.push(...epicGames);
+                    try {
+                        const epicResponse = await fetch('/data/EpicData.json');
+                        const epicData = await epicResponse.json();
+                        const epicGames = (epicData.epic?.games || []).map((game: Game) => ({
+                            ...game,
+                            platform: "epic" as const
+                        }));
+                        allGames.push(...epicGames);
+                    } catch (error) {
+                        console.error('Error fetching Epic games:', error);
+                    }
                 }
 
                 const top3 = allGames
@@ -69,14 +119,20 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                     .slice(0, 3);
                 setGames(top3);
             } catch (error) {
-                console.error("Error fetching games:", error);
+                console.error('Error fetching games:', error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchGames();
-    }, [isSteamConnected, isEpicConnected]);
+    }, [isSteamConnected, isEpicConnected, steamId]);
+
+    if (loading) {
+        return <p className="text-center text-(--secondary-text-color) mt-5">Loading top games...</p>;
+    }
 
     if (games.length === 0) {
-        return <p className="text-center text-gray-500">No games played yet.</p>;
+        return <p className="text-center text-(--secondary-text-color) mt-5">No games played yet.</p>;
     }
 
     return (
