@@ -527,7 +527,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                             key={index}
                                             className={`p-3 rounded-sm border flex gap-3 ${
                                                 achievement.achieved
-                                                    ? "bg-(--background-color) border-green-500/30"
+                                                    ? "bg-(--background-color) border-green-500/30 border-2"
                                                     : "bg-(--background-color) border-white/10"
                                             }`}
                                         >
@@ -535,35 +535,27 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                                 <img
                                                     src={achievement.achieved ? achievement.icon : achievement.icongray || achievement.icon}
                                                     alt={achievement.name}
-                                                    className="w-12 h-12 rounded-sm shrink-0"
+                                                    className="w-15 h-15 rounded-sm shrink-0"
                                                 />
                                             )}
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-(--text-color) text-sm">
+                                                <p className="font-semibold text-(--text-color) text-lg">
                                                     {achievement.name}
                                                 </p>
                                                 {achievement.description && (
-                                                    <p className="text-xs text-(--secondary-text-color) mt-1">
+                                                    <p className="text-sm text-(--secondary-text-color) mt-1">
                                                         {achievement.description}
                                                     </p>
                                                 )}
-                                                <p className={`text-xs mt-2 ${
+                                                <p className={`text-lg mt-2 ${
                                                     achievement.achieved
                                                         ? "text-green-400"
                                                         : "text-(--secondary-text-color)"
                                                 }`}>
-                                                    {achievement.achieved ? "✓ Unlocked" : "🔒 Locked"}
+                                                    {achievement.achieved && achievement.unlocktime > 0
+                                                        ? `✓ Unlocked ${epochToDate(achievement.unlocktime)}`
+                                                        : "Not yet unlocked"}
                                                 </p>
-                                                {achievement.achieved && achievement.unlocktime > 0 && (
-                                                    <p className="text-xs text-(--secondary-text-color) mt-1">
-                                                        {epochToDate(achievement.unlocktime)}
-                                                    </p>
-                                                )}
-                                                {!achievement.achieved && (
-                                                    <p className="text-xs text-(--secondary-text-color) mt-1">
-                                                        Not yet unlocked
-                                                    </p>
-                                                )}
                                             </div>
                                         </div>
                                     ))
