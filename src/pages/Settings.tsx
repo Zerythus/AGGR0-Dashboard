@@ -388,9 +388,9 @@ export default function Settings() {
       </div>
 
       {activeTab === "general" && (
-        <section className="mt-5 bg-(--background-color) rounded-sm p-5">
+        <div className="mt-5 space-y-8">
           {successMessage && (
-            <div className={`mb-5 p-4 rounded-sm text-white ${
+            <div className={`p-4 rounded-sm text-white ${
               successMessage.includes("Error") 
                 ? "bg-red-500/20 border border-red-500/50" 
                 : "bg-green-500/20 border border-green-500/50"
@@ -398,95 +398,96 @@ export default function Settings() {
               {successMessage}
             </div>
           )}
-          
-          <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
-          <p>
-            Note: Epic Games is currently using mock data (JSON file)
-          </p>
 
-          <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
-            {platforms.map((platform, index) => (
-              <div key={platform.name}>
-                <div className="flex items-center justify-between py-6 px-6">
-                  <div className="flex items-center gap-5">
-                    {typeof platform.icon === "string" ? (
-                      <img src={platform.icon} alt={platform.name} className="w-10 h-10" />
-                    ) : (
-                      <FontAwesomeIcon
-                        icon={platform.icon}
-                        className="text-3xl text-(--text-color)"
-                        size="2xl"
-                      />
-                    )}
+          <div className="bg-(--background-color) rounded-sm p-5">
+            <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
+            <p>
+              Note: Epic Games is currently using mock data (JSON file)
+            </p>
 
-                    <div>
-                      <p className="text-xl text-(--text-color)">{platform.name}</p>
-                      <p
-                        className="text-lg"
-                        style={{
-                          color: syncedPlatforms[platform.name]
-                            ? "#85C29C"
-                            : "var(--secondary-text-color)",
-                        }}
-                      >
-                        {syncedPlatforms[platform.name] ? "Connected" : "Not connected"}
-                      </p>
+            <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
+              {platforms.map((platform, index) => (
+                <div key={platform.name}>
+                  <div className="flex items-center justify-between py-6 px-6">
+                    <div className="flex items-center gap-5">
+                      {typeof platform.icon === "string" ? (
+                        <img src={platform.icon} alt={platform.name} className="w-10 h-10" />
+                      ) : (
+                        <FontAwesomeIcon
+                          icon={platform.icon}
+                          className="text-3xl text-(--text-color)"
+                          size="2xl"
+                        />
+                      )}
+
+                      <div>
+                        <p className="text-xl text-(--text-color)">{platform.name}</p>
+                        <p
+                          className="text-lg"
+                          style={{
+                            color: syncedPlatforms[platform.name]
+                              ? "#85C29C"
+                              : "var(--secondary-text-color)",
+                          }}
+                        >
+                          {syncedPlatforms[platform.name] ? "Connected" : "Not connected"}
+                        </p>
+                      </div>
                     </div>
+
+                    {syncedPlatforms[platform.name] ? (
+                      <div className="flex gap-3">
+                        <button
+                          className="text-lg px-5 py-2 rounded-sm bg-red-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleDisconnect(platform.name)}
+                          disabled={isDisconnecting && platform.name === "Steam"}
+                        >
+                          {isDisconnecting && platform.name === "Steam" ? "Disconnecting..." : "Disconnect"}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="text-lg bg-(--text-color) text-black px-5 py-2 rounded-sm hover:opacity-90"
+                        onClick={() => handleSync(platform.name)}
+                      >
+                        Sync
+                      </button>
+                    )}
                   </div>
 
-                  {syncedPlatforms[platform.name] ? (
-                    <div className="flex gap-3">
+                  {/* Steam-specific: Show username toggle when synced */}
+                  {platform.name === "Steam" && syncedPlatforms[platform.name] && steamUsername && (
+                    <div className="flex items-center justify-between py-4 px-6 bg-(--background-inner-color) border-t border-(--disabled-color)">
+                      <div>
+                        <p className="text-lg text-(--text-color)">Use Steam username as display name</p>
+                        <p className="text-sm text-(--secondary-text-color)">Currently: {steamUsername}</p>
+                      </div>
                       <button
-                        className="text-lg px-5 py-2 rounded-sm bg-red-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => handleDisconnect(platform.name)}
-                        disabled={isDisconnecting && platform.name === "Steam"}
+                        onClick={() => handleToggleSteamUsername(!useSteamUsername)}
+                        className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
+                          useSteamUsername ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
+                        }`}
+                        role="switch"
+                        aria-checked={useSteamUsername}
                       >
-                        {isDisconnecting && platform.name === "Steam" ? "Disconnecting..." : "Disconnect"}
+                        <div
+                          className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
+                            useSteamUsername ? "translate-x-8" : "translate-x-1"
+                          }`}
+                        />
                       </button>
                     </div>
-                  ) : (
-                    <button
-                      className="text-lg bg-(--text-color) text-black px-5 py-2 rounded-sm hover:opacity-90"
-                      onClick={() => handleSync(platform.name)}
-                    >
-                      Sync
-                    </button>
+                  )}
+
+                  {index !== platforms.length - 1 && (
+                    <div className="border-b border-(--disabled-color)" />
                   )}
                 </div>
-
-                {/* Steam-specific: Show username toggle when synced */}
-                {platform.name === "Steam" && syncedPlatforms[platform.name] && steamUsername && (
-                  <div className="flex items-center justify-between py-4 px-6 bg-(--background-inner-color) border-t border-(--disabled-color)">
-                    <div>
-                      <p className="text-lg text-(--text-color)">Use Steam username as display name</p>
-                      <p className="text-sm text-(--secondary-text-color)">Currently: {steamUsername}</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggleSteamUsername(!useSteamUsername)}
-                      className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
-                        useSteamUsername ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
-                      }`}
-                      role="switch"
-                      aria-checked={useSteamUsername}
-                    >
-                      <div
-                        className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
-                          useSteamUsername ? "translate-x-8" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
-                )}
-
-                {index !== platforms.length - 1 && (
-                  <div className="border-b border-(--disabled-color)" />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Dashboard Settings */}
-          <div className="mt-8 bg-(--background-color) rounded-sm p-5">
+          <div className="bg-(--background-color) rounded-sm p-5">
             <h3 className="text-lg font-semibold text-(--text-color) mb-4">Dashboard Settings</h3>
             
             <div className="flex items-center justify-between gap-4">
@@ -518,7 +519,7 @@ export default function Settings() {
               </button>
             </div>
           </div>
-        </section>
+        </div>
       )}
 
       {activeTab === "account" && (
