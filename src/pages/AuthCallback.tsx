@@ -37,6 +37,11 @@ export default function AuthCallback() {
           return;
         }
 
+        // Set Steam as connected platform in localStorage
+        const syncedPlatforms = JSON.parse(localStorage.getItem("syncedPlatforms") || "{}");
+        syncedPlatforms["Steam"] = true;
+        localStorage.setItem("syncedPlatforms", JSON.stringify(syncedPlatforms));
+
         // Redirect to dashboard
         setTimeout(() => navigate("/dashboard"), 1000);
       } catch (err) {
