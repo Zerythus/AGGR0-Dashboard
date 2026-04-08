@@ -495,15 +495,20 @@ export default function Settings() {
                 <p className="text-(--secondary-text-color) text-lg mb-3">
                   When your unplayed games value reaches this amount, the value will turn yellow on the dashboard metric card.
                 </p>
-                <div className="flex items-center gap-5">
-                  <span className="text-(--secondary-text-color) text-lg">CAD $</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                  <span className="text-(--secondary-text-color) text-lg whitespace-nowrap">CAD $</span>
                   <input
-                    type="text"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="99999"
                     inputMode="decimal"
                     value={maxUnplayedValue}
                     onChange={handleMaxUnplayedValueChange}
                     placeholder="500"
-                    className="px-4 py-2 rounded-sm bg-(--background-inner-color) text-(--text-color) border border-white/10 outline-none focus:border-white/30 max-w-5"
+                    className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none "
                   />
                   <button
                     onClick={handleSaveMaxUnplayedValue}
@@ -512,7 +517,6 @@ export default function Settings() {
                   >
                     {isSavingMaxValue ? "Saving..." : "Save"}
                   </button>
-                </div>
               </div>
             </div>
           </div>
@@ -526,7 +530,7 @@ export default function Settings() {
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>
               <p className="mt-3 text-lg text-(--secondary-text-color)">
                 This action is irreversible and will permanently remove all your data from
-                our servers. Please proceed with caution.
+                our database. Please proceed with caution.
               </p>
             </div>
 

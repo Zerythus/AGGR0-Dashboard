@@ -16,7 +16,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 11,
         "unlocked_achievements": 10,
-        "image_url": "https://cdn2.unrealengine.com/egst-edition-thumbnail-1920x1080-1920x1080-b0c8fcb1f25e.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egst-edition-thumbnail-1920x1080-1920x1080-b0c8fcb1f25e.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 14.99
       },
       {
         "appid": 900009,
@@ -32,7 +33,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 4,
         "unlocked_achievements": 3,
-        "image_url": "https://cdn2.unrealengine.com/Diesel%2Fproductv2%2Fark%2Fhome%2FEGS_ARKSurvivalEvolved_StudioWildcard_G1A_00-1920x1080-a1c15e26c2524399c88753cd53f47298a2e3b873.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/Diesel%2Fproductv2%2Fark%2Fhome%2FEGS_ARKSurvivalEvolved_StudioWildcard_G1A_00-1920x1080-a1c15e26c2524399c88753cd53f47298a2e3b873.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 14.99
       },
       {
         "appid": 900029,
@@ -48,7 +50,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 17,
         "unlocked_achievements": 16,
-        "image_url": "https://cdn1.epicgames.com/offer/cf318a791de349f2b724136be105a6f1/EGS_TheInvincible_StarwardIndustries_S1_2560x1440-31417ba82002a93433bc9f1af64b789d?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn1.epicgames.com/offer/cf318a791de349f2b724136be105a6f1/EGS_TheInvincible_StarwardIndustries_S1_2560x1440-31417ba82002a93433bc9f1af64b789d?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 11.99
       },
       {
         "appid": 900005,
@@ -64,7 +67,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 3,
         "unlocked_achievements": 1,
-        "image_url": "https://cdn2.unrealengine.com/tr2013-goty-new-960x540-a9db4115b5a7.png?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/tr2013-goty-new-960x540-a9db4115b5a7.png?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 2.99
       },
       {
         "appid": 900028,
@@ -80,7 +84,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 15,
         "unlocked_achievements": 12,
-        "image_url": "https://cdn1.epicgames.com/spt-assets/84a18d8cf0024c43915abf945899f352/stray-1g3q7.jpg"
+        "image_url": "https://cdn1.epicgames.com/spt-assets/84a18d8cf0024c43915abf945899f352/stray-1g3q7.jpg",
+        "retail_price": 29.99
       },
       {
         "appid": 900000,
@@ -96,7 +101,8 @@
         "playtime_disconnected": 4,
         "total_achievements": 11,
         "unlocked_achievements": 3,
-        "image_url": "https://cdn2.unrealengine.com/egs-cyberpunk2077-cdprojektred-s1-03-22-22-2560x1440-8b29e725f1ef.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-cyberpunk2077-cdprojektred-s1-03-22-22-2560x1440-8b29e725f1ef.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 20.99
       },
       {
         "appid": 900045,
@@ -112,7 +118,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 19,
         "unlocked_achievements": 14,
-        "image_url": "https://cdn1.epicgames.com/spt-assets/709ac59000cd4eb99c3397e7c35b68f1/inscryption-1jn0w.png"
+        "image_url": "https://cdn1.epicgames.com/spt-assets/709ac59000cd4eb99c3397e7c35b68f1/inscryption-1jn0w.png",
+        "retail_price": 7.99
       },
       {
         "appid": 900019,
@@ -128,7 +135,8 @@
         "playtime_disconnected": 7,
         "total_achievements": 13,
         "unlocked_achievements": 13,
-        "image_url": "https://cdn2.unrealengine.com/egs-roguelegacy2-cellardoorgames-ic1-400x400-a028db9c15a9.png?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-roguelegacy2-cellardoorgames-ic1-400x400-a028db9c15a9.png?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 9.99
       },
       {
         "appid": 900004,
@@ -144,7 +152,8 @@
         "playtime_disconnected": 18,
         "total_achievements": 16,
         "unlocked_achievements": 7,
-        "image_url": "https://cdn2.unrealengine.com/epic-rottr-20th-logo-960x540-960x540-eb4bd185a2af.png?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/epic-rottr-20th-logo-960x540-960x540-eb4bd185a2af.png?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 4.49
       },
       {
         "appid": 900011,
@@ -160,7 +169,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 14,
         "unlocked_achievements": 9,
-        "image_url": "https://cdn2.unrealengine.com/fnbr-40-00-c7s2--egs-launcher-br-quicklaunch-2560x1440-2560x1440-56c9d7301fb2.jpg"
+        "image_url": "https://cdn2.unrealengine.com/fnbr-40-00-c7s2--egs-launcher-br-quicklaunch-2560x1440-2560x1440-56c9d7301fb2.jpg",
+        "retail_price": 0.0
       },
       {
         "appid": 900002,
@@ -176,7 +186,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 9,
         "unlocked_achievements": 3,
-        "image_url": "https://cdn2.unrealengine.com/egs-thewitcher3wildhuntcompleteedition-cdprojektred-s1-2560x1440-cfc1c384744d.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-thewitcher3wildhuntcompleteedition-cdprojektred-s1-2560x1440-cfc1c384744d.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 9.99
       },
       {
         "appid": 900016,
@@ -192,7 +203,8 @@
         "playtime_disconnected": 5,
         "total_achievements": 5,
         "unlocked_achievements": 4,
-        "image_url": "https://cdn2.unrealengine.com/egs-deadisland2-deepsilverdambusterstudios-s1-2560x1440-a6dd204e3cd6.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-deadisland2-deepsilverdambusterstudios-s1-2560x1440-a6dd204e3cd6.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 9.99
       },
       {
         "appid": 900010,
@@ -208,7 +220,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 15,
         "unlocked_achievements": 2,
-        "image_url": "https://cdn2.unrealengine.com/egs-alanwake2-remedyentertainment-s1-2560x1440-309c7412b7bc.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-alanwake2-remedyentertainment-s1-2560x1440-309c7412b7bc.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 14.99
       },
       {
         "appid": 900024,
@@ -224,7 +237,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 16,
         "unlocked_achievements": 12,
-        "image_url": "https://cdn2.unrealengine.com/egs-ghostwiretokyo-tangogameworks-s1-2560x1440-c9636b80d7a4.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-ghostwiretokyo-tangogameworks-s1-2560x1440-c9636b80d7a4.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 14.99
       },
       {
         "appid": 900035,
@@ -240,7 +254,8 @@
         "playtime_disconnected": 5,
         "total_achievements": 9,
         "unlocked_achievements": 2,
-        "image_url": "https://cdn1.epicgames.com/spt-assets/068f920aa2e3477db96c60a00aebf8a3/dredge-lrysr.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn1.epicgames.com/spt-assets/068f920aa2e3477db96c60a00aebf8a3/dredge-lrysr.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 9.99
       },
       {
         "appid": 900033,
@@ -256,7 +271,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 11,
         "unlocked_achievements": 8,
-        "image_url": "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_SherlockHolmesChapterOne_Frogwares_S1_2560x1440-748a653c7dc63671db3ea3c4e01914d4?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_SherlockHolmesChapterOne_Frogwares_S1_2560x1440-748a653c7dc63671db3ea3c4e01914d4?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 4.49
       },
       {
         "appid": 900001,
@@ -272,7 +288,8 @@
         "playtime_disconnected": 1,
         "total_achievements": 5,
         "unlocked_achievements": 4,
-        "image_url": "https://cdn2.unrealengine.com/egs-hitmanworldofassassinationdeluxeedition-iointeractiveas-bundles-s1-2560x1440-8305818cfd90.jpg?h=200&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-hitmanworldofassassinationdeluxeedition-iointeractiveas-bundles-s1-2560x1440-8305818cfd90.jpg?h=200&quality=medium&resize=1&w=480",
+        "retail_price": 27.99
       },
       {
         "appid": 900014,
@@ -288,7 +305,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 14,
         "unlocked_achievements": 2,
-        "image_url": "https://cdn2.unrealengine.com/egs-kenabridgeofspirits-emberlab-g1a-11-1920x1080-bca5be6666ff.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-kenabridgeofspirits-emberlab-g1a-11-1920x1080-bca5be6666ff.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 31.99
       },
       {
         "appid": 900044,
@@ -304,7 +322,8 @@
         "playtime_disconnected": 20,
         "total_achievements": 12,
         "unlocked_achievements": 6,
-        "image_url": "https://cdn2.unrealengine.com/egs-deathsdoor-acidnerve-g1a-00-1920x1080-215fd8423113.jpg"
+        "image_url": "https://cdn2.unrealengine.com/egs-deathsdoor-acidnerve-g1a-00-1920x1080-215fd8423113.jpg",
+        "retail_price": 4.99
       },
       {
         "appid": 900025,
@@ -320,7 +339,8 @@
         "playtime_disconnected": 0,
         "total_achievements": 7,
         "unlocked_achievements": 7,
-        "image_url": "https://cdn2.unrealengine.com/egs-deliverusmars-keokeninteractive-s1-2560x1440-0d09fc67023c.jpg?h=270&quality=medium&resize=1&w=480"
+        "image_url": "https://cdn2.unrealengine.com/egs-deliverusmars-keokeninteractive-s1-2560x1440-0d09fc67023c.jpg?h=270&quality=medium&resize=1&w=480",
+        "retail_price": 57.99
       }
     ]
   }

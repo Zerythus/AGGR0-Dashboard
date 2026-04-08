@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 
-import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotateLeft } from "@fortawesome/free-solid-svg-icons/faRotateLeft";
+
 import SearchFilter from "./searchFilter";
 
 type GameItem = {
@@ -15,6 +16,7 @@ type GameItem = {
   img_icon_url?: string;
   platform?: "steam" | "epic";
   image_url?: string;
+  retail_price?: number;
 };
 
 function minToHours(minutes: number): number {
@@ -47,7 +49,6 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [pricePaid, setPricePaid] = useState("0.00");
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [isFree, setIsFree] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -58,6 +59,32 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
     const fetchGames = async () => {
       try {
         const allGames: GameItem[] = [];
+        let savedGame: { appid: string | number; platform: string } | null = null;
+
+        // Load saved game selection from Supabase first
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          const { data, error } = await supabase
+            .from('user_settings')
+            .select('*')
+            .eq('user_id', authUser.id)
+            .single();
+
+          console.log('Full user_settings row:', data);
+          console.log('Error (if any):', error);
+
+          if (data && data.cost_per_hour_game_appid) {
+            savedGame = {
+              appid: String(data.cost_per_hour_game_appid),
+              platform: data.cost_per_hour_game_platform,
+            };
+            console.log('Loaded saved game from Supabase:', savedGame);
+          } else if (data) {
+            console.log('Row exists but cost_per_hour_game_appid is:', data.cost_per_hour_game_appid);
+          } else if (error && error.code !== 'PGRST116') {
+            console.error('Error loading saved game:', error);
+          }
+        }
 
         if (isSteamConnected) {
           try {
@@ -113,6 +140,25 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
         }
 
         setGames(allGames);
+
+        // Restore previously selected game after games are loaded
+        if (savedGame) {
+          console.log('Attempting to restore game. Looking for appid:', savedGame.appid, 'platform:', savedGame.platform);
+          console.log('Available games:', allGames.map(g => ({ appid: String(g.appid), platform: g.platform })));
+          const restoredGame = allGames.find(
+            (g) => String(g.appid) === String(savedGame.appid) && g.platform === savedGame.platform
+          );
+          if (restoredGame) {
+            console.log('Game restored:', restoredGame.name);
+            setSelectedGame(restoredGame);
+            setSearchTerm(restoredGame.name);
+            if (restoredGame.retail_price) {
+              setPricePaid(String(restoredGame.retail_price));
+            }
+          } else {
+            console.log('Game not found in games list');
+          }
+        }
       } catch (error) {
         console.error("Error fetching games:", error);
       }
@@ -157,13 +203,57 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
     setSelectedGame(game);
     setSearchTerm(game.name);
     setIsDropdownOpen(false);
+    if (game.retail_price) {
+      setPricePaid(String(game.retail_price));
+    }
+
+    // Save to Supabase
+    const saveGameSelection = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      console.log('Saving game selection:', { appid: String(game.appid), platform: game.platform });
+
+      const { error: fetchError } = await supabase
+        .from('user_settings')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code === 'PGRST116') {
+        // Row doesn't exist, insert
+        const { error: insertError } = await supabase
+          .from('user_settings')
+          .insert({
+            user_id: user.id,
+            cost_per_hour_game_appid: String(game.appid),
+            cost_per_hour_game_platform: game.platform,
+          });
+        if (insertError) console.error('Error inserting game selection:', insertError);
+        else console.log('Game selection inserted');
+      } else if (fetchError) {
+        console.error('Error checking user_settings:', fetchError);
+      } else {
+        // Row exists, update
+        const { error: updateError } = await supabase
+          .from('user_settings')
+          .update({
+            cost_per_hour_game_appid: String(game.appid),
+            cost_per_hour_game_platform: game.platform,
+          })
+          .eq('user_id', user.id);
+        if (updateError) console.error('Error updating game selection:', updateError);
+        else console.log('Game selection updated');
+      }
+    };
+
+    saveGameSelection();
   }
 
   function handleClearSearch() {
     setSearchTerm("");
     setSelectedGame(null);
     setIsDropdownOpen(false);
-    setIsEditingPrice(false);
     setIsFree(false);
     setPricePaid("0.00");
   }
@@ -238,11 +328,11 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
           />
         </div>
 
-        <h3 className="mb-3 text-2xl font-bold tracking-tight text-(--primary-color)">
+        <h3 className="mb-5 text-2xl font-bold tracking-tight text-(--primary-color)">
           {selectedGame?.name || "Game Title"}
         </h3>
 
-        <div className="mb-3 flex items-center justify-between gap-4">
+        <div className="mb-5 flex items-center justify-between gap-4">
           <span className="text-xl text-white">Your hours</span>
           <span className="text-xl text-white">
             {selectedGame ? `${hours} hours` : "--"}
@@ -270,26 +360,27 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
                   setPricePaid(value);
                 }
               }}
-              disabled={!isEditingPrice || isFree}
-              className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none disabled:cursor-not-allowed"
+              disabled={isFree}
+              className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none"
             />
 
             <button
               type="button"
-              disabled={isFree}
+              disabled={isFree || !selectedGame?.retail_price}
               onClick={() => {
-                setIsEditingPrice((prev) => !prev);
-                setTimeout(() => inputRef.current?.focus(), 0);
+                if (selectedGame?.retail_price) {
+                  setPricePaid(String(selectedGame.retail_price));
+                }
               }}
-              className="rounded-sm bg-sky-500 p-3 text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-500"
-              aria-label="Edit price"
+              className="rounded-sm bg-sky-500 p-3 text-slate-950 transition hover:bg-sky-400"
+              aria-label="Reset to retail price"
             >
-              <FontAwesomeIcon icon={faPencil} className="h-6 w-6" strokeWidth={2.2} />
+              <FontAwesomeIcon icon={faRotateLeft} className="h-6 w-6" />
             </button>
           </div>
         </div>
 
-        <div className="text-center py-10">
+        <div className="text-center py-5">
             <p className="text-3xl font-medium tracking-tight text-slate-50">
               <span className="text-sky-400">
                 {selectedGame && hours > 0 && !Number.isNaN(numericPrice)
