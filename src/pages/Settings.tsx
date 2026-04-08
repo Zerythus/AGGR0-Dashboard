@@ -487,17 +487,15 @@ export default function Settings() {
           </div>
 
           <div className="bg-(--background-color) rounded-sm p-5">
-            <h3 className="text-lg font-semibold text-(--text-color) mb-4">Dashboard Settings</h3>
-            
             <div className="flex items-center justify-between gap-4">
               <div className="flex-1">
                 <label className="text-(--text-color) text-lg font-semibold mb-2 block">
                   Max Unplayed Games Value (CAD)
                 </label>
                 <p className="text-(--secondary-text-color) text-lg mb-3">
-                  When your unplayed games value reaches this amount, it will turn yellow on the dashboard.
+                  When your unplayed games value reaches this amount, the value will turn yellow on the dashboard metric card.
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-5">
                   <span className="text-(--secondary-text-color) text-lg">CAD $</span>
                   <input
                     type="text"
@@ -505,17 +503,17 @@ export default function Settings() {
                     value={maxUnplayedValue}
                     onChange={handleMaxUnplayedValueChange}
                     placeholder="500"
-                    className="px-4 py-2 rounded-sm bg-(--background-inner-color) text-(--text-color) border border-white/10 outline-none focus:border-white/30 w-10"
+                    className="px-4 py-2 rounded-sm bg-(--background-inner-color) text-(--text-color) border border-white/10 outline-none focus:border-white/30 max-w-5"
                   />
+                  <button
+                    onClick={handleSaveMaxUnplayedValue}
+                    disabled={isSavingMaxValue}
+                    className="text-lg bg-(--primary-color) text-black px-6 py-2 rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                  >
+                    {isSavingMaxValue ? "Saving..." : "Save"}
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={handleSaveMaxUnplayedValue}
-                disabled={isSavingMaxValue}
-                className="text-lg bg-(--primary-color) text-black px-6 py-2 rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed h-fit"
-              >
-                {isSavingMaxValue ? "Saving..." : "Save"}
-              </button>
             </div>
           </div>
         </div>
