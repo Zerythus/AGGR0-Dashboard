@@ -606,7 +606,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                         </div>
 
                         <div className="bg-(--background-inner-color) flex-1 p-4 overflow-hidden flex flex-col">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
                                 {achievements.length > 0 ? (
                                     (() => {
                                         const itemsPerPage = 10;
