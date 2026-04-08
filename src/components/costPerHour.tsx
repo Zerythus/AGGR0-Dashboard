@@ -168,11 +168,6 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
     setPricePaid("0.00");
   }
 
-  function handleGiftToggle() {
-    setIsFree((prev) => !prev);
-    setIsEditingPrice(false);
-  }
-
   const hours = getHours(selectedGame);
   const numericPrice = isFree ? 0 : Number(pricePaid || 0);
 
@@ -294,27 +289,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
           </div>
         </div>
 
-        <div className="flex items-center">
-          <label className="cursor-pointer flex items-center">
-            <input
-              type="checkbox"
-              checked={isFree}
-              onChange={handleGiftToggle}
-              className="h-5 w-5 rounded-sm border-slate-300 accent-sky-500"
-            />
-          </label>
-
-          <span className="text-xl text-slate-100 ml-3">
-            Received as a gift / free
-          </span>
-        </div>
-
         <div className="text-center mt-5">
-          {isFree ? (
-            <p className="text-3xl font-medium tracking-tight text-sky-400">
-              FREE
-            </p>
-          ) : (
             <p className="text-3xl font-medium tracking-tight text-slate-50">
               <span className="text-sky-400">
                 {selectedGame && hours > 0 && !Number.isNaN(numericPrice)
@@ -327,7 +302,6 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
                 <span className="text-slate-100"> CAD / hour</span>
               )}
             </p>
-          )}
         </div>
       </div>
     </section>
