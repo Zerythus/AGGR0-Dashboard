@@ -123,13 +123,6 @@ export default function Home() {
             >
                 Log in
             </button>
-
-            <div className="flex items-center gap-3 pt-2">
-                <div className="h-px flex-1 bg-white/15" />
-                <span className="text-base text-white/60">or log in with</span>
-                <div className="h-px flex-1 bg-white/15" />
-            </div>
-
             <button
                 type="button"
                 className="h-14 w-full rounded-sm border border-[#2EB8FF] bg-transparent text-[#2EB8FF] hover:bg-[#2EB8FF]/10 mt-15"
