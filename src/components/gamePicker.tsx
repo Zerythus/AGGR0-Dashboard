@@ -411,15 +411,17 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         <p>Achievements: </p>
                                         <div className="flex items-center gap-2">
                                             <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
-                                            {game.platform === "steam" && (
-                                                <button
-                                                    onClick={() => openAchievementsModal(game)}
-                                                    className="h-5 px-3 bg-(--primary-color) text-black text-lg rounded-sm hover:opacity-90 whitespace-nowrap"
-                                                >
-                                                    View Achievements
-                                                </button>
-                                            )}
                                         </div>
+                                    </div>
+                                    <div className="flex justify-end mt-3">
+                                        {game.platform === "steam" && (
+                                            <button
+                                                onClick={() => openAchievementsModal(game)}
+                                                className="h-8 px-3 bg-(--primary-color) text-black text-lg rounded-smhover:opacity-90 whitespace-nowrap"
+                                            >
+                                                View Achievements
+                                            </button>
+                                        )}
                                     </div>
 
                                     <div className="flex justify-between items-center mt-5">
