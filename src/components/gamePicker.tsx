@@ -535,7 +535,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
 
             {achievementsModalOpen && selectedGameForAchievements && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                    <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-2xl h-[80vh] flex flex-col relative">
+                    <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-3xl h-[80vh] flex flex-col relative">
                         <div className="flex justify-between items-center p-5 border-b border-(--disabled-color)/20 gap-4 flex-wrap">
                             <h3 className="text-xl font-semibold text-(--primary-color)">
                                 {selectedGameForAchievements.name}
