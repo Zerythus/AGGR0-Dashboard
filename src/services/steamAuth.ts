@@ -1,9 +1,5 @@
 import { supabase } from "./supabaseClient";
 
-const STEAM_OPENID_URL = "https://steamcommunity.com/openid/login";
-// const STEAM_API_KEY = import.meta.env.VITE_STEAM_API_KEY;
-const APP_URL = window.location.origin;
-
 interface SteamUser {
   steamid: string;
   communityvisibilitystate: number;
