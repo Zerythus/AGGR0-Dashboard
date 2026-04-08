@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/services/supabaseClient";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { getRememberedCredentials, saveRememberedCredentials } from "@/utils/rememberMeHelper";
+import { getSteamLoginUrl } from "@/services/steamAuth";
 
 export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +46,10 @@ export default function Home() {
     }
 
     navigate("/dashboard");
+  };
+
+  const handleSteamLogin = () => {
+    window.location.href = getSteamLoginUrl();
   };
 
   return (
@@ -129,6 +134,31 @@ export default function Home() {
                 className="h-14 w-full rounded-sm bg-(--primary-color) text-slate-950 hover:bg-(--hover-primary-color) active:bg-(--pressed-primary-color)"
             >
                 Log in
+            </button>
+
+            <div className="flex items-center gap-3 pt-2">
+                <div className="h-px flex-1 bg-white/15" />
+                <span className="text-base text-white/60">or log in with</span>
+                <div className="h-px flex-1 bg-white/15" />
+            </div>
+
+            <button
+                type="button"
+                onClick={handleSteamLogin}
+                className="
+                    flex h-12 w-full items-center justify-center gap-3 text-base
+                    rounded-sm border border-white/35
+                    bg-transparent text-white/90
+                    hover:bg-white/10
+                "
+                >
+                <img
+                    src="/icons/steam.svg"
+                    alt="steam icon"
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                />
+                <span>Steam</span>
             </button>
 
             <button

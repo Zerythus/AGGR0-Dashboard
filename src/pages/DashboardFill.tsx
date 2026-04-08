@@ -71,9 +71,10 @@ export default function DashboardFill() {
                     <h2 className="text-4xl font-bold text-(--text-color)">{greeting}</h2>
 
                     {/* Grid container for metric cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10 w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10 w-full">
                         <MetricCard metric="totalGames" label="TOTAL GAMES" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                         <MetricCard metric="unplayedGames" label="UNPLAYED GAMES" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        <MetricCard metric="unplayedGamesPrice" label="UNPLAYED GAMES VALUE" unit="CAD" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                         <MetricCard metric="totalHours" label="TOTAL PLAYTIME" unit="hrs" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                     </div>
 
