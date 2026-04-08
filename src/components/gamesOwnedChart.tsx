@@ -20,14 +20,14 @@ interface GamesOwnedChartProps {
 // Playtime category constants
 const PLAYTIME_CATEGORIES = [
     { min: 0, max: 0, label: 'Unplayed' },
-    { min: 1, max: 60, label: '<1' },
-    { min: 61, max: 300, label: '1-5' },
-    { min: 301, max: 600, label: '5-10' },
-    { min: 601, max: 900, label: '10-15' },
-    { min: 901, max: 1500, label: '15-25' },
-    { min: 1501, max: 3000, label: '25-50' },
-    { min: 3001, max: 6000, label: '50-100' },
-    { min: 6001, max: Infinity, label: '100+' }
+    { min: 1, max: 60, label: '<1h' },
+    { min: 61, max: 300, label: '1-5h' },
+    { min: 301, max: 600, label: '5-10h' },
+    { min: 601, max: 900, label: '10-15h' },
+    { min: 901, max: 1500, label: '15-25h' },
+    { min: 1501, max: 3000, label: '25-50h' },
+    { min: 3001, max: 6000, label: '50-100h' },
+    { min: 6001, max: Infinity, label: '100+h' }
 ];
 
 export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, isEpicConnected = false }: GamesOwnedChartProps) {
