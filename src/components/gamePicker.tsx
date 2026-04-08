@@ -501,8 +501,8 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                     <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-2xl h-[80vh] flex flex-col relative">
                         <div className="flex justify-between items-center p-5 border-b border-(--disabled-color)/20">
-                            <h3 className="text-xl font-semibold text-(--text-color)">
-                                Achievements - {selectedGameForAchievements.name}
+                            <h3 className="text-xl font-semibold text-(--primary-color)">
+                                {selectedGameForAchievements.name}
                             </h3>
                             <FontAwesomeIcon
                                 icon={faRectangleXmark}
