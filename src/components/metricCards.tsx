@@ -152,8 +152,8 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
   return (
     <>
       <div className="card outline outline-white/10 bg-(--background-color) rounded-sm px-3 py-2 flex items-center gap-4 border border-slate-700/40">
-        <div className="flex items-center justify-end text-(--disabled-color) bg-linear-to-r from-(--background-color2) from-10% via-sky-800 via-50% to-(--background-color2) to-90% rounded-xl p-5 border-white/10 border">
-          {/* <FontAwesomeIcon 
+        {/* <div className="flex items-center justify-end text-(--disabled-color) bg-linear-to-r from-(--background-color2) from-10% via-sky-800 via-50% to-(--background-color2) to-90% rounded-xl p-5 border-white/10 border">
+          <FontAwesomeIcon 
             icon={
               metric === 'totalHours' ? faClock : 
               metric === 'totalGames' ? faGamepad : 
@@ -161,8 +161,8 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
               faGamepad
             }
             style={{ width: '50px', height: '40px' }}
-          /> */}
-        </div>
+          />
+        </div> */}
         <div className="card-body">
             <p className="text-4xl font-bold pr-5 pt-3 pl-5" 
               style={{ color: 'var(--primary-color)' }}
