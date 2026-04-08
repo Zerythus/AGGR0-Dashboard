@@ -87,11 +87,11 @@ function applyAccessibilitySettings(settings: AccessibilitySettings) {
   const root = document.documentElement;
 
   // Calculate font size multiplier
-  // Level 3 is default (1x), level 2 is 0.9x, level 4 is 1.1x
+  // Level 3 is default (1x), level 2 is 0.9x, level 4 is 1.2x
   const fontMultipliers: { [key: number]: number } = {
-    2: 0.9,
+    2: 0.85,
     3: 1,
-    4: 1.1,
+    4: 1.2,
   };
 
   const multiplier = fontMultipliers[settings.fontSizeLevel] || 1;
@@ -184,7 +184,7 @@ function injectAccessibilityStyles() {
     }
     
     /* Override Recharts and other library text sizes */
-    tspan, text {
+    tspan, text, span, p, select {
       font-size: calc(var(--font-size-multiplier, 1) * 1em) !important;
     }
     

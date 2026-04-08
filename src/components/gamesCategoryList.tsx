@@ -18,12 +18,16 @@ interface GamesCategoryListProps {
     selectedCategory: string | null;
     filteredGames: Game[];
     onClose: () => void;
+    isSteamConnected?: boolean;
+    isEpicConnected?: boolean;
 }
 
 export default function GamesCategoryList({
     selectedCategory,
     filteredGames,
     onClose,
+    isSteamConnected = true,
+    isEpicConnected = true,
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('hoursHigh');
@@ -123,7 +127,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
             <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
                 <div 
                     ref={modalRef}
-                    className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-4xl h-50vh flex flex-col"
+                    className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-5xl h-50vh flex flex-col"
                 >
                     <div className='flex justify-between items-center p-5'>
                         <div className="flex items-center gap-1">
@@ -166,12 +170,12 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                 onChange={(e) => {
                                     setFilterBy(e.target.value as 'all' | 'steam' | 'epic');
                                 }}
-                                className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat"
+                                className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat disabled:opacity-50 disabled:cursor-not-allowed"
                                 style={{ backgroundImage: 'url("/icons/chevron-down.svg")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
                             >
                                 <option value="all">All Games</option>
-                                <option value="steam">Steam Games</option>
-                                <option value="epic">Epic Games</option>
+                                <option value="steam" disabled={!isSteamConnected}>Steam Games</option>
+                                <option value="epic" disabled={!isEpicConnected}>Epic Games</option>
                             </select>
                         </div>
 
@@ -203,7 +207,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                                     className="w-6 h-6 inline mr-2"
                                                 />
                                             </div>
-                                            <span className="font-medium">{game.name}</span>
+                                            <p className="font-medium">{game.name}</p>
                                         </div>
                                         <div>
                                             <span className="text-(--secondary-text-color)">

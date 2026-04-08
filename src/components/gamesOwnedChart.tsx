@@ -19,14 +19,14 @@ interface GamesOwnedChartProps {
 // Playtime category constants
 const PLAYTIME_CATEGORIES = [
     { min: 0, max: 0, label: 'Unplayed' },
-    { min: 1, max: 60, label: '<1 hr' },
-    { min: 61, max: 300, label: '1-5 hrs' },
-    { min: 301, max: 600, label: '5-10 hrs' },
-    { min: 601, max: 900, label: '10-15 hrs' },
-    { min: 901, max: 1500, label: '15-25 hrs' },
-    { min: 1501, max: 3000, label: '25-50 hrs' },
-    { min: 3001, max: 6000, label: '50-100 hrs' },
-    { min: 6001, max: Infinity, label: '100+ hrs' }
+    { min: 1, max: 60, label: '<1' },
+    { min: 61, max: 300, label: '1-5' },
+    { min: 301, max: 600, label: '5-10' },
+    { min: 601, max: 900, label: '10-15' },
+    { min: 901, max: 1500, label: '15-25' },
+    { min: 1501, max: 3000, label: '25-50' },
+    { min: 3001, max: 6000, label: '50-100' },
+    { min: 6001, max: Infinity, label: '100+' }
 ];
 
 export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, isEpicConnected = false }: GamesOwnedChartProps) {
@@ -127,7 +127,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                 <h3 className="text-2xl font-semibold text-(--disabled-color)">Number of games owned per playtime (hours)</h3>  
             </div>
             <p className='text-base text-(--secondary-text-color)'>
-                This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in. <i>Click on any bar to see the specific games in that category.</i>
+                This chart categorizes your owned games based on your total playtime. It helps identify how many games you've never played, lightly played, or heavily invested time in. Click on any bar to see the specific games in that category.
             </p>
             <ResponsiveContainer 
                 width="100%" 
@@ -137,7 +137,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     width={1000}
                     height={chartHeight}
                     data={playtimeCategoryData}
-                    margin={{ top: 20, right: 0, left: 10, bottom: 20 }}
+                    margin={{ top: 20, right: 0, left: 10, bottom: 35 }}
                 >
                     <defs>
                         <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -148,7 +148,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     <XAxis 
                         dataKey="category" 
                         stroke="white"
-                        label={{ value: 'Playtime Category', position: 'insideBottom', fill: 'white', offset: -15 }}
+                        label={{ value: 'Playtime Category (hours)', position: 'insideBottom', fill: 'white', offset: -30 }}
                     />
                     <YAxis 
                         dataKey="count" 

@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSteam } from "@fortawesome/free-brands-svg-icons";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
+
 import { supabase } from "../services/supabaseClient";
 import { deleteUserAccount } from "../services/accountService";
 import { useAccessibility } from "../contexts/AccessibilityContext";
@@ -21,11 +24,15 @@ export default function Settings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const syncModalRef = useRef<HTMLDivElement>(null);
+  const deleteModalRef = useRef<HTMLDivElement>(null);
 
   const handleSync = (platformName: string) => {
     const updated = { ...syncedPlatforms, [platformName]: true };
     setSyncedPlatforms(updated);
     localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
+    setShowSyncModal(true);
   };
 
   const handleDisconnect = (platformName: string) => {
@@ -38,6 +45,39 @@ export default function Settings() {
     const hasSyncedPlatforms = Object.values(syncedPlatforms).some((value) => value === true);
     navigate(hasSyncedPlatforms ? "/dashboardFill" : "/dashboard");
   };
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        if (showSyncModal) {
+          setShowSyncModal(false);
+        }
+        if (showDeleteConfirm) {
+          setShowDeleteConfirm(false);
+          setDeleteError(null);
+        }
+      }
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (showSyncModal && syncModalRef.current && !syncModalRef.current.contains(event.target as Node)) {
+        setShowSyncModal(false);
+      }
+      if (showDeleteConfirm && deleteModalRef.current && !deleteModalRef.current.contains(event.target as Node)) {
+        setShowDeleteConfirm(false);
+        setDeleteError(null);
+      }
+    }
+
+    if (showSyncModal || showDeleteConfirm) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showSyncModal, showDeleteConfirm]);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -117,6 +157,9 @@ export default function Settings() {
       {activeTab === "general" && (
         <section className="mt-5 bg-(--background-color) rounded-sm p-5">
           <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
+          <p>
+            Note: Epic Games is currently using mock data (JSON file)
+          </p>
 
           <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
             {platforms.map((platform, index) => (
@@ -128,7 +171,7 @@ export default function Settings() {
                     ) : (
                       <FontAwesomeIcon
                         icon={platform.icon}
-                        className="text-2xl text-(--text-color)"
+                        className="text-3xl text-(--text-color)"
                         size="2xl"
                       />
                     )}
@@ -178,7 +221,7 @@ export default function Settings() {
 
       {activeTab === "account" && (
         <section className="mt-5 space-y-8">
-          <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
+          {/* <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Change your password</h3>
               <p className="mt-3 text-lg text-(--secondary-text-color)">
@@ -189,7 +232,7 @@ export default function Settings() {
             <button className="text-lg bg-(--primary-color) my-auto text-black px-5 py-2 rounded-sm hover:opacity-90">
               Change Password
             </button>
-          </div>
+          </div> */}
 
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
@@ -215,9 +258,48 @@ export default function Settings() {
         </section>
       )}
 
+      {showSyncModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div ref={syncModalRef} className="bg-(--background-color) rounded-sm p-6 max-w-lg mx-4 outline outline-white/10">
+            <div className="flex justify-between">
+              <h3 className="text-xl font-bold text-(--text-color) mb-4">Platform connected!</h3>
+              <FontAwesomeIcon
+                icon={faRectangleXmark}
+                style={{ color: "#29bdff" }}
+                className="text-4xl cursor-pointer hover:opacity-80"
+                onClick={() => {
+                    setShowSyncModal(false);
+                }}
+              />
+            </div>
+
+            <p className="text-(--text-color) mb-6">
+              What would you like to do next?
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                className="text-lg px-5 py-2 rounded-sm bg-(--primary-color) text-black hover:opacity-80"
+                onClick={handleBackToDashboard}
+              >
+                Go to dashboard
+              </button>
+              <button
+                className="text-lg px-5 py-2 rounded-sm bg-(--text-color) text-black hover:opacity-80"
+                onClick={() => {
+                  setShowSyncModal(false);
+                }}
+              >
+                Link more platforms
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-(--background-color) rounded-sm p-6 max-w-sm mx-4 outline outline-white/10">
+          <div ref={deleteModalRef} className="bg-(--background-color) rounded-sm p-6 max-w-sm mx-4 outline outline-white/10">
             <h3 className="text-xl font-bold text-(--text-color) mb-4">Delete Account?</h3>
 
             <p className="text-(--text-color) mb-2">

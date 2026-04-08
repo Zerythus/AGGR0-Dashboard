@@ -1,7 +1,7 @@
 export default function HomeHero() {
 
   return (
-    <section className="flex h-full flex-col bg-(--background-color2) px-10 py-10">
+    <section className="flex h-full flex-col bg-linear-to-b from-(--background-inner-color) from-10% to-(--background-color2) px-10 py-10">
       <div className="flex justify-start">
           <img src="/logo/aggr0-logo.png" alt="AGGR0 Logo" className="h-15 w-50" />
       </div>
@@ -10,9 +10,9 @@ export default function HomeHero() {
           Hundreds of games tracked
         </h1>
         <p className="mt-6 max-w-lg text-xl text-white/75">
-          Understand your gaming habits through unified playtime and library insights.
+          Understand your gaming habits with playtime and measure your investments in games
         </p>
-        <img src="/images/placeholder.png" alt="Placeholder" className="mt-10 h-105 w-150 border border-(--secondary-text-color) outline-5 outline-(--background-color2) bg-(--background-color) rounded-sm " />
+        <img src="/img/HomeImg.png" alt="Home Image" className="mt-10 h-105 w-full rounded-sm " />
       </div>
     </section>
     );
