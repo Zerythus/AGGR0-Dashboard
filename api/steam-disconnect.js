@@ -48,12 +48,14 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch user data' });
     }
 
-    // Build new metadata without Steam fields
+    // Build new metadata - explicitly set Steam fields to null to remove them
     const newMetadata = { ...currentUser.user_metadata || {} };
-    delete newMetadata.steam_id;
-    delete newMetadata.steam_username;
-    delete newMetadata.avatar_url;
-    delete newMetadata.use_steam_username;
+    newMetadata.steam_id = null;
+    newMetadata.steam_username = null;
+    newMetadata.avatar_url = null;
+    newMetadata.use_steam_username = null;
+
+    console.log('Updating metadata to remove Steam fields:', newMetadata);
 
     // Clear Steam metadata from auth user
     const { error: updateError } = await supabase.auth.admin.updateUserById(
@@ -66,6 +68,15 @@ export default async function handler(req, res) {
     if (updateError) {
       console.error('Error clearing Steam metadata:', updateError);
       return res.status(500).json({ error: 'Failed to clear Steam data', details: updateError.message });
+    }
+
+    // Verify the update was successful by fetching the user again
+    const { data: { user: updatedUser }, error: verifyError } = await supabase.auth.admin.getUserById(userId);
+    
+    if (verifyError) {
+      console.error('Error verifying metadata update:', verifyError);
+    } else {
+      console.log('Metadata verification - steam_id after update:', updatedUser?.user_metadata?.steam_id);
     }
 
     return res.status(200).json({
