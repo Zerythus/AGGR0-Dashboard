@@ -154,6 +154,8 @@ export default function Settings() {
         setTimeout(() => setSuccessMessage(""), 3000);
       } finally {
         setIsDisconnecting(false);
+        // Dispatch custom event to notify AppLayout of metadata change
+        window.dispatchEvent(new Event('userMetadataChanged'));
       }
     } else {
       // For Epic Games - just toggle in localStorage
@@ -182,6 +184,9 @@ export default function Settings() {
       }
 
       setUseSteamUsername(newValue);
+      
+      // Dispatch custom event to notify AppLayout of metadata change
+      window.dispatchEvent(new Event('userMetadataChanged'));
     } catch (error) {
       console.error("Failed to update username preference:", error);
     }
@@ -374,12 +379,20 @@ export default function Settings() {
                       <p className="text-lg text-(--text-color)">Use Steam username as display name</p>
                       <p className="text-sm text-(--secondary-text-color)">Currently: {steamUsername}</p>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={useSteamUsername}
-                      onChange={(e) => handleToggleSteamUsername(e.target.checked)}
-                      className="h-5 w-5 cursor-pointer"
-                    />
+                    <button
+                      onClick={() => handleToggleSteamUsername(!useSteamUsername)}
+                      className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
+                        useSteamUsername ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
+                      }`}
+                      role="switch"
+                      aria-checked={useSteamUsername}
+                    >
+                      <div
+                        className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
+                          useSteamUsername ? "translate-x-8" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
                   </div>
                 )}
 

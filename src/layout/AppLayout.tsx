@@ -14,47 +14,64 @@ export default function AppLayout() {
   // Sync Steam metadata from user metadata to localStorage on app startup
   useSyncSteamMetadata();
 
+  const fetchAndSetDisplayName = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/");
+      return;
+    }
+
+    // Refresh session to ensure we get latest user metadata
+    await supabase.auth.refreshSession();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      let displayName = "";
+      
+      // Check if user wants to use Steam username and has Steam linked
+      const useSteamUsername = user.user_metadata?.use_steam_username === true;
+      
+      if (useSteamUsername && user.user_metadata?.steam_id) {
+        // Fetch steam_username from steam_profiles table (source of truth)
+        const steamProfile = await getSteamProfileData(user.id);
+        if (steamProfile) {
+          displayName = steamProfile.steam_username;
+        }
+      }
+      
+      // Fallback to regular username or email
+      if (!displayName) {
+        const regularUsername = user.user_metadata?.username;
+        displayName = regularUsername || user.email?.split('@')[0] || "User";
+      }
+      
+      setUsername(displayName);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/");
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        let displayName = "";
-        
-        // Check if user wants to use Steam username and has Steam linked
-        const useSteamUsername = user.user_metadata?.use_steam_username === true;
-        
-        if (useSteamUsername && user.user_metadata?.steam_id) {
-          // Fetch steam_username from steam_profiles table (source of truth)
-          const steamProfile = await getSteamProfileData(user.id);
-          if (steamProfile) {
-            displayName = steamProfile.steam_username;
-          }
-        }
-        
-        // Fallback to regular username or email
-        if (!displayName) {
-          const regularUsername = user.user_metadata?.username;
-          displayName = regularUsername || user.email?.split('@')[0] || "User";
-        }
-        
-        setUsername(displayName);
-        
-        // Track login count
-        const currentCount = parseInt(localStorage.getItem('loginCount') || '0', 10);
-        localStorage.setItem('loginCount', String(currentCount + 1));
-      }
-
+    const initializeAuth = async () => {
+      await fetchAndSetDisplayName();
+      
+      // Track login count only on initial load
+      const currentCount = parseInt(localStorage.getItem('loginCount') || '0', 10);
+      localStorage.setItem('loginCount', String(currentCount + 1));
+      
       setIsAuthChecked(true);
     };
 
-    fetchUser();
+    initializeAuth();
   }, [navigate]);
+
+  // Listen for metadata changes (from Settings toggle/disconnect)
+  useEffect(() => {
+    const handleMetadataChange = () => {
+      fetchAndSetDisplayName();
+    };
+
+    window.addEventListener('userMetadataChanged', handleMetadataChange);
+    return () => window.removeEventListener('userMetadataChanged', handleMetadataChange);
+  }, []);
 
   // Prevent rendering until auth is verified
   if (!isAuthChecked) {
