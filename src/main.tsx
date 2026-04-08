@@ -8,7 +8,6 @@ import Home from "./pages/Home";
 import CreateAccount from "./pages/CreateAccount";
 
 import Dashboard from "./pages/Dashboard"; // This is displayed when the users first created an account/first use the app
-import Library from "./pages/Library";
 import Settings from "./pages/Settings";
 
 import DashboardFill from "./pages/DashboardFill"; //FOR SHOW ONLY TO FILL IN THE DASHBOARD WITH COMPONENTS
@@ -29,7 +28,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboardFill" element={<DashboardFill />} /> {/* TEST ONLY - DELETE LATER */}
         </Route>
