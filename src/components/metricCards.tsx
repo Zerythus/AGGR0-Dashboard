@@ -19,6 +19,8 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
   const [displayValue, setDisplayValue] = useState<number | string>(value || 0);
   const [loading, setLoading] = useState(true);
   const [steamId, setSteamId] = useState<string | null>(null);
+  const [maxUnplayedValue, setMaxUnplayedValue] = useState<number>(500);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const getCurrentSteamId = async () => {
@@ -38,6 +40,7 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
           return;
         }
 
+        setUserId(user.id);
         const steam_id = user.user_metadata?.steam_id;
         setSteamId(steam_id ?? null);
       } catch (error) {
@@ -48,6 +51,34 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
 
     getCurrentSteamId();
   }, [isSteamConnected]);
+
+  // Fetch max unplayed value from user_settings
+  useEffect(() => {
+    const fetchMaxUnplayedValue = async () => {
+      if (!userId) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('max_unplayed_value')
+          .eq('user_id', userId)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user settings:', error);
+          return;
+        }
+
+        if (data) {
+          setMaxUnplayedValue(data.max_unplayed_value || 500);
+        }
+      } catch (error) {
+        console.error('Error fetching max unplayed value:', error);
+      }
+    };
+
+    fetchMaxUnplayedValue();
+  }, [userId]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -147,25 +178,45 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
     };
 
     loadData();
-  }, [isSteamConnected, isEpicConnected, metric, steamId]);
+  }, [isSteamConnected, isEpicConnected, metric, steamId, maxUnplayedValue]);
+
+  // Subscribe to user_settings changes
+  useEffect(() => {
+    if (!userId) return;
+
+    const subscription = supabase
+      .channel('user_settings')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_settings',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload: { new: { max_unplayed_value: number } }) => {
+          setMaxUnplayedValue(payload.new.max_unplayed_value || 500);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [userId]);
+
+  // Check if unplayed games price exceeds max threshold
+  const isUnplayedValueExceeded = 
+    metric === 'unplayedGamesPrice' && 
+    typeof displayValue === 'number' && 
+    displayValue >= maxUnplayedValue;
 
   return (
     <>
-      <div className="card outline outline-white/10 bg-(--background-color) rounded-sm px-3 py-2 flex items-center gap-4 border border-slate-700/40">
-        {/* <div className="flex items-center justify-end text-(--disabled-color) bg-linear-to-r from-(--background-color2) from-10% via-sky-800 via-50% to-(--background-color2) to-90% rounded-xl p-5 border-white/10 border">
-          <FontAwesomeIcon 
-            icon={
-              metric === 'totalHours' ? faClock : 
-              metric === 'totalGames' ? faGamepad : 
-              metric === 'unplayedGames' ? faBookmark : 
-              faGamepad
-            }
-            style={{ width: '50px', height: '40px' }}
-          />
-        </div> */}
-        <div className="card-body">
-            <p className="text-4xl font-bold pr-5 pt-3 pl-5" 
-              style={{ color: 'var(--primary-color)' }}
+      <div className="card outline outline-white/10 bg-(--background-color) rounded-sm px-3 py-2 flex items-center justify-center border border-slate-700/40">
+        <div className="card-body text-center">
+            <p className="text-4xl font-bold px-5 py-3" 
+              style={{ color: isUnplayedValueExceeded ? '#FFD700' : 'var(--primary-color)' }}
             >
             {loading ? '...' : (
               <>
@@ -177,7 +228,7 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
               </>
             )} {metric === 'totalGames' || metric === 'unplayedGamesPrice' ? '' : unit}
             </p>
-            <h2 className="card-title text-xl mt-2 pr-5 pb-3 pl-5">{label}</h2>
+            <h2 className="card-title text-lg mt-2 px-5 pb-3">{label}</h2>
         </div>
 
       </div>

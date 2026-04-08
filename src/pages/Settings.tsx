@@ -34,6 +34,8 @@ export default function Settings() {
   const [showSyncModal, setShowSyncModal] = useState(false);
   const syncModalRef = useRef<HTMLDivElement>(null);
   const deleteModalRef = useRef<HTMLDivElement>(null);
+  const [maxUnplayedValue, setMaxUnplayedValue] = useState<number | string>(500);
+  const [isSavingMaxValue, setIsSavingMaxValue] = useState(false);
 
   // Initialize Steam username preference and data on mount
   useEffect(() => {
@@ -46,6 +48,21 @@ export default function Settings() {
         const steamProfile = await getSteamProfileData(user.id);
         if (steamProfile) {
           setSteamUsername(steamProfile.steam_username);
+        }
+      }
+
+      // Fetch max unplayed value
+      if (user) {
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('max_unplayed_value')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user settings:', error);
+        } else if (data) {
+          setMaxUnplayedValue(data.max_unplayed_value || 500);
         }
       }
     };
@@ -193,6 +210,70 @@ export default function Settings() {
     }
   };
 
+  const handleMaxUnplayedValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only numbers and one decimal point
+    if (value === '' || /^\d*\.?\d{0,1}$/.test(value)) {
+      setMaxUnplayedValue(value);
+    }
+  };
+
+  const handleSaveMaxUnplayedValue = async () => {
+    try {
+      setIsSavingMaxValue(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      const numValue = parseFloat(maxUnplayedValue as string) || 500;
+      if (numValue < 0) {
+        setSuccessMessage("Error: Value cannot be negative");
+        setIsSavingMaxValue(false);
+        setTimeout(() => setSuccessMessage(""), 3000);
+        return;
+      }
+
+      // Try to update existing row, if not found, insert new
+      const { data: existing, error: fetchError } = await supabase
+        .from('user_settings')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+
+      if (existing) {
+        // Update
+        const { error } = await supabase
+          .from('user_settings')
+          .update({ max_unplayed_value: numValue })
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        // Insert
+        const { error } = await supabase
+          .from('user_settings')
+          .insert({ user_id: user.id, max_unplayed_value: numValue });
+
+        if (error) throw error;
+      }
+
+      setMaxUnplayedValue(numValue);
+      setSuccessMessage(`Max unplayed value set to $${numValue.toFixed(1)}`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to save max unplayed value";
+      setSuccessMessage(`Error: ${message}`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } finally {
+      setIsSavingMaxValue(false);
+    }
+  };
+
   const handleBackToDashboard = () => {
     const hasSyncedPlatforms = Object.values(syncedPlatforms).some((value) => value === true);
     navigate(hasSyncedPlatforms ? "/dashboardFill" : "/dashboard");
@@ -307,9 +388,9 @@ export default function Settings() {
       </div>
 
       {activeTab === "general" && (
-        <section className="mt-5 bg-(--background-color) rounded-sm p-5">
+        <div className="mt-5 space-y-8">
           {successMessage && (
-            <div className={`mb-5 p-4 rounded-sm text-white ${
+            <div className={`p-4 rounded-sm text-white ${
               successMessage.includes("Error") 
                 ? "bg-red-500/20 border border-red-500/50" 
                 : "bg-green-500/20 border border-green-500/50"
@@ -317,93 +398,129 @@ export default function Settings() {
               {successMessage}
             </div>
           )}
-          
-          <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
-          <p>
-            Note: Epic Games is currently using mock data (JSON file)
-          </p>
 
-          <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
-            {platforms.map((platform, index) => (
-              <div key={platform.name}>
-                <div className="flex items-center justify-between py-6 px-6">
-                  <div className="flex items-center gap-5">
-                    {typeof platform.icon === "string" ? (
-                      <img src={platform.icon} alt={platform.name} className="w-10 h-10" />
-                    ) : (
-                      <FontAwesomeIcon
-                        icon={platform.icon}
-                        className="text-3xl text-(--text-color)"
-                        size="2xl"
-                      />
-                    )}
+          <div className="bg-(--background-color) rounded-sm p-5">
+            <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
+            <p>
+              Note: Epic Games is currently using mock data (JSON file)
+            </p>
 
-                    <div>
-                      <p className="text-xl text-(--text-color)">{platform.name}</p>
-                      <p
-                        className="text-lg"
-                        style={{
-                          color: syncedPlatforms[platform.name]
-                            ? "#85C29C"
-                            : "var(--secondary-text-color)",
-                        }}
-                      >
-                        {syncedPlatforms[platform.name] ? "Connected" : "Not connected"}
-                      </p>
+            <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
+              {platforms.map((platform, index) => (
+                <div key={platform.name}>
+                  <div className="flex items-center justify-between py-6 px-6">
+                    <div className="flex items-center gap-5">
+                      {typeof platform.icon === "string" ? (
+                        <img src={platform.icon} alt={platform.name} className="w-10 h-10" />
+                      ) : (
+                        <FontAwesomeIcon
+                          icon={platform.icon}
+                          className="text-3xl text-(--text-color)"
+                          size="2xl"
+                        />
+                      )}
+
+                      <div>
+                        <p className="text-xl text-(--text-color)">{platform.name}</p>
+                        <p
+                          className="text-lg"
+                          style={{
+                            color: syncedPlatforms[platform.name]
+                              ? "#85C29C"
+                              : "var(--secondary-text-color)",
+                          }}
+                        >
+                          {syncedPlatforms[platform.name] ? "Connected" : "Not connected"}
+                        </p>
+                      </div>
                     </div>
+
+                    {syncedPlatforms[platform.name] ? (
+                      <div className="flex gap-3">
+                        <button
+                          className="text-lg px-5 py-2 rounded-sm bg-red-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleDisconnect(platform.name)}
+                          disabled={isDisconnecting && platform.name === "Steam"}
+                        >
+                          {isDisconnecting && platform.name === "Steam" ? "Disconnecting..." : "Disconnect"}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="text-lg bg-(--text-color) text-black px-5 py-2 rounded-sm hover:opacity-90"
+                        onClick={() => handleSync(platform.name)}
+                      >
+                        Sync
+                      </button>
+                    )}
                   </div>
 
-                  {syncedPlatforms[platform.name] ? (
-                    <div className="flex gap-3">
+                  {/* Steam-specific: Show username toggle when synced */}
+                  {platform.name === "Steam" && syncedPlatforms[platform.name] && steamUsername && (
+                    <div className="flex items-center justify-between py-4 px-6 bg-(--background-inner-color) border-t border-(--disabled-color)">
+                      <div>
+                        <p className="text-lg text-(--text-color)">Use Steam username as display name. </p>
+                      </div>
                       <button
-                        className="text-lg px-5 py-2 rounded-sm bg-red-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => handleDisconnect(platform.name)}
-                        disabled={isDisconnecting && platform.name === "Steam"}
+                        onClick={() => handleToggleSteamUsername(!useSteamUsername)}
+                        className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
+                          useSteamUsername ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
+                        }`}
+                        role="switch"
+                        aria-checked={useSteamUsername}
                       >
-                        {isDisconnecting && platform.name === "Steam" ? "Disconnecting..." : "Disconnect"}
+                        <div
+                          className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
+                            useSteamUsername ? "translate-x-8" : "translate-x-1"
+                          }`}
+                        />
                       </button>
                     </div>
-                  ) : (
-                    <button
-                      className="text-lg bg-(--text-color) text-black px-5 py-2 rounded-sm hover:opacity-90"
-                      onClick={() => handleSync(platform.name)}
-                    >
-                      Sync
-                    </button>
+                  )}
+
+                  {index !== platforms.length - 1 && (
+                    <div className="border-b border-(--disabled-color)" />
                   )}
                 </div>
-
-                {/* Steam-specific: Show username toggle when synced */}
-                {platform.name === "Steam" && syncedPlatforms[platform.name] && steamUsername && (
-                  <div className="flex items-center justify-between py-4 px-6 bg-(--background-inner-color) border-t border-(--disabled-color)">
-                    <div>
-                      <p className="text-lg text-(--text-color)">Use Steam username as display name</p>
-                      <p className="text-sm text-(--secondary-text-color)">Currently: {steamUsername}</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggleSteamUsername(!useSteamUsername)}
-                      className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
-                        useSteamUsername ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
-                      }`}
-                      role="switch"
-                      aria-checked={useSteamUsername}
-                    >
-                      <div
-                        className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
-                          useSteamUsername ? "translate-x-8" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
-                )}
-
-                {index !== platforms.length - 1 && (
-                  <div className="border-b border-(--disabled-color)" />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </section>
+
+          <div className="bg-(--background-color) rounded-sm p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <label className="text-(--text-color) text-lg font-semibold mb-2 block">
+                  Max Unplayed Games Value (CAD)
+                </label>
+                <p className="text-(--secondary-text-color) text-lg mb-3">
+                  When your unplayed games value reaches this amount, the value will turn yellow on the dashboard metric card.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                  <span className="text-(--secondary-text-color) text-lg whitespace-nowrap">CAD $</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="99999"
+                    inputMode="decimal"
+                    value={maxUnplayedValue}
+                    onChange={handleMaxUnplayedValueChange}
+                    placeholder="500"
+                    className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none "
+                  />
+                  <button
+                    onClick={handleSaveMaxUnplayedValue}
+                    disabled={isSavingMaxValue}
+                    className="text-lg bg-(--primary-color) text-black px-6 py-2 rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                  >
+                    {isSavingMaxValue ? "Saving..." : "Save"}
+                  </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {activeTab === "account" && (
@@ -413,7 +530,7 @@ export default function Settings() {
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>
               <p className="mt-3 text-lg text-(--secondary-text-color)">
                 This action is irreversible and will permanently remove all your data from
-                our servers. Please proceed with caution.
+                our database. Please proceed with caution.
               </p>
             </div>
 
