@@ -34,6 +34,8 @@ export default function Settings() {
   const [showSyncModal, setShowSyncModal] = useState(false);
   const syncModalRef = useRef<HTMLDivElement>(null);
   const deleteModalRef = useRef<HTMLDivElement>(null);
+  const [maxUnplayedValue, setMaxUnplayedValue] = useState<number | string>(500);
+  const [isSavingMaxValue, setIsSavingMaxValue] = useState(false);
 
   // Initialize Steam username preference and data on mount
   useEffect(() => {
@@ -46,6 +48,21 @@ export default function Settings() {
         const steamProfile = await getSteamProfileData(user.id);
         if (steamProfile) {
           setSteamUsername(steamProfile.steam_username);
+        }
+      }
+
+      // Fetch max unplayed value
+      if (user) {
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('max_unplayed_value')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user settings:', error);
+        } else if (data) {
+          setMaxUnplayedValue(data.max_unplayed_value || 500);
         }
       }
     };
@@ -190,6 +207,70 @@ export default function Settings() {
       window.dispatchEvent(new Event('userMetadataChanged'));
     } catch (error) {
       console.error("Failed to update username preference:", error);
+    }
+  };
+
+  const handleMaxUnplayedValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only numbers and one decimal point
+    if (value === '' || /^\d*\.?\d{0,1}$/.test(value)) {
+      setMaxUnplayedValue(value);
+    }
+  };
+
+  const handleSaveMaxUnplayedValue = async () => {
+    try {
+      setIsSavingMaxValue(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      const numValue = parseFloat(maxUnplayedValue as string) || 500;
+      if (numValue < 0) {
+        setSuccessMessage("Error: Value cannot be negative");
+        setIsSavingMaxValue(false);
+        setTimeout(() => setSuccessMessage(""), 3000);
+        return;
+      }
+
+      // Try to update existing row, if not found, insert new
+      const { data: existing, error: fetchError } = await supabase
+        .from('user_settings')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+
+      if (existing) {
+        // Update
+        const { error } = await supabase
+          .from('user_settings')
+          .update({ max_unplayed_value: numValue })
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        // Insert
+        const { error } = await supabase
+          .from('user_settings')
+          .insert({ user_id: user.id, max_unplayed_value: numValue });
+
+        if (error) throw error;
+      }
+
+      setMaxUnplayedValue(numValue);
+      setSuccessMessage(`Max unplayed value set to $${numValue.toFixed(1)}`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to save max unplayed value";
+      setSuccessMessage(`Error: ${message}`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } finally {
+      setIsSavingMaxValue(false);
     }
   };
 
@@ -402,6 +483,40 @@ export default function Settings() {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Dashboard Settings */}
+          <div className="mt-8 bg-(--background-color) rounded-sm p-5">
+            <h3 className="text-lg font-semibold text-(--text-color) mb-4">Dashboard Settings</h3>
+            
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <label className="text-(--text-color) text-lg font-semibold mb-2 block">
+                  Max Unplayed Games Value (CAD)
+                </label>
+                <p className="text-(--secondary-text-color) text-sm mb-3">
+                  When your unplayed games value reaches this amount, it will turn yellow on the dashboard.
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-(--secondary-text-color) text-lg">$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={maxUnplayedValue}
+                    onChange={handleMaxUnplayedValueChange}
+                    placeholder="500"
+                    className="px-4 py-2 rounded-sm bg-(--background-inner-color) text-(--text-color) border border-white/10 outline-none focus:border-white/30 w-32"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleSaveMaxUnplayedValue}
+                disabled={isSavingMaxValue}
+                className="text-lg bg-(--primary-color) text-black px-6 py-2 rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+              >
+                {isSavingMaxValue ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
         </section>
       )}
