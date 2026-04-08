@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { validateSteamResponse, getSteamProfile, createOrUpdateSteamUser } from "@/services/steamAuth";
+import { validateSteamResponse, getSteamProfile } from "@/services/steamAuth";
 import { supabase } from "@/services/supabaseClient";
 
 export default function SettingsCallback() {
@@ -77,15 +77,33 @@ export default function SettingsCallback() {
           return;
         }
 
-        // Update or create Steam profile for current user
-        const userId = await createOrUpdateSteamUser(steamProfile);
-        
-        if (!userId) {
-          const errorMsg = "Failed to link Steam account. Please try again.";
-          setError(errorMsg);
-          localStorage.setItem("steamSyncError", errorMsg);
-          setTimeout(() => navigate("/settings"), 3000);
-          return;
+        // Update current user's metadata with Steam data
+        const { error: metadataError } = await supabase.auth.updateUser({
+          data: {
+            steam_id: steamProfile.steamid,
+            steam_username: steamProfile.personaname,
+            avatar_url: steamProfile.avatarfull,
+          },
+        });
+
+        if (metadataError) {
+          throw new Error(`Failed to update user metadata: ${metadataError.message}`);
+        }
+
+        // Upsert steam_profiles record for current user
+        const { error: profileError } = await supabase
+          .from('steam_profiles')
+          .upsert([
+            {
+              id: user.id,
+              steam_id: steamProfile.steamid,
+              steam_username: steamProfile.personaname,
+              avatar_url: steamProfile.avatarfull,
+            },
+          ]);
+
+        if (profileError) {
+          throw new Error(`Failed to save Steam profile: ${profileError.message}`);
         }
 
         // Set Steam as connected in localStorage
