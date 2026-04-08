@@ -1,6 +1,6 @@
 // LOGIN LANDING PAGE
 import HomeHero from "@/components/homeHero";
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/services/supabaseClient";
@@ -14,20 +14,13 @@ export default function Home() {
   const navigate = useNavigate();
   const { settings } = useAccessibility();
 
-  const [ email, setEmail ] = useState("");
-  const [ password, setPassword ] = useState("");
-  const [ rememberMe, setRememberMe ] = useState(false);
+  // Initialize from remembered credentials
+  const rememberedCreds = getRememberedCredentials();
+  const [email, setEmail] = useState(rememberedCreds?.email || "");
+  const [password, setPassword] = useState(rememberedCreds?.password || "");
+  const [rememberMe, setRememberMe] = useState(!!rememberedCreds);
 
   const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const credentials = getRememberedCredentials();
-    if (credentials) {
-      setEmail(credentials.email);
-      setPassword(credentials.password);
-      setRememberMe(true);
-    }
-  }, []);
 
   const handleLogin = async () => {
     if (rememberMe) {

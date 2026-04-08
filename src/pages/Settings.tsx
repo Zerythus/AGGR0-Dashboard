@@ -53,8 +53,9 @@ export default function Settings() {
     initializeSteamData();
   }, []);
 
-  // Handle sync success from callback
+  // Handle sync success/error from callback
   useEffect(() => {
+    // Check for sync success
     if (searchParams.get("syncSuccess") === "steam") {
       setSuccessMessage("Steam account synced successfully!");
       
@@ -76,6 +77,17 @@ export default function Settings() {
       
       // Clear message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, "/settings");
+    }
+    
+    // Check for sync error
+    const syncError = localStorage.getItem("steamSyncError");
+    if (syncError) {
+      setSuccessMessage(`Error: ${syncError}`);
+      localStorage.removeItem("steamSyncError");
+      setTimeout(() => setSuccessMessage(""), 5000);
       
       // Clean up URL
       window.history.replaceState({}, document.title, "/settings");

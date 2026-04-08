@@ -15,7 +15,9 @@ export default function SettingsCallback() {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          setError("Not authenticated. Please log in first.");
+          const errorMsg = "Not authenticated. Please log in first.";
+          setError(errorMsg);
+          localStorage.setItem("steamSyncError", errorMsg);
           setTimeout(() => navigate("/"), 3000);
           return;
         }
@@ -24,7 +26,9 @@ export default function SettingsCallback() {
         const steamId = await validateSteamResponse(searchParams);
         
         if (!steamId) {
-          setError("Invalid Steam response. Please try again.");
+          const errorMsg = "Invalid Steam response. Please try again.";
+          setError(errorMsg);
+          localStorage.setItem("steamSyncError", errorMsg);
           setTimeout(() => navigate("/settings"), 3000);
           return;
         }
@@ -33,20 +37,42 @@ export default function SettingsCallback() {
         const steamProfile = await getSteamProfile(steamId);
         
         if (!steamProfile) {
-          setError("Failed to fetch Steam profile. Please try again.");
+          const errorMsg = "Failed to fetch Steam profile. Please try again.";
+          setError(errorMsg);
+          localStorage.setItem("steamSyncError", errorMsg);
           setTimeout(() => navigate("/settings"), 3000);
           return;
         }
 
         // Check if this Steam account is already linked to a different user
-        const { data: existingProfile } = await supabase
-          .from('steam_profiles')
-          .select('id')
-          .eq('steam_id', steamProfile.steamid)
-          .single();
+        let existingProfile = null;
+        try {
+          const { data, error } = await supabase
+            .from('steam_profiles')
+            .select('id')
+            .eq('steam_id', steamProfile.steamid)
+            .limit(1);
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error checking existing Steam profile:', error);
+            throw new Error('Failed to verify Steam account availability');
+          }
+
+          // Check if profile exists and belongs to different user
+          if (data && data.length > 0) {
+            existingProfile = data[0];
+          }
+        } catch (queryError) {
+          console.error('Database query error:', queryError);
+          setError("An error occurred while checking Steam account. Please try again.");
+          setTimeout(() => navigate("/settings"), 3000);
+          return;
+        }
 
         if (existingProfile && existingProfile.id !== user.id) {
-          setError("This Steam account is already linked to another account. Disconnect it first.");
+          const errorMsg = "This Steam account is already connected to another AGGRO account. Please disconnect it from the other account first.";
+          setError(errorMsg);
+          localStorage.setItem("steamSyncError", errorMsg);
           setTimeout(() => navigate("/settings"), 3000);
           return;
         }
@@ -55,7 +81,9 @@ export default function SettingsCallback() {
         const userId = await createOrUpdateSteamUser(steamProfile);
         
         if (!userId) {
-          setError("Failed to link Steam account. Please try again.");
+          const errorMsg = "Failed to link Steam account. Please try again.";
+          setError(errorMsg);
+          localStorage.setItem("steamSyncError", errorMsg);
           setTimeout(() => navigate("/settings"), 3000);
           return;
         }
@@ -68,8 +96,10 @@ export default function SettingsCallback() {
         // Redirect to settings with success
         setTimeout(() => navigate("/settings?syncSuccess=steam"), 1500);
       } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "An error occurred during Steam sync. Please try again.";
         console.error("Settings callback error:", err);
-        setError("An error occurred during Steam sync. Please try again.");
+        setError(errorMsg);
+        localStorage.setItem("steamSyncError", errorMsg);
         setTimeout(() => navigate("/settings"), 3000);
       }
     };
