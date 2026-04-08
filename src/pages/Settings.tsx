@@ -137,12 +137,13 @@ export default function Settings() {
           throw new Error(error.error || "Failed to disconnect Steam");
         }
 
-        // Update local state
-        const updated = { ...syncedPlatforms, [platformName]: false };
+        // Update local state - remove Steam from connected platforms
+        const updated = { ...syncedPlatforms };
+        delete updated["Steam"];
         setSyncedPlatforms(updated);
         localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
         
-        // Clear steam username
+        // Clear steam username and preference
         setSteamUsername("");
         setUseSteamUsername(false);
         
@@ -407,19 +408,6 @@ export default function Settings() {
 
       {activeTab === "account" && (
         <section className="mt-5 space-y-8">
-          {/* <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
-            <div>
-              <h3 className="text-xl font-bold text-(--text-color)">Change your password</h3>
-              <p className="mt-3 text-lg text-(--secondary-text-color)">
-                For security purposes, we recommend using a unique password that isn't used
-                for any other account.
-              </p>
-            </div>
-            <button className="text-lg bg-(--primary-color) my-auto text-black px-5 py-2 rounded-sm hover:opacity-90">
-              Change Password
-            </button>
-          </div> */}
-
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>

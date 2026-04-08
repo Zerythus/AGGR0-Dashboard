@@ -289,7 +289,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
           </div>
         </div>
 
-        <div className="text-center mt-5">
+        <div className="text-center mt-7">
             <p className="text-3xl font-medium tracking-tight text-slate-50">
               <span className="text-sky-400">
                 {selectedGame && hours > 0 && !Number.isNaN(numericPrice)
