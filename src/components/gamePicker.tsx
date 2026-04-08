@@ -73,6 +73,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     const [activeSlot, setActiveSlot] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [steamId, setSteamId] = useState<string | null>(null);
 
     const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -101,6 +102,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             }
 
             setCurrentUserId(user?.id ?? null);
+            setSteamId(user?.user_metadata?.steam_id ?? null);
         }
 
         getCurrentUser();
@@ -110,17 +112,26 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         const fetchGames = async () => {
             const allGames: Game[] = [];
 
-            if (isSteamConnected) {
+            if (isSteamConnected && steamId) {
                 try {
-                    const response = await fetch("/data/SteamData.json");
-                    const json = await response.json();
-                    const steamGames = json.steam.games.map((game: Game) => ({
-                        ...game,
-                        platform: "steam" as const,
-                    }));
-                    allGames.push(...steamGames);
+                    const response = await fetch("/api/steam-owned-games", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ steamId }),
+                    });
+
+                    if (!response.ok) {
+                        console.error("Failed to fetch Steam games:", response.statusText);
+                    } else {
+                        const data = await response.json();
+                        const steamGames = (data.response?.games || []).map((game: Game) => ({
+                            ...game,
+                            platform: "steam" as const,
+                        }));
+                        allGames.push(...steamGames);
+                    }
                 } catch (error) {
-                    console.error("Error fetching Steam data:", error);
+                    console.error("Error fetching Steam games:", error);
                 }
             }
 
@@ -128,13 +139,13 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                 try {
                     const response = await fetch("/data/EpicData.json");
                     const json = await response.json();
-                    const epicGames = json.epic.games.map((game: Game) => ({
+                    const epicGames = (json.epic?.games || []).map((game: Game) => ({
                         ...game,
                         platform: "epic" as const,
                     }));
                     allGames.push(...epicGames);
                 } catch (error) {
-                    console.error("Error fetching Epic data:", error);
+                    console.error("Error fetching Epic games:", error);
                 }
             }
 
@@ -142,7 +153,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         };
 
         fetchGames();
-    }, [isSteamConnected, isEpicConnected]);
+    }, [isSteamConnected, isEpicConnected, steamId]);
 
     useEffect(() => {
         async function fetchSelectedGames() {
@@ -245,8 +256,39 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         }
     }
 
+    async function fetchGameAchievements(game: Game): Promise<Game> {
+        if (game.platform !== "steam" || !steamId) {
+            return game;
+        }
+
+        try {
+            const response = await fetch("/api/steam-achievements", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ steamId, steamAppId: game.appid }),
+            });
+
+            if (!response.ok) {
+                return game;
+            }
+
+            const data = await response.json();
+
+            return {
+                ...game,
+                unlocked_achievements: data.response?.unlocked ?? undefined,
+                total_achievements: data.response?.total ?? undefined,
+            };
+        } catch (error) {
+            console.error(`Error fetching achievements for ${game.appid}:`, error);
+            return game;
+        }
+    }
+
     async function selectGame(game: Game) {
         if (activeSlot === null || !game.platform) return;
+
+        const enrichedGame = await fetchGameAchievements(game);
 
         const nextSlots = [...slots];
 
@@ -261,7 +303,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             }
         }
 
-        nextSlots[activeSlot] = game;
+        nextSlots[activeSlot] = enrichedGame;
 
         setSlots(nextSlots);
         setPickerOpen(false);
