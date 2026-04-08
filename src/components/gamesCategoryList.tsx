@@ -12,6 +12,8 @@ interface Game {
     image?: string;
     platform?: "steam" | "epic"; //Track which platform the game came from
     img_icon_url?: string;
+    total_achievements?: number;
+    unlocked_achievements?: number;
 }
 
 interface GamesCategoryListProps {
@@ -194,9 +196,9 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                     key={game.appid}
                                     className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
                                 >
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex gap-5 items-start">
-                                            <div className="rounded-sm">
+                                    <div className="flex justify-between items-center gap-4">
+                                        <div className="flex-1 flex gap-3 items-start min-w-0">
+                                            <div className="rounded-sm shrink-0">
                                                 <img
                                                     src={
                                                         game.platform === "epic"
@@ -207,12 +209,25 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                                     className="w-6 h-6 inline mr-2"
                                                 />
                                             </div>
-                                            <p className="font-medium">{game.name}</p>
+                                            <p className="font-medium truncate">{game.name}</p>
                                         </div>
-                                        <div>
-                                            <span className="text-(--secondary-text-color)">
-                                                {minutesToHours(game.playtime_forever)} hours
-                                            </span>
+                                        <div className="flex gap-20 items-center">
+                                            <div>
+                                                {game.total_achievements ? (
+                                                    <span className="text-(--secondary-text-color)">
+                                                        {game.unlocked_achievements || 0}/{game.total_achievements} achievements
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-(--secondary-text-color) text-sm">
+                                                        No achievements
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <span className="text-(--secondary-text-color)">
+                                                    {minutesToHours(game.playtime_forever)} hours
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </li>

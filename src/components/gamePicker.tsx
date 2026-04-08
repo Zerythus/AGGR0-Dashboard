@@ -22,6 +22,13 @@ type Game = {
     image_url?: string;
 };
 
+type Achievement = {
+    name: string;
+    description?: string;
+    icon?: string;
+    unlock_time?: number;
+};
+
 type MonitorRow = {
     app_id: number;
     platform: Platform;
@@ -74,6 +81,9 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     const [searchTerm, setSearchTerm] = useState("");
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [steamId, setSteamId] = useState<string | null>(null);
+    const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
+    const [selectedGameForAchievements, setSelectedGameForAchievements] = useState<Game | null>(null);
+    const [achievements, setAchievements] = useState<Achievement[]>([]);
 
     const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -114,6 +124,28 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
         },
         [steamId]
     );
+
+    const openAchievementsModal = async (game: Game) => {
+        if (game.platform !== "steam" || !steamId) return;
+
+        setSelectedGameForAchievements(game);
+        setAchievementsModalOpen(true);
+
+        try {
+            const response = await fetch("/api/steam-achievements", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ steamId, steamAppId: game.appid }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setAchievements(data.response?.achievements || []);
+            }
+        } catch (error) {
+            console.error("Error fetching achievements:", error);
+        }
+    };
 
     const gameMap = useMemo(() => {
         return new Map<string, Game>(
@@ -377,7 +409,17 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
 
                                     <div className="flex justify-between items-center">
                                         <p>Achievements: </p>
-                                        <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
+                                        <div className="flex items-center gap-2">
+                                            <p>{game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
+                                            {game.platform === "steam" && (
+                                                <button
+                                                    onClick={() => openAchievementsModal(game)}
+                                                    className="h-5 px-3 bg-(--primary-color) text-black text-lg rounded-sm hover:opacity-90 whitespace-nowrap"
+                                                >
+                                                    View Achievements
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="flex justify-between items-center mt-5">
@@ -448,6 +490,70 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                     </li>
                                 ))}
                             </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {achievementsModalOpen && selectedGameForAchievements && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-2xl h-[80vh] flex flex-col relative">
+                        <div className="flex justify-between items-center p-5 border-b border-(--disabled-color)/20">
+                            <h3 className="text-xl font-semibold text-(--text-color)">
+                                Achievements - {selectedGameForAchievements.name}
+                            </h3>
+                            <FontAwesomeIcon
+                                icon={faRectangleXmark}
+                                style={{ color: "#29bdff" }}
+                                className="text-4xl cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                    setAchievementsModalOpen(false);
+                                    setSelectedGameForAchievements(null);
+                                    setAchievements([]);
+                                }}
+                            />
+                        </div>
+
+                        <div className="bg-(--background-inner-color) flex-1 p-4 overflow-y-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {achievements.length > 0 ? (
+                                    achievements.map((achievement, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-(--background-color) p-3 rounded-sm border border-white/10"
+                                        >
+                                            <div className="flex gap-3">
+                                                {achievement.icon && (
+                                                    <img
+                                                        src={achievement.icon}
+                                                        alt={achievement.name}
+                                                        className="w-12 h-12 rounded-sm"
+                                                    />
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-semibold text-(--text-color) text-sm">
+                                                        {achievement.name}
+                                                    </p>
+                                                    <p className="text-xs text-(--secondary-text-color) mt-1">
+                                                        {achievement.description}
+                                                    </p>
+                                                    {achievement.unlock_time && (
+                                                        <p className="text-xs text-(--secondary-text-color) mt-1">
+                                                            Unlocked: {epochToDate(achievement.unlock_time)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center py-10">
+                                        <p className="text-(--secondary-text-color)">
+                                            No achievements data available
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
