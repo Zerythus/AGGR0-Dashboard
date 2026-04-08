@@ -18,8 +18,12 @@ export default function AppLayout() {
       }
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.user_metadata?.username) {
-        setUsername(user.user_metadata.username);
+      if (user) {
+        // Prioritize Steam username, then fall back to regular username, then email
+        const steamUsername = user.user_metadata?.steam_username;
+        const regularUsername = user.user_metadata?.username;
+        const displayName = steamUsername || regularUsername || user.email?.split('@')[0] || "User";
+        setUsername(displayName);
         
         // Track login count
         const currentCount = parseInt(localStorage.getItem('loginCount') || '0', 10);
