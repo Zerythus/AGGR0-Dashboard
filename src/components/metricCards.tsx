@@ -213,9 +213,9 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
 
   return (
     <>
-      <div className="card outline outline-white/10 bg-(--background-color) rounded-sm px-3 py-2 flex items-center gap-4 border border-slate-700/40">
+      <div className="card outline outline-white/10 bg-(--background-color) rounded-sm px-3 py-2 flex items-center justify-center border border-slate-700/40">
         <div className="card-body text-center">
-            <p className="text-4xl font-bold pr-5 pt-3 pl-5" 
+            <p className="text-4xl font-bold px-5 py-3" 
               style={{ color: isUnplayedValueExceeded ? '#FFD700' : 'var(--primary-color)' }}
             >
             {loading ? '...' : (
@@ -228,7 +228,7 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
               </>
             )} {metric === 'totalGames' || metric === 'unplayedGamesPrice' ? '' : unit}
             </p>
-            <h2 className="card-title text-lg mt-2 pr-5 pb-3 pl-5">{label}</h2>
+            <h2 className="card-title text-lg mt-2 px-5 pb-3">{label}</h2>
         </div>
 
       </div>
