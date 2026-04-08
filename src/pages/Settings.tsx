@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSteam } from "@fortawesome/free-brands-svg-icons";
@@ -8,11 +8,13 @@ import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleX
 
 import { supabase } from "../services/supabaseClient";
 import { deleteUserAccount } from "../services/accountService";
+import { getSteamProfileData } from "../services/steamProfileService";
 import { useAccessibility } from "../contexts/AccessibilityContext";
 import epicLogo from "/public/icons/epic-games.svg";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { settings, setFontSizeLevel, setHighContrast, resetAccessibility } = useAccessibility();
 
   const [activeTab, setActiveTab] = useState("general");
@@ -21,6 +23,11 @@ export default function Settings() {
     return saved ? JSON.parse(saved) : {};
   });
 
+  const [useSteamUsername, setUseSteamUsername] = useState(false);
+  const [steamUsername, setSteamUsername] = useState("");
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -28,17 +35,162 @@ export default function Settings() {
   const syncModalRef = useRef<HTMLDivElement>(null);
   const deleteModalRef = useRef<HTMLDivElement>(null);
 
+  // Initialize Steam username preference and data on mount
+  useEffect(() => {
+    const initializeSteamData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && user.user_metadata?.steam_id) {
+        setUseSteamUsername(user.user_metadata?.use_steam_username === true);
+        
+        // Fetch steam username from steam_profiles table
+        const steamProfile = await getSteamProfileData(user.id);
+        if (steamProfile) {
+          setSteamUsername(steamProfile.steam_username);
+        }
+      }
+    };
+
+    initializeSteamData();
+  }, []);
+
+  // Handle sync success/error from callback
+  useEffect(() => {
+    // Check for sync success
+    if (searchParams.get("syncSuccess") === "steam") {
+      setSuccessMessage("Steam account synced successfully!");
+      
+      // Refresh platform sync status
+      const syncedPlats = JSON.parse(localStorage.getItem("syncedPlatforms") || "{}");
+      setSyncedPlatforms(syncedPlats);
+      
+      // Refresh steam username
+      const initializeSteamData = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && user.user_metadata?.steam_id) {
+          const steamProfile = await getSteamProfileData(user.id);
+          if (steamProfile) {
+            setSteamUsername(steamProfile.steam_username);
+          }
+        }
+      };
+      initializeSteamData();
+      
+      // Clear message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, "/settings");
+    }
+    
+    // Check for sync error
+    const syncError = localStorage.getItem("steamSyncError");
+    if (syncError) {
+      setSuccessMessage(`Error: ${syncError}`);
+      localStorage.removeItem("steamSyncError");
+      setTimeout(() => setSuccessMessage(""), 5000);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, "/settings");
+    }
+  }, [searchParams]);
+
   const handleSync = (platformName: string) => {
-    const updated = { ...syncedPlatforms, [platformName]: true };
-    setSyncedPlatforms(updated);
-    localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
-    setShowSyncModal(true);
+    if (platformName === "Steam") {
+      // Redirect to Steam OpenID login with settings callback
+      const returnUrl = `${window.location.origin}/settings-callback`;
+      const params = new URLSearchParams({
+        "openid.ns": "http://specs.openid.net/auth/2.0",
+        "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
+        "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
+        "openid.mode": "checkid_setup",
+        "openid.return_to": returnUrl,
+        "openid.realm": window.location.origin,
+      });
+      
+      window.location.href = `https://steamcommunity.com/openid/login?${params.toString()}`;
+    } else {
+      // For Epic Games - just toggle in localStorage
+      const updated = { ...syncedPlatforms, [platformName]: true };
+      setSyncedPlatforms(updated);
+      localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
+      setShowSyncModal(true);
+    }
   };
 
-  const handleDisconnect = (platformName: string) => {
-    const updated = { ...syncedPlatforms, [platformName]: false };
-    setSyncedPlatforms(updated);
-    localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
+  const handleDisconnect = async (platformName: string) => {
+    if (platformName === "Steam") {
+      setIsDisconnecting(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("Not authenticated");
+        }
+
+        const response = await fetch("/api/steam-disconnect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to disconnect Steam");
+        }
+
+        // Update local state - remove Steam from connected platforms
+        const updated = { ...syncedPlatforms };
+        delete updated["Steam"];
+        setSyncedPlatforms(updated);
+        localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
+        
+        // Clear steam username and preference
+        setSteamUsername("");
+        setUseSteamUsername(false);
+        
+        setSuccessMessage("Steam account disconnected successfully");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to disconnect Steam";
+        setSuccessMessage(`Error: ${message}`);
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } finally {
+        setIsDisconnecting(false);
+        // Dispatch custom event to notify AppLayout of metadata change
+        window.dispatchEvent(new Event('userMetadataChanged'));
+      }
+    } else {
+      // For Epic Games - just toggle in localStorage
+      const updated = { ...syncedPlatforms, [platformName]: false };
+      setSyncedPlatforms(updated);
+      localStorage.setItem("syncedPlatforms", JSON.stringify(updated));
+    }
+  };
+
+  const handleToggleSteamUsername = async (newValue: boolean) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      // Update user metadata with preference
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          use_steam_username: newValue,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setUseSteamUsername(newValue);
+      
+      // Dispatch custom event to notify AppLayout of metadata change
+      window.dispatchEvent(new Event('userMetadataChanged'));
+    } catch (error) {
+      console.error("Failed to update username preference:", error);
+    }
   };
 
   const handleBackToDashboard = () => {
@@ -156,6 +308,16 @@ export default function Settings() {
 
       {activeTab === "general" && (
         <section className="mt-5 bg-(--background-color) rounded-sm p-5">
+          {successMessage && (
+            <div className={`mb-5 p-4 rounded-sm text-white ${
+              successMessage.includes("Error") 
+                ? "bg-red-500/20 border border-red-500/50" 
+                : "bg-green-500/20 border border-green-500/50"
+            }`}>
+              {successMessage}
+            </div>
+          )}
+          
           <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
           <p>
             Note: Epic Games is currently using mock data (JSON file)
@@ -194,10 +356,11 @@ export default function Settings() {
                   {syncedPlatforms[platform.name] ? (
                     <div className="flex gap-3">
                       <button
-                        className="text-lg px-5 py-2 rounded-sm bg-red-500 text-white hover:opacity-90"
+                        className="text-lg px-5 py-2 rounded-sm bg-red-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleDisconnect(platform.name)}
+                        disabled={isDisconnecting && platform.name === "Steam"}
                       >
-                        Disconnect
+                        {isDisconnecting && platform.name === "Steam" ? "Disconnecting..." : "Disconnect"}
                       </button>
                     </div>
                   ) : (
@@ -210,6 +373,30 @@ export default function Settings() {
                   )}
                 </div>
 
+                {/* Steam-specific: Show username toggle when synced */}
+                {platform.name === "Steam" && syncedPlatforms[platform.name] && steamUsername && (
+                  <div className="flex items-center justify-between py-4 px-6 bg-(--background-inner-color) border-t border-(--disabled-color)">
+                    <div>
+                      <p className="text-lg text-(--text-color)">Use Steam username as display name</p>
+                      <p className="text-sm text-(--secondary-text-color)">Currently: {steamUsername}</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSteamUsername(!useSteamUsername)}
+                      className={`relative w-16 h-9 rounded-full transition-colors focus:outline-none ${
+                        useSteamUsername ? "bg-(--primary-color)" : "bg-(--secondary-text-color)"
+                      }`}
+                      role="switch"
+                      aria-checked={useSteamUsername}
+                    >
+                      <div
+                        className={`absolute top-1 w-7 h-7 bg-white rounded-full transition-transform ${
+                          useSteamUsername ? "translate-x-8" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                )}
+
                 {index !== platforms.length - 1 && (
                   <div className="border-b border-(--disabled-color)" />
                 )}
@@ -221,19 +408,6 @@ export default function Settings() {
 
       {activeTab === "account" && (
         <section className="mt-5 space-y-8">
-          {/* <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
-            <div>
-              <h3 className="text-xl font-bold text-(--text-color)">Change your password</h3>
-              <p className="mt-3 text-lg text-(--secondary-text-color)">
-                For security purposes, we recommend using a unique password that isn't used
-                for any other account.
-              </p>
-            </div>
-            <button className="text-lg bg-(--primary-color) my-auto text-black px-5 py-2 rounded-sm hover:opacity-90">
-              Change Password
-            </button>
-          </div> */}
-
           <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>

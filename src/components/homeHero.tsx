@@ -12,7 +12,7 @@ export default function HomeHero() {
         <p className="mt-6 max-w-lg text-xl text-white/75">
           Understand your gaming habits with playtime and measure your investments in games
         </p>
-        <img src="/img/HomeImg.png" alt="Home Image" className="mt-10 h-105 w-full rounded-sm " />
+        <img src="/img/HomeImg.png" alt="Home Image" className="mt-10 h-105 min-w-xl max-w-3xl rounded-sm " />
       </div>
     </section>
     );

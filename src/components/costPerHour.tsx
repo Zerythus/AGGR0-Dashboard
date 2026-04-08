@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "../services/supabaseClient";
 
 import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -52,30 +53,63 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch games from SteamData.json and/or EpicData.json
+  // Fetch games from Steam API and/or EpicData.json
   useEffect(() => {
     const fetchGames = async () => {
       try {
         const allGames: GameItem[] = [];
 
         if (isSteamConnected) {
-          const steamResponse = await fetch("/data/SteamData.json");
-          const steamData = await steamResponse.json();
-          const steamGames = (steamData.steam?.games || []).map((game: GameItem) => ({
-            ...game,
-            platform: "steam"
-          }));
-          allGames.push(...steamGames);
+          try {
+            // Get current user
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+            if (userError || !user) {
+              console.error("Failed to get user:", userError);
+            } else {
+              // Get Steam ID from user metadata
+              const steamId = user.user_metadata?.steam_id;
+
+              if (!steamId) {
+                console.error("No Steam ID in user metadata");
+              } else {
+                // Fetch Steam games data from API
+                const response = await fetch("/api/steam-owned-games", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ steamId }),
+                });
+
+                if (!response.ok) {
+                  console.error("Failed to fetch Steam games:", response.statusText);
+                } else {
+                  const data = await response.json();
+                  const gameList: GameItem[] = data.response?.games || [];
+                  const steamGames = gameList.map((game: GameItem) => ({
+                    ...game,
+                    platform: "steam" as const
+                  }));
+                  allGames.push(...steamGames);
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching Steam games:", error);
+          }
         }
 
         if (isEpicConnected) {
-          const epicResponse = await fetch("/data/EpicData.json");
-          const epicData = await epicResponse.json();
-          const epicGames = (epicData.epic?.games || []).map((game: GameItem) => ({
-            ...game,
-            platform: "epic"
-          }));
-          allGames.push(...epicGames);
+          try {
+            const epicResponse = await fetch("/data/EpicData.json");
+            const epicData = await epicResponse.json();
+            const epicGames = (epicData.epic?.games || []).map((game: GameItem) => ({
+              ...game,
+              platform: "epic" as const
+            }));
+            allGames.push(...epicGames);
+          } catch (error) {
+            console.error("Error fetching Epic games:", error);
+          }
         }
 
         setGames(allGames);
@@ -132,11 +166,6 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
     setIsEditingPrice(false);
     setIsFree(false);
     setPricePaid("0.00");
-  }
-
-  function handleGiftToggle() {
-    setIsFree((prev) => !prev);
-    setIsEditingPrice(false);
   }
 
   const hours = getHours(selectedGame);
@@ -260,27 +289,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
           </div>
         </div>
 
-        <div className="flex items-center">
-          <label className="cursor-pointer flex items-center">
-            <input
-              type="checkbox"
-              checked={isFree}
-              onChange={handleGiftToggle}
-              className="h-5 w-5 rounded-sm border-slate-300 accent-sky-500"
-            />
-          </label>
-
-          <span className="text-xl text-slate-100 ml-3">
-            Received as a gift / free
-          </span>
-        </div>
-
-        <div className="text-center mt-5">
-          {isFree ? (
-            <p className="text-3xl font-medium tracking-tight text-sky-400">
-              FREE
-            </p>
-          ) : (
+        <div className="text-center py-10">
             <p className="text-3xl font-medium tracking-tight text-slate-50">
               <span className="text-sky-400">
                 {selectedGame && hours > 0 && !Number.isNaN(numericPrice)
@@ -293,7 +302,6 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
                 <span className="text-slate-100"> CAD / hour</span>
               )}
             </p>
-          )}
         </div>
       </div>
     </section>

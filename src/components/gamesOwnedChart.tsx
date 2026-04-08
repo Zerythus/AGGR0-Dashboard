@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { supabase } from '../services/supabaseClient';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 
@@ -19,20 +20,21 @@ interface GamesOwnedChartProps {
 // Playtime category constants
 const PLAYTIME_CATEGORIES = [
     { min: 0, max: 0, label: 'Unplayed' },
-    { min: 1, max: 60, label: '<1' },
-    { min: 61, max: 300, label: '1-5' },
-    { min: 301, max: 600, label: '5-10' },
-    { min: 601, max: 900, label: '10-15' },
-    { min: 901, max: 1500, label: '15-25' },
-    { min: 1501, max: 3000, label: '25-50' },
-    { min: 3001, max: 6000, label: '50-100' },
-    { min: 6001, max: Infinity, label: '100+' }
+    { min: 1, max: 60, label: '<1h' },
+    { min: 61, max: 300, label: '1-5h' },
+    { min: 301, max: 600, label: '5-10h' },
+    { min: 601, max: 900, label: '10-15h' },
+    { min: 901, max: 1500, label: '15-25h' },
+    { min: 1501, max: 3000, label: '25-50h' },
+    { min: 3001, max: 6000, label: '50-100h' },
+    { min: 6001, max: Infinity, label: '100+h' }
 ];
 
 export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, isEpicConnected = false }: GamesOwnedChartProps) {
     const { settings } = useAccessibility();
     const [playtimeCategoryData, setPlaytimeCategoryData] = useState<{ category: string; count: number; }[]>([]);
     const [allGames, setAllGames] = useState<Game[]>([]);
+    const [steamId, setSteamId] = useState<string | null>(null);
 
     // Calculate chart height based on font size level
     const chartHeightMap: { [key: number]: number } = {
@@ -43,20 +45,56 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
     const chartHeight = chartHeightMap[settings.fontSizeLevel] || 600;
 
     useEffect(() => {
+        const getCurrentSteamId = async () => {
+            if (!isSteamConnected) {
+                setSteamId(null);
+                return;
+            }
+
+            try {
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+                if (userError || !user) {
+                    console.error("Failed to get user:", userError);
+                    setSteamId(null);
+                    return;
+                }
+
+                const steam_id = user.user_metadata?.steam_id;
+                setSteamId(steam_id ?? null);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+                setSteamId(null);
+            }
+        };
+
+        getCurrentSteamId();
+    }, [isSteamConnected]);
+
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 let allGamesData: Game[] = [];
 
                 // Fetch Steam data if connected
-                if (isSteamConnected) {
+                if (isSteamConnected && steamId) {
                     try {
-                        const steamResponse = await fetch('data/SteamData.json');
-                        const steamData = await steamResponse.json();
-                        const steamGames: Game[] = (steamData.steam?.games || []).map((game: Game) => ({
-                            ...game,
-                            platform: "steam"
-                        }));
-                        allGamesData = [...allGamesData, ...steamGames];
+                        const steamResponse = await fetch('/api/steam-owned-games', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ steamId }),
+                        });
+
+                        if (!steamResponse.ok) {
+                            console.error('Failed to fetch Steam games:', steamResponse.statusText);
+                        } else {
+                            const steamData = await steamResponse.json();
+                            const steamGames: Game[] = (steamData.response?.games || []).map((game: Game) => ({
+                                ...game,
+                                platform: "steam" as const
+                            }));
+                            allGamesData = [...allGamesData, ...steamGames];
+                        }
                     } catch (error) {
                         console.error('Error loading Steam data:', error);
                     }
@@ -69,7 +107,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                         const epicData = await epicResponse.json();
                         const epicGames: Game[] = (epicData.epic?.games || []).map((game: Game) => ({
                             ...game,
-                            platform: "epic"
+                            platform: "epic" as const
                         }));
                         allGamesData = [...allGamesData, ...epicGames];
                     } catch (error) {
@@ -105,9 +143,9 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
         };
 
         fetchData();
-    }, [isSteamConnected, isEpicConnected]);
+    }, [isSteamConnected, isEpicConnected, steamId]);
 
-    const handleBarClick = (props: any) => {
+    const handleBarClick = (props: { payload?: { category: string; count: number } }) => {
         if (!onBarClick || !props.payload) return;
 
         const data = props.payload;
