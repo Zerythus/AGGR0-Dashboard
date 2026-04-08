@@ -23,10 +23,9 @@ type Game = {
 };
 
 type Achievement = {
-    name: string;
-    description?: string;
-    icon?: string;
-    unlock_time?: number;
+    apiname: string;
+    achieved: boolean;
+    unlocktime: number;
 };
 
 type MonitorRow = {
@@ -522,26 +521,32 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                     achievements.map((achievement, index) => (
                                         <div
                                             key={index}
-                                            className="bg-(--background-color) p-3 rounded-sm border border-white/10"
+                                            className={`p-3 rounded-sm border ${
+                                                achievement.achieved
+                                                    ? "bg-(--background-color) border-green-500/30"
+                                                    : "bg-(--background-color) border-white/10"
+                                            }`}
                                         >
-                                            <div className="flex gap-3">
-                                                {achievement.icon && (
-                                                    <img
-                                                        src={achievement.icon}
-                                                        alt={achievement.name}
-                                                        className="w-12 h-12 rounded-sm"
-                                                    />
-                                                )}
+                                            <div className="flex justify-between items-start gap-2">
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-semibold text-(--text-color) text-sm">
-                                                        {achievement.name}
+                                                        {achievement.apiname}
                                                     </p>
-                                                    <p className="text-xs text-(--secondary-text-color) mt-1">
-                                                        {achievement.description}
+                                                    <p className={`text-xs mt-2 ${
+                                                        achievement.achieved
+                                                            ? "text-green-400"
+                                                            : "text-(--secondary-text-color)"
+                                                    }`}>
+                                                        {achievement.achieved ? "✓ Unlocked" : "🔒 Locked"}
                                                     </p>
-                                                    {achievement.unlock_time && (
+                                                    {achievement.achieved && achievement.unlocktime > 0 && (
                                                         <p className="text-xs text-(--secondary-text-color) mt-1">
-                                                            Unlocked: {epochToDate(achievement.unlock_time)}
+                                                            {epochToDate(achievement.unlocktime)}
+                                                        </p>
+                                                    )}
+                                                    {!achievement.achieved && (
+                                                        <p className="text-xs text-(--secondary-text-color) mt-1">
+                                                            Not yet unlocked
                                                         </p>
                                                     )}
                                                 </div>

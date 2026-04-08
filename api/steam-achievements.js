@@ -76,6 +76,7 @@ export default async function handler(req, res) {
           unlocked: null,
           total: null,
           status: "none",
+          achievements: [],
         },
       });
     }
@@ -86,11 +87,18 @@ export default async function handler(req, res) {
 
     const totalCount = achievements.length;
 
+    const achievementsList = achievements.map((achievement) => ({
+      apiname: achievement.apiname,
+      achieved: achievement.achieved === 1,
+      unlocktime: achievement.unlocktime || 0,
+    }));
+
     return res.status(200).json({
       response: {
         unlocked: unlockedCount,
         total: totalCount,
         status: "ok",
+        achievements: achievementsList,
       },
     });
   } catch (error) {
