@@ -670,7 +670,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                 const filteredAndSortedAchievements = sortAchievements(filterAchievements(achievements));
                                 const totalPages = Math.ceil(filteredAndSortedAchievements.length / 10);
                                 return (
-                                    <div className="p-4 border-t border-(--disabled-color)/20">
+                                    <div className="p-4 mt-3 border-t border-(--disabled-color)/20">
                                         <div className="flex justify-between items-center">
                                             <button
                                                 onClick={() => setCurrentAchievementsPage(prev => Math.max(prev - 1, 1))}
