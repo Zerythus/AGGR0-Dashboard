@@ -567,8 +567,8 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                 }}
                             />
                         </div>
-                        <div className="flex justify-between items-center pr-5 pl-5 pb-5 gap-4">              
-                            <div className="flex items-center gap-3 ml-auto">
+                        <div className="flex items-center pr-5 pl-5 pb-5 gap-4">              
+                            <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1">
                                     <span className="text-(--secondary-text-color) text-sm">
                                         Sort by:
