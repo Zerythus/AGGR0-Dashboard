@@ -11,11 +11,12 @@ interface MetricCardProps {
   value?: number | string;
   unit?: string; //hours, mins
   metric?: 'totalHours' | 'totalGames' | 'unplayedGames' | 'unplayedGamesPrice';
+  subtitle?: string;
   isSteamConnected?: boolean;
   isEpicConnected?: boolean;
 }
 
-export default function MetricCard({ label, value, unit, metric, isSteamConnected = false, isEpicConnected = false }: MetricCardProps) {
+export default function MetricCard({ label, value, unit, metric, subtitle, isSteamConnected = false, isEpicConnected = false }: MetricCardProps) {
   const [displayValue, setDisplayValue] = useState<number | string>(value || 0);
   const [loading, setLoading] = useState(true);
   const [steamId, setSteamId] = useState<string | null>(null);
@@ -228,7 +229,8 @@ export default function MetricCard({ label, value, unit, metric, isSteamConnecte
               </>
             )} {metric === 'totalGames' || metric === 'unplayedGamesPrice' ? '' : unit}
             </p>
-            <h2 className="card-title text-lg mt-2 px-5 pb-3">{label}</h2>
+            <h2 className="card-title text-lg mt-2 px-5 pb-1">{label}</h2>
+            {subtitle && <p className="text-xs text-(--secondary-text-color) px-5 pb-3">{subtitle}</p>}
         </div>
 
       </div>
