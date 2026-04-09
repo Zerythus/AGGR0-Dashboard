@@ -74,7 +74,7 @@ export default function DashboardFill() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10 w-full">
                         <MetricCard metric="totalGames" label="Total Games" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                         <MetricCard metric="unplayedGames" label="Unplayed Games" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
-                        <MetricCard metric="unplayedGamesPrice" label="Unplayed Games Value" unit="CAD" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        <MetricCard metric="unplayedGamesPrice" label="Unplayed Games Value" unit="CAD" subtitle="Based on retail price" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                         <MetricCard metric="totalHours" label="Total Playtime" unit="hrs" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
                     </div>
 
