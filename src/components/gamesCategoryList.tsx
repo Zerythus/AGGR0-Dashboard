@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
 
 import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../services/supabaseClient';
 
 interface Game {
     appid: number;
@@ -35,6 +36,8 @@ export default function GamesCategoryList({
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('hoursHigh');
     const [filterBy, setFilterBy] = useState<'all' | 'steam' | 'epic'>('all');
+    const [enrichedGames, setEnrichedGames] = useState<Game[]>(filteredGames);
+    const [isLoading, setIsLoading] = useState(false);
     const itemsPerPage = 10;
     const modalRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +45,77 @@ export default function GamesCategoryList({
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedCategory]);
+
+    // Lazy load achievements and prices when modal opens
+    useEffect(() => {
+        if (!selectedCategory || filteredGames.length === 0) {
+            setEnrichedGames(filteredGames);
+            return;
+        }
+
+        const enrichGames = async () => {
+            setIsLoading(true);
+            try {
+                // Get steamId from Supabase
+                const { data: { user } } = await supabase.auth.getUser();
+                const steamId = user?.user_metadata?.steam_id;
+
+                const enrichedGamesList = await Promise.all(
+                    filteredGames.map(async (game) => {
+                        // Skip if already enriched or if it's an Epic game
+                        if (game.total_achievements !== undefined && game.retail_price !== undefined) {
+                            return game;
+                        }
+
+                        if (game.platform === "epic") {
+                            return game;
+                        }
+
+                        try {
+                            // Fetch achievements for Steam games
+                            const achievementsResponse = await fetch('/api/steam-achievements', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    steamId, 
+                                    steamAppId: game.appid 
+                                }),
+                            });
+                            const achievementsData = await achievementsResponse.json();
+                            const achievements = achievementsData.response;
+
+                            // Fetch price for Steam games
+                            const priceResponse = await fetch('/api/steam-price', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ steamAppId: game.appid }),
+                            });
+                            const priceData = await priceResponse.json();
+                            const price = priceData.response;
+
+                            return {
+                                ...game,
+                                total_achievements: achievements?.total,
+                                unlocked_achievements: achievements?.unlocked,
+                                retail_price: price?.price
+                            };
+                        } catch (error) {
+                            console.error(`Error enriching game ${game.appid}:`, error);
+                            return game;
+                        }
+                    })
+                );
+                setEnrichedGames(enrichedGamesList);
+            } catch (error) {
+                console.error('Error enriching games:', error);
+                setEnrichedGames(filteredGames);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        enrichGames();
+    }, [selectedCategory, filteredGames]);
 
     const sortGames = (games: Game[]) => {
         const sorted = [...games];
@@ -98,7 +172,7 @@ export default function GamesCategoryList({
         return null;
     }
 
-    const gamesByPlatform = filterGames(filteredGames);
+    const gamesByPlatform = filterGames(enrichedGames);
     const finalSortedGames = sortGames(gamesByPlatform);
     const totalPages = Math.ceil(finalSortedGames.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -191,52 +265,78 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                     </div>
                     
                     <div className="bg-(--background-inner-color) flex-1 p-4 overflow-hidden flex flex-col">
-                        <ul className="flex-1 space-y-2">
-                            {paginatedGames.map((game) => (
-                                <li
-                                    key={game.appid}
-                                    className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
-                                >
-                                    <div className="flex justify-between items-center gap-4 w-full">
-                                        <div className="flex gap-3 items-center min-w-0">
-                                            <div className="rounded-sm shrink-0">
-                                                <img
-                                                    src={
-                                                        game.platform === "epic"
-                                                            ? "/icons/epic-games.svg"
-                                                            : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
-                                                    }
-                                                    alt={game.name}
-                                                    className="w-6 h-6 inline mr-2"
-                                                />
-                                            </div>
-                                            <p className="font-medium truncate">{game.name}</p>
-                                        </div>
-                                        <div className="text-center min-w-fit">
-                                            <span className="text-(--secondary-text-color)">
-                                                {game.retail_price ? `$${game.retail_price.toFixed(2)} CAD` : "N/A"}
-                                            </span>
-                                        </div>
-                                        <div className="text-center min-w-fit">
-                                            {game.total_achievements ? (
-                                                <span className="text-(--secondary-text-color)">
-                                                    {game.unlocked_achievements || 0}/{game.total_achievements}
-                                                </span>
-                                            ) : (
-                                                <span className="text-(--secondary-text-color) text-sm">
-                                                    N/A
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="text-right min-w-fit">
-                                            <span className="text-(--secondary-text-color)">
-                                                {minutesToHours(game.playtime_forever)}h
-                                            </span>
-                                        </div>
+                        {isLoading && (
+                            <div className="flex items-center justify-center h-full">
+                                <p className="text-(--secondary-text-color)">Loading game details...</p>
+                            </div>
+                        )}
+                        {!isLoading && (
+                            <>
+                                {/* Column Headers */}
+                                <div className="flex items-center gap-4 w-full pb-3 border-b border-white/20 mb-2">
+                                    <div className="flex-1 text-sm font-semibold text-(--secondary-text-color)">
+                                        Game Name
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
+                                    <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
+                                        Retail Price
+                                    </div>
+                                    <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
+                                        Achievements
+                                    </div>
+                                    <div className="w-20 text-right text-sm font-semibold text-(--secondary-text-color)">
+                                        Playtime
+                                    </div>
+                                </div>
+
+                                {/* Game List */}
+                                <ul className="flex-1 space-y-2 overflow-y-auto">
+                                    {paginatedGames.map((game) => (
+                                        <li
+                                            key={game.appid}
+                                            className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
+                                        >
+                                            <div className="flex items-center gap-4 w-full">
+                                                <div className="flex-1 flex gap-3 items-center min-w-0">
+                                                    <div className="rounded-sm shrink-0">
+                                                        <img
+                                                            src={
+                                                                game.platform === "epic"
+                                                                    ? "/icons/epic-games.svg"
+                                                                    : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
+                                                            }
+                                                            alt={game.name}
+                                                            className="w-6 h-6 inline mr-2"
+                                                        />
+                                                    </div>
+                                                    <p className="font-medium truncate">{game.name}</p>
+                                                </div>
+                                                <div className="w-28 text-center">
+                                                    <span className="text-(--secondary-text-color)">
+                                                        {game.retail_price ? `$${game.retail_price.toFixed(2)}` : "N/A"}
+                                                    </span>
+                                                </div>
+                                                <div className="w-28 text-center">
+                                                    {game.total_achievements ? (
+                                                        <span className="text-(--secondary-text-color)">
+                                                            {game.unlocked_achievements || 0}/{game.total_achievements}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-(--secondary-text-color) text-sm">
+                                                            N/A
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="w-20 text-right">
+                                                    <span className="text-(--secondary-text-color)">
+                                                        {minutesToHours(game.playtime_forever)}h
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
                     </div>
 
                     {/* Pagination Controls */}
