@@ -554,7 +554,21 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                         <div className="flex justify-between items-center p-5 border-b border-(--disabled-color)/20 gap-4 flex-wrap">
                             <h3 className="text-xl font-semibold text-(--primary-color)">
                                 {selectedGameForAchievements.name}
-                            </h3>                            <div className="flex items-center gap-3 ml-auto">
+                            </h3>
+                            <FontAwesomeIcon
+                                icon={faRectangleXmark}
+                                style={{ color: "#29bdff" }}
+                                className="text-4xl cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                    setAchievementsModalOpen(false);
+                                    setSelectedGameForAchievements(null);
+                                    setAchievements([]);
+                                    setCurrentAchievementsPage(1);
+                                }}
+                            />
+                        </div>
+                        <div className="flex justify-between items-center p-5 gap-4 flex-wrap">              
+                            <div className="flex items-center gap-3 ml-auto">
                                 <div className="flex items-center gap-1">
                                     <span className="text-(--secondary-text-color) text-sm">
                                         Sort by:
@@ -592,17 +606,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         <option value="locked">Locked</option>
                                     </select>
                                 </div>
-                            </div>                            <FontAwesomeIcon
-                                icon={faRectangleXmark}
-                                style={{ color: "#29bdff" }}
-                                className="text-4xl cursor-pointer hover:opacity-80"
-                                onClick={() => {
-                                    setAchievementsModalOpen(false);
-                                    setSelectedGameForAchievements(null);
-                                    setAchievements([]);
-                                    setCurrentAchievementsPage(1);
-                                }}
-                            />
+                            </div>                            
                         </div>
 
                         <div className="bg-(--background-inner-color) flex-1 p-4 overflow-hidden flex flex-col">
