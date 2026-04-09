@@ -415,10 +415,10 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
     return (
         <div className="mt-5 bg-(--background-color) p-5 rounded-sm outline outline-white/10 w-full">
             <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-semibold text-(--disabled-color)">Monitor up to three games</h3>
+                <h3 className="text-2xl font-semibold text-(--disabled-color)">Track your game stats</h3>
             </div>
             <p className="text-base text-(--secondary-text-color)">
-                Select up to three games to monitor their playtime, last played date, and achievements at a glance. Your selections will be saved for future visits.
+                Select up to three games to track their playtime, last played date, and achievements at a glance. View detailed achievement info for your Steam games. Note: Epic Games achievements are not supported due to API limitations.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mx-auto mt-5">
