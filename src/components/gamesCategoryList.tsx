@@ -34,7 +34,7 @@ export default function GamesCategoryList({
     isEpicConnected = true,
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
-    const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh'>('hoursHigh');
+    const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh' | 'priceLow' | 'priceHigh'>('hoursHigh');
     const [filterBy, setFilterBy] = useState<'all' | 'steam' | 'epic'>('all');
     const [enrichedGames, setEnrichedGames] = useState<Game[]>(filteredGames);
     const [isLoading, setIsLoading] = useState(false);
@@ -128,6 +128,10 @@ export default function GamesCategoryList({
                 return sorted.sort((a, b) => a.playtime_forever - b.playtime_forever);
             case 'hoursHigh':
                 return sorted.sort((a, b) => b.playtime_forever - a.playtime_forever);
+            case 'priceLow':
+                return sorted.sort((a, b) => (a.retail_price ?? 0) - (b.retail_price ?? 0));
+            case 'priceHigh':
+                return sorted.sort((a, b) => (b.retail_price ?? 0) - (a.retail_price ?? 0));
             default:
                 return sorted;
         }
@@ -226,7 +230,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                             <select
                                 value={sortBy}
                                 onChange={(e) => {
-                                    setSortBy(e.target.value as 'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh');
+                                    setSortBy(e.target.value as 'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh' | 'priceLow' | 'priceHigh');
                                 }}
                                 className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat"
                                 style={{ backgroundImage: 'url("/icons/chevron-down.svg")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
@@ -235,6 +239,8 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                 <option value="nameZA">Z to A (Alphabetical)</option>
                                 <option value="hoursLow">Low to High Hours</option>
                                 <option value="hoursHigh">High to Low Hours</option>
+                                <option value="priceLow">Low to High Price</option>
+                                <option value="priceHigh">High to Low Price</option>
                             </select>
                         </div>
 
