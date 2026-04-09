@@ -287,10 +287,6 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                                 <p className="text-base text-(--secondary-text-color)">Achievements:</p>
                                 <p className="text-base text-(--text-color)"> {game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
                             </div>
-                            <div className="flex justify-between items-center mt-5">
-                                <p className="text-base text-(--secondary-text-color)">Gaming Platform:</p>
-                                <p className="text-base text-(--text-color)"> {game.platform === "epic" ? "Epic Games" : "Steam"}</p>
-                            </div>
                             <div className="flex mt-3 w-full">
                                 {game.platform === "steam" && (
                                     <button
@@ -300,6 +296,10 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                                         View Achievements
                                     </button>
                                 )}
+                            </div>
+                            <div className="flex justify-between items-center mt-5">
+                                <p className="text-base text-(--secondary-text-color)">Gaming Platform:</p>
+                                <p className="text-base text-(--text-color)"> {game.platform === "epic" ? "Epic Games" : "Steam"}</p>
                             </div>
                         </div>
                     </div>
