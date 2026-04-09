@@ -86,7 +86,7 @@ export default function AppLayout() {
           <motion.img 
             src="/logo/aggr0-logo.png" 
             alt="Logo" 
-            className="h-10 mx-5 my-3 cursor-pointer" 
+            className="h-8 mx-5 my-3 cursor-pointer" 
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
             onClick={() => navigate("/dashboard")}

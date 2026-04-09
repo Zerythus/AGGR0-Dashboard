@@ -18,7 +18,7 @@ interface Game {
 
 export default function DashboardFill() {
     const { username } = useOutletContext<{ username: string }>();
-    const [greeting, setGreeting] = useState('Welcome');
+    const [greeting, setGreeting] = useState<{ greetingPrefix: string; username: string }>({ greetingPrefix: 'Welcome,', username: '' });
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [filteredGames, setFilteredGames] = useState<Game[]>([]);
     const [isSteamConnected] = useState(() => {
@@ -62,13 +62,14 @@ export default function DashboardFill() {
             {!isSteamConnected && !isEpicConnected ? (
                 <div className="px-4 sm:px-6 lg:px-8 mt-5">
                     <div>
-                        <h2 className="text-3xl font-bold text-(--text-color)">Welcome, {username}!</h2>
+                        <h2 className="text-3xl font-bold text-(--text-color)">Welcome, <span className="text-(--primary-color)">{username}</span>!
+                        </h2>
                     </div>
                 </div>
             ) : (
                 /* max width to control content stretching on large screens, and padding on sides */
                 <div className="px-4 sm:px-6 lg:px-8 max-w-350 mx-auto mt-5">
-                    <h2 className="text-4xl font-bold text-(--text-color)">{greeting}</h2>
+                    <h2 className="text-4xl font-bold text-(--text-color)">{greeting.greetingPrefix} <span className="text-(--primary-color)">{greeting.username}</span>!</h2>
 
                     {/* Grid container for metric cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10 w-full">

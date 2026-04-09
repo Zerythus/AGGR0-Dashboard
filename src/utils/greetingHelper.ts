@@ -15,7 +15,7 @@ function getTimePeriod(): 'morning' | 'afternoon' | 'evening' {
 export async function getRandomGreeting(
   username: string,
   loginCount: number = 1
-): Promise<string> {
+): Promise<{ greetingPrefix: string; username: string }> {
   try {
     const response = await fetch('/data/Greetings.json');
     const data = await response.json();
@@ -53,10 +53,18 @@ export async function getRandomGreeting(
       Math.floor(Math.random() * filteredGreetings.length)
     ];
 
-    // Replace {username} placeholder with actual username
-    return randomGreeting.replace('{username}', username);
+    // Extract greeting prefix (everything before {username}) and remove trailing punctuation
+    const greetingPrefix = randomGreeting.replace('{username}', '').trim().replace(/!$/, '');
+
+    return {
+      greetingPrefix,
+      username
+    };
   } catch (error) {
     console.error('Error fetching greetings:', error);
-    return `Hello, ${username}!`;
+    return {
+      greetingPrefix: 'Hello,',
+      username
+    };
   }
 }
