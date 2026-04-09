@@ -57,7 +57,7 @@ export default function GamesCategoryList({
             setIsLoading(true);
             try {
                 // Get steamId from Supabase
-                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                const { data: { user } } = await supabase.auth.getUser();
                 const steamId = user?.user_metadata?.steam_id;
 
                 const enrichedGamesList = await Promise.all(
