@@ -152,7 +152,21 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
             console.log('Game restored:', restoredGame.name);
             setSelectedGame(restoredGame);
             setSearchTerm(restoredGame.name);
-            if (restoredGame.retail_price) {
+            
+            // Fetch retail price for Steam games if not already loaded
+            if (restoredGame.platform === "steam" && !restoredGame.retail_price) {
+              fetch('/api/steam-price', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ steamAppId: restoredGame.appid }),
+              })
+                .then(res => res.json())
+                .then(data => {
+                  const price = data.response?.price;
+                  if (price) setPricePaid(String(price));
+                })
+                .catch(error => console.error('Error fetching retail price:', error));
+            } else if (restoredGame.retail_price) {
               setPricePaid(String(restoredGame.retail_price));
             }
           } else {
@@ -203,9 +217,30 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
     setSelectedGame(game);
     setSearchTerm(game.name);
     setIsDropdownOpen(false);
-    if (game.retail_price) {
-      setPricePaid(String(game.retail_price));
-    }
+    
+    // Fetch retail price if it's a Steam game and not already loaded
+    const fetchPriceIfNeeded = async () => {
+      if (game.platform === "steam" && !game.retail_price) {
+        try {
+          const priceResponse = await fetch('/api/steam-price', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ steamAppId: game.appid }),
+          });
+          const priceData = await priceResponse.json();
+          const price = priceData.response?.price;
+          if (price) {
+            setPricePaid(String(price));
+          }
+        } catch (error) {
+          console.error('Error fetching retail price:', error);
+        }
+      } else if (game.retail_price) {
+        setPricePaid(String(game.retail_price));
+      }
+    };
+
+    fetchPriceIfNeeded();
 
     // Save to Supabase
     const saveGameSelection = async () => {
