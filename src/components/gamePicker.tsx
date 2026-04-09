@@ -551,24 +551,12 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             {achievementsModalOpen && selectedGameForAchievements && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                     <div className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-3xl max-h-[90vh] flex flex-col relative">
-                        <div className="flex justify-between items-center p-5 border-b border-(--disabled-color)/20 gap-4 flex-wrap">
+                        <div className="flex justify-between items-center p-5 gap-4 flex-wrap border-b border-(--disabled-color)/20">
                             <h3 className="text-xl font-semibold text-(--primary-color)">
                                 {selectedGameForAchievements.name}
                             </h3>
-                            <FontAwesomeIcon
-                                icon={faRectangleXmark}
-                                style={{ color: "#29bdff" }}
-                                className="text-4xl cursor-pointer hover:opacity-80"
-                                onClick={() => {
-                                    setAchievementsModalOpen(false);
-                                    setSelectedGameForAchievements(null);
-                                    setAchievements([]);
-                                    setCurrentAchievementsPage(1);
-                                }}
-                            />
-                        </div>
-                        <div className="flex justify-between items-center p-5 gap-4 flex-wrap">              
-                            <div className="flex items-center gap-3 ml-auto">
+                            
+                            <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1">
                                     <span className="text-(--secondary-text-color) text-sm">
                                         Sort by:
@@ -606,7 +594,19 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         <option value="locked">Locked</option>
                                     </select>
                                 </div>
-                            </div>                            
+                            </div>
+                            
+                            <FontAwesomeIcon
+                                icon={faRectangleXmark}
+                                style={{ color: "#29bdff" }}
+                                className="text-4xl cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                    setAchievementsModalOpen(false);
+                                    setSelectedGameForAchievements(null);
+                                    setAchievements([]);
+                                    setCurrentAchievementsPage(1);
+                                }}
+                            />
                         </div>
 
                         <div className="bg-(--background-inner-color) flex-1 p-4 overflow-hidden flex flex-col">
