@@ -271,52 +271,71 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                             </div>
                         )}
                         {!isLoading && (
-                            <ul className="flex-1 space-y-2">
-                                {paginatedGames.map((game) => (
-                                    <li
-                                        key={game.appid}
-                                        className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
-                                    >
-                                        <div className="flex justify-between items-center gap-4 w-full">
-                                            <div className="flex gap-3 items-center min-w-0">
-                                                <div className="rounded-sm shrink-0">
-                                                    <img
-                                                        src={
-                                                            game.platform === "epic"
-                                                                ? "/icons/epic-games.svg"
-                                                                : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
-                                                        }
-                                                        alt={game.name}
-                                                        className="w-6 h-6 inline mr-2"
-                                                    />
+                            <>
+                                {/* Column Headers */}
+                                <div className="flex items-center gap-4 w-full pb-3 border-b border-white/20 mb-2">
+                                    <div className="flex-1 text-sm font-semibold text-(--secondary-text-color)">
+                                        Game Name
+                                    </div>
+                                    <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
+                                        Retail Price
+                                    </div>
+                                    <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
+                                        Achievements
+                                    </div>
+                                    <div className="w-20 text-right text-sm font-semibold text-(--secondary-text-color)">
+                                        Playtime
+                                    </div>
+                                </div>
+
+                                {/* Game List */}
+                                <ul className="flex-1 space-y-2 overflow-y-auto">
+                                    {paginatedGames.map((game) => (
+                                        <li
+                                            key={game.appid}
+                                            className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
+                                        >
+                                            <div className="flex items-center gap-4 w-full">
+                                                <div className="flex-1 flex gap-3 items-center min-w-0">
+                                                    <div className="rounded-sm shrink-0">
+                                                        <img
+                                                            src={
+                                                                game.platform === "epic"
+                                                                    ? "/icons/epic-games.svg"
+                                                                    : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
+                                                            }
+                                                            alt={game.name}
+                                                            className="w-6 h-6 inline mr-2"
+                                                        />
+                                                    </div>
+                                                    <p className="font-medium truncate">{game.name}</p>
                                                 </div>
-                                                <p className="font-medium truncate">{game.name}</p>
-                                            </div>
-                                            <div className="text-center min-w-fit">
-                                                <span className="text-(--secondary-text-color)">
-                                                    {game.retail_price ? `$${game.retail_price.toFixed(2)} CAD` : "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="text-center min-w-fit">
-                                                {game.total_achievements ? (
+                                                <div className="w-28 text-center">
                                                     <span className="text-(--secondary-text-color)">
-                                                        {game.unlocked_achievements || 0}/{game.total_achievements}
+                                                        {game.retail_price ? `$${game.retail_price.toFixed(2)}` : "N/A"}
                                                     </span>
-                                                ) : (
-                                                    <span className="text-(--secondary-text-color) text-sm">
-                                                        N/A
+                                                </div>
+                                                <div className="w-28 text-center">
+                                                    {game.total_achievements ? (
+                                                        <span className="text-(--secondary-text-color)">
+                                                            {game.unlocked_achievements || 0}/{game.total_achievements}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-(--secondary-text-color) text-sm">
+                                                            N/A
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="w-20 text-right">
+                                                    <span className="text-(--secondary-text-color)">
+                                                        {minutesToHours(game.playtime_forever)}h
                                                     </span>
-                                                )}
+                                                </div>
                                             </div>
-                                            <div className="text-right min-w-fit">
-                                                <span className="text-(--secondary-text-color)">
-                                                    {minutesToHours(game.playtime_forever)}h
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
                         )}
                     </div>
 
