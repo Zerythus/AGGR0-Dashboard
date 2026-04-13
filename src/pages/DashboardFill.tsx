@@ -4,7 +4,7 @@ import { getRandomGreeting } from '@/utils/greetingHelper';
 
 import MetricCard from '../components/metricCards';
 import GamePicker from '@/components/gamePicker';
-import TopGames from '@/components/top3Games';
+// import TopGames from '@/components/top3Games';
 import CostPerHour from '@/components/costPerHour';
 import GamesOwnedChart from '@/components/gamesOwnedChart';
 import GamesCategoryList from '@/components/gamesCategoryList';
@@ -104,7 +104,7 @@ export default function DashboardFill() {
                     </div>
 
                     {/* Most Played Games */}
-                    <TopGames isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                    {/* <TopGames isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} /> */}
 
                     <div className='mb-10'>
                         {/* Just footer space here */}
