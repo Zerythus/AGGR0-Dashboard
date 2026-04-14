@@ -402,7 +402,7 @@ export default function Settings() {
           <div className="bg-(--background-color) rounded-sm p-5">
             <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
             <p>
-              Note: Epic Games is currently using mock data (JSON file)
+              Note: Steam profile data visibility must be public. Epic Games is currently using mock data (JSON file)
             </p>
 
             <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
