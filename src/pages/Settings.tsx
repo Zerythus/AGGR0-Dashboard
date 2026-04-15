@@ -629,12 +629,12 @@ export default function Settings() {
 
       {activeTab === "Accessibility" && (
         <section className="mt-5 space-y-8">
-          {/* Font Size Control */}
+          {/* Zoom Level Control */}
           <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 flex justify-between items-center">
             <div>
-              <h3 className="text-xl font-bold text-(--text-color) mb-3">Text Size</h3>
+              <h3 className="text-xl font-bold text-(--text-color) mb-3">Zoom In/Out</h3>
               <p className="text-lg text-(--secondary-text-color)">
-                Adjust the size of text throughout the application.
+                Adjust the zoom level of the application.
               </p>
             </div>
 
