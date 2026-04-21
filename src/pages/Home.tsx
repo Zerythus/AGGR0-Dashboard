@@ -52,12 +52,16 @@ export default function Home() {
           <img src="/logo/aggr0-logo.png" alt="AGGR0 Logo" className="h-10 w-50" />
         </div>
 
+        <p className="text-center text-xl text-white/75 mt-5 md:hidden">
+          Understand your gaming habits with playtime and measure your investments in games
+        </p>
+
         <div className={`flex flex-1 items-center w-full max-w-2xl mx-auto ${styles.formContainer}`}>
           <div className="w-full">
-            <h2 className="text-4xl tracking-tight">Welcome!</h2>
+            <h2 className="text-4xl tracking-tight hidden md:block">Welcome!</h2>
 
             <form
-              className="mt-8 space-y-6 text-lg"
+              className="md:mt-8 space-y-6 text-lg"
               onSubmit={(e) => {
                 e.preventDefault();
                 handleLogin();
