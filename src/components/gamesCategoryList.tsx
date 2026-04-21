@@ -3,6 +3,7 @@ import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleX
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../services/supabaseClient';
+import styles from './gamesCategoryList.module.css';
 
 interface Game {
     appid: number;
@@ -205,21 +206,18 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
             />
             
             {/* Modal */}
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4 min-h-screen">
                 <div 
                     ref={modalRef}
-                    className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-5xl h-50vh flex flex-col"
+                    className={`bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-5xl flex flex-col my-auto ${styles.categoryModal}`}
                 >
-                    <div className='flex justify-between items-center p-5'>
+                    <div className={`flex justify-between items-center p-5 ${styles.headerSection}`}>
                         <div className="flex items-center gap-1">
-                            <h4 className="text-xl font-semibold text-(--text-color)">
-                                Games in 
-                            </h4>
                             <h4 className='text-xl font-semibold text-(--primary-color)'>
                                 {selectedCategory}
                             </h4>
                             <h4 className="text-xl font-semibold text-(--text-color)">
-                                category
+                                games
                             </h4> 
                             
                         </div>
@@ -270,7 +268,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                         />
                     </div>
                     
-                    <div className="bg-(--background-inner-color) flex-1 p-4 overflow-hidden flex flex-col">
+                    <div className={`bg-(--background-inner-color) flex-1 p-4 flex flex-col ${styles.contentArea}`}>
                         {isLoading && (
                             <div className="flex items-center justify-center h-full">
                                 <p className="text-(--secondary-text-color)">Loading game details...</p>
@@ -278,30 +276,31 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                         )}
                         {!isLoading && (
                             <>
-                                {/* Column Headers */}
-                                <div className="flex items-center gap-4 w-full pb-3 border-b border-white/20 mb-2">
-                                    <div className="flex-1 text-sm font-semibold text-(--secondary-text-color)">
-                                        Game Name
+                                <div className={styles.gameListRow}>
+                                    {/* Column Headers */}
+                                    <div className="flex items-center gap-4 w-full pb-3 border-b border-white/20 mb-2">
+                                        <div className="flex-1 text-sm font-semibold text-(--secondary-text-color)">
+                                            Game Name
+                                        </div>
+                                        <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
+                                            Retail Price
+                                        </div>
+                                        <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
+                                            Achievements
+                                        </div>
+                                        <div className="w-20 text-right text-sm font-semibold text-(--secondary-text-color)">
+                                            Playtime
+                                        </div>
                                     </div>
-                                    <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
-                                        Retail Price
-                                    </div>
-                                    <div className="w-28 text-center text-sm font-semibold text-(--secondary-text-color)">
-                                        Achievements
-                                    </div>
-                                    <div className="w-20 text-right text-sm font-semibold text-(--secondary-text-color)">
-                                        Playtime
-                                    </div>
-                                </div>
 
-                                {/* Game List */}
-                                <ul className="flex-1 space-y-2 overflow-y-auto">
-                                    {paginatedGames.map((game) => (
-                                        <li
-                                            key={game.appid}
-                                            className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
-                                        >
-                                            <div className="flex items-center gap-4 w-full">
+                                    {/* Game List */}
+                                    <ul className="space-y-2">
+                                        {paginatedGames.map((game) => (
+                                            <li
+                                                key={game.appid}
+                                                className="text-(--text-color) py-2 px-2 border-b border-(--disabled-color)/10"
+                                            >
+                                                <div className="flex items-center gap-4 w-full">
                                                 <div className="flex-1 flex gap-3 items-center min-w-0">
                                                     <div className="rounded-sm shrink-0">
                                                         <img
@@ -340,7 +339,8 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                             </div>
                                         </li>
                                     ))}
-                                </ul>
+                                    </ul>
+                                </div>
                             </>
                         )}
                     </div>
