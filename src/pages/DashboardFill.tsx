@@ -8,6 +8,7 @@ import GamePicker from '@/components/gamePicker';
 import CostPerHour from '@/components/costPerHour';
 import GamesOwnedChart from '@/components/gamesOwnedChart';
 import GamesCategoryList from '@/components/gamesCategoryList';
+import MonthlyRecommend from '@/components/monthlyRecommend';
 
 interface Game {
     appid: number;
@@ -103,8 +104,8 @@ export default function DashboardFill() {
                         />
                     </div>
 
-                    {/* Most Played Games */}
-                    {/* <TopGames isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} /> */}
+                    {/* Monthly Recommended Games */}
+                    <MonthlyRecommend isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
 
                     <div className='mb-10'>
                         {/* Just footer space here */}
