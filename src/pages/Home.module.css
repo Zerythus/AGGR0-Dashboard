@@ -1,0 +1,9 @@
+.formContainer {
+  margin-top: -60px;
+}
+
+@media (min-width: 768px) {
+  .formContainer {
+    margin-top: 20px;
+  }
+}
