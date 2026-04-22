@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       response: {
-        price: priceOverview.final / 100, // Convert from cents to dollars
+        price: priceOverview.initial / 100, // Convert from cents to dollars
         currency: priceOverview.currency,
         formatted: priceOverview.initial_formatted,
       },
