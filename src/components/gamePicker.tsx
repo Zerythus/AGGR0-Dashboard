@@ -419,7 +419,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                 <h3 className="text-2xl font-semibold text-(--disabled-color)">Track your game stats</h3>
             </div>
             <p className="text-base text-(--secondary-text-color)">
-                Select up to three games to track their playtime, last played date, and achievements at a glance. View detailed achievement info for your Steam games. Note: Epic Games achievements are not supported due to API limitations.
+                Select up to three games to track their playtime and achievements at a glance. View detailed achievement info for your Steam games. Note: Epic Games achievements are not supported due to API limitations.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mx-auto mt-5">
@@ -454,10 +454,10 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         <p>{minToHours(game.playtime_forever)} hours</p>
                                     </div>
 
-                                    <div className="flex justify-between items-center">
+                                    {/* <div className="flex justify-between items-center">
                                         <p>Last Played: </p>
                                         <p>{epochToDate(game.rtime_last_played)}</p>
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex justify-between items-center">
                                         <p>Achievements: </p>
