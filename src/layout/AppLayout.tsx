@@ -13,7 +13,8 @@ export default function AppLayout() {
   const [username, setUsername] = useState("");
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+
   useSyncSteamMetadata();
 
   const fetchAndSetDisplayName = async () => {
@@ -28,21 +29,21 @@ export default function AppLayout() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       let displayName = "";
-      
+
       const useSteamUsername = user.user_metadata?.use_steam_username === true;
-      
+
       if (useSteamUsername && user.user_metadata?.steam_id) {
         const steamProfile = await getSteamProfileData(user.id);
         if (steamProfile) {
           displayName = steamProfile.steam_username;
         }
       }
-      
+
       if (!displayName) {
         const regularUsername = user.user_metadata?.username;
         displayName = regularUsername || user.email?.split('@')[0] || "User";
       }
-      
+
       setUsername(displayName);
     }
   };
@@ -68,16 +69,18 @@ export default function AppLayout() {
   }, []);
 
   useEffect(() => {
+    if (!scrollContainer) return;
+
     const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 300);
+      setShowBackToTop(scrollContainer.scrollTop > 300);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [scrollContainer]);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (!isAuthChecked) {
@@ -85,18 +88,21 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen max-w-full overflow-x-hidden relative">
+    <div className="flex h-screen w-screen overflow-hidden">
       <div className="flex min-w-0 flex-1 flex-col bg-(--main-background-color) text-white">
-        <div className="flex items-center justify-between border-b border-white/10">
-          <motion.img 
-            src="/logo/aggr0-logo.png" 
-            alt="Logo" 
-            className="h-8 mx-5 my-3 cursor-pointer" 
+
+        {/* HEADER */}
+        <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-(--main-background-color)">
+          <motion.img
+            src="/logo/aggr0-logo.png"
+            alt="Logo"
+            className="h-8 max-[425px]:h-5 mx-5 my-3 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
             onClick={() => navigate("/dashboard")}
           />
-          <header className="flex h-15 items-center justify-end px-5">
+
+          <header className="flex h-15 items-center justify-end px-1 max-w-[50%]">
             <UserMenu
               username={username}
               chevronSrc="/icons/chevron-down.svg"
@@ -106,7 +112,7 @@ export default function AppLayout() {
                 localStorage.removeItem("syncedPlatforms");
                 localStorage.removeItem("loginCount");
 
-                const keysToRemove = Object.keys(localStorage).filter(key => 
+                const keysToRemove = Object.keys(localStorage).filter(key =>
                   key.includes("supabase") || key.includes("auth")
                 );
                 keysToRemove.forEach(key => localStorage.removeItem(key));
@@ -122,15 +128,24 @@ export default function AppLayout() {
           </header>
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        {/* SCROLL AREA */}
+        <main
+          ref={(el) => setScrollContainer(el)}
+          className="min-w-0 flex-1 overflow-y-auto"
+        >
           <Outlet context={{ username }} />
         </main>
-              {showBackToTop && ( 
-                <button onClick={scrollToTop} 
-                  className="fixed bottom-5 right-5 bg-(--primary-color) text-black p-3 rounded-full hover:opacity-80 transition-opacity z-50" aria-label="Back to top" > 
-                  <FontAwesomeIcon icon={faArrowUp} className="text-xl" /> 
-                </button> )
-              }
+
+        {/* BACK TO TOP */}
+        {showBackToTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-5 right-5 bg-(--primary-color) text-black p-3 rounded-full hover:opacity-80 transition-opacity z-50"
+            aria-label="Back to top"
+          >
+            <FontAwesomeIcon icon={faArrowUp} className="text-xl" />
+          </button>
+        )}
       </div>
     </div>
   );
