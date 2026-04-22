@@ -1,0 +1,140 @@
+.settingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .settingRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .settingRow > div:last-child {
+    width: 100%;
+  }
+
+  .settingRow button {
+    width: 100%;
+  }
+}
+
+.maxUnplayedContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .maxUnplayedContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .maxUnplayedInputGroup {
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .maxInputField {
+    width: 50%;
+  }
+
+  .maxUnplayedButton {
+    width: 50%;
+  }
+}
+
+.deleteAccountContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .deleteAccountContainer {
+    flex-direction: column;
+  }
+
+  .deleteAccountContainer button {
+    width: 100%;
+    margin-top: 1rem;
+    justify-content: center;
+  }
+}
+
+.resetAccessibilityContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .resetAccessibilityContainer {
+    flex-direction: column;
+  }
+
+  .resetAccessibilityContainer button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 🔥 FIXED PLATFORM LAYOUT */
+.platformRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.platformInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.platformAction {
+  flex-shrink: 0;
+}
+
+/* ✅ MOBILE FIX */
+@media (max-width: 460px) {
+  .platformRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .platformInfo {
+    width: 100%;
+  }
+
+  .platformAction {
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+
+  .platformAction button {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.settingsTabs {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 🔥 MOBILE FIX */
+@media (max-width: 460px) {
+  .settingsTabs {
+    gap: 1rem;
+    margin-bottom: 2rem; 
+  }
+}

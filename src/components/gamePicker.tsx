@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "../services/supabaseClient";
 import SearchFilter from "./searchFilter";
+import styles from "./gamePicker.module.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
@@ -485,7 +486,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                             <div className="card outline-2 outline-dashed outline-(--primary-color) text-(--disabled-color) bg-(--background-color2) hover:bg-(--hover-primary-color) hover:outline-0 hover:text-(--disabled-color) active:bg-(--pressed-primary-color) rounded-sm">
                                 <button
                                     onClick={() => togglePicker(index)}
-                                    className="card-body w-full min-h-40 flex flex-col items-center justify-center text-xl text-primary hover:text-black"
+                                    className={`card-body w-full flex flex-col items-center justify-center text-xl text-primary hover:text-black ${styles.addGameButton}`}
                                 >
                                     <div className="text-2xl font-semibold">+</div>
                                     <div className="text-base">Add Game</div>
@@ -499,7 +500,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
             {pickerOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                     <div
-                        className="bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl h-[80vh] flex flex-col relative"
+                        className={`bg-(--background-color) rounded-sm outline outline-white/10 w-full max-w-xl flex flex-col relative ${styles.pickerModal}`}
                         ref={modalRef}
                     >
                         <div className="flex justify-between items-center p-5">

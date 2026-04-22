@@ -1,0 +1,19 @@
+.addGameButton {
+  min-height: 160px;
+}
+
+@media (max-width: 768px) {
+  .addGameButton {
+    min-height: 80px;
+  }
+}
+
+.pickerModal {
+  height: 60vh;
+}
+
+@media (min-width: 769px) {
+  .pickerModal {
+    height: 80vh;
+  }
+}

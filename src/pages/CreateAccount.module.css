@@ -1,0 +1,21 @@
+.section {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+.formContainer {
+  margin-top: -60px;
+}
+
+@media (min-width: 768px) {
+  .formContainer {
+    margin-top: 20px;
+  }
+}

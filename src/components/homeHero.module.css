@@ -1,0 +1,49 @@
+.section {
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 8px;
+  padding-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .logo {
+    justify-content: flex-start;
+  }
+}
+
+.heroContent {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .heroContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+.heroImage {
+  width: 100%;
+  max-width: 768px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}

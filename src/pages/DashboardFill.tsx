@@ -8,6 +8,7 @@ import GamePicker from '@/components/gamePicker';
 import CostPerHour from '@/components/costPerHour';
 import GamesOwnedChart from '@/components/gamesOwnedChart';
 import GamesCategoryList from '@/components/gamesCategoryList';
+import MonthlyRecommend from '@/components/monthlyRecommend';
 
 interface Game {
     appid: number;
@@ -47,6 +48,8 @@ export default function DashboardFill() {
         loadGreeting();
     }, [username]);
 
+
+
     const handleBarClick = (category: string, games: Game[]) => {
         setSelectedCategory(category);
         setFilteredGames(games);
@@ -62,14 +65,14 @@ export default function DashboardFill() {
             {!isSteamConnected && !isEpicConnected ? (
                 <div className="px-4 sm:px-6 lg:px-8 mt-5">
                     <div>
-                        <h2 className="text-3xl font-bold text-(--text-color)">Welcome, <span className="text-(--primary-color)">{username}</span>!
+                        <h2 className="text-3xl md:text-4xl font-bold text-(--text-color)">Welcome, <span className="text-(--primary-color)">{username}</span>!
                         </h2>
                     </div>
                 </div>
             ) : (
                 /* max width to control content stretching on large screens, and padding on sides */
                 <div className="px-4 sm:px-6 lg:px-8 max-w-350 mx-auto mt-5">
-                    <h2 className="text-4xl font-bold text-(--text-color)">{greeting.greetingPrefix} <span className="text-(--primary-color)">{greeting.username}</span>!</h2>
+                    <h2 className="text-[1.75rem] md:text-4xl font-bold text-(--text-color)">{greeting.greetingPrefix} <span className="text-(--primary-color)">{greeting.username}</span>!</h2>
 
                     {/* Grid container for metric cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10 w-full">
@@ -103,8 +106,8 @@ export default function DashboardFill() {
                         />
                     </div>
 
-                    {/* Most Played Games */}
-                    {/* <TopGames isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} /> */}
+                    {/* Monthly Recommended Games */}
+                    <MonthlyRecommend isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
 
                     <div className='mb-10'>
                         {/* Just footer space here */}
@@ -113,5 +116,4 @@ export default function DashboardFill() {
             )}
         </>
     );
-
 }
