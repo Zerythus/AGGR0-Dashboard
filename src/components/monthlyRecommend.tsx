@@ -324,8 +324,8 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                                 <p className="text-base text-(--text-color)">{game.pegi || "N/A"}</p>
                             </div>
                             <div className="flex justify-between items-center mt-3">
-                                <p className="text-lg text-(--secondary-text-color)">Metacritic:</p> 
-                                <p className="text-lg font-bold text-(--text-color)">{game.metacritic ? `${game.metacritic}%` : "N/A"}</p>
+                                <p className="text-base text-(--secondary-text-color)">Metacritic:</p> 
+                                <p className="text-lg font-bold text-(--primary-color)">{game.metacritic ? `${game.metacritic}%` : "N/A"}</p>
                             </div>
                         </div>
                     </div>
