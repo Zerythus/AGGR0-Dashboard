@@ -48,6 +48,8 @@ export default function DashboardFill() {
         loadGreeting();
     }, [username]);
 
+
+
     const handleBarClick = (category: string, games: Game[]) => {
         setSelectedCategory(category);
         setFilteredGames(games);
@@ -114,5 +116,4 @@ export default function DashboardFill() {
             )}
         </>
     );
-
 }

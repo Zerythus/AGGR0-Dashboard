@@ -21,7 +21,13 @@
 }
 
 .gameListRow {
-  min-width: max-content;
+  min-width: fit-content;
+}
+
+@media (max-width: 768px) {
+  .gameListRow {
+    min-width: max-content;
+  }
 }
 
 .titleContainer {
