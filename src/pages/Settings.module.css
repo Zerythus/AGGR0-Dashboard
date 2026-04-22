@@ -1,0 +1,130 @@
+/* General and Account Management - flex items that should stack on mobile */
+.settingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .settingRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .settingRow > div:last-child {
+    width: 100%;
+  }
+
+  .settingRow button {
+    width: 100%;
+  }
+}
+
+/* Max Unplayed Value Section - special layout with flex items */
+.maxUnplayedContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .maxUnplayedContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .maxUnplayedInputGroup {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .maxInputField {
+    width: 50%;
+  }
+
+  .maxUnplayedButton {
+    width: 50%;
+  }
+}
+
+/* Delete Account Container */
+.deleteAccountContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+}
+
+@media (max-width: 768px) {
+  .deleteAccountContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .deleteAccountContainer button {
+    width: 100%;
+    margin-top: 1rem;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 439px) {
+  .settingTab{
+    margin-top: 2.5rem;
+  }
+}
+
+/* Reset Accessibility Container */
+.resetAccessibilityContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .resetAccessibilityContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resetAccessibilityContainer button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Platform container adjustments */
+.platformRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .platformRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .platformRow > div:last-child {
+    width: 100%;
+  }
+
+  .platformRow button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .platformRow button {
+    display: flex;
+    justify-content: center;
+  }
+}

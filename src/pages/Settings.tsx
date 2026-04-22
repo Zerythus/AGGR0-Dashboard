@@ -11,6 +11,7 @@ import { deleteUserAccount } from "../services/accountService";
 import { getSteamProfileData } from "../services/steamProfileService";
 import { useAccessibility } from "../contexts/AccessibilityContext";
 import epicLogo from "/public/icons/epic-games.svg";
+import styles from "./Settings.module.css";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -388,7 +389,7 @@ export default function Settings() {
       </div>
 
       {activeTab === "general" && (
-        <div className="mt-5 space-y-8">
+        <div className={`mt-5 space-y-8 ${styles.settingTab}`}>
           {successMessage && (
             <div className={`p-4 rounded-sm text-white ${
               successMessage.includes("Error") 
@@ -405,7 +406,7 @@ export default function Settings() {
               Note: Steam profile data visibility must be public. Epic Games is currently using mock data (JSON file)
             </p>
 
-            <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : ''}`}>
+            <div className={`mt-6 bg-(--background-inner-color) rounded-sm ${settings.highContrast ? 'border border-white/20' : 'border border-slate-700/40'}`}>
               {platforms.map((platform, index) => (
                 <div key={platform.name}>
                   <div className="flex items-center justify-between py-6 px-6">
@@ -487,7 +488,7 @@ export default function Settings() {
           </div>
 
           <div className="bg-(--background-color) rounded-sm p-5">
-            <div className="flex items-center justify-between gap-4">
+            <div className={styles.maxUnplayedContainer}>
               <div className="flex-1">
                 <label className="text-(--text-color) text-lg font-semibold mb-2 block">
                   Max Unplayed Games Value (CAD)
@@ -497,8 +498,8 @@ export default function Settings() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                  <span className="text-(--secondary-text-color) text-lg whitespace-nowrap">CAD $</span>
+              <div className={`flex gap-1 ${styles.maxUnplayedInputGroup}`}>
+                  <span className="text-(--secondary-text-color) text-lg whitespace-nowrap my-auto">CAD $</span>
                   <input
                     type="number"
                     step="0.01"
@@ -508,12 +509,12 @@ export default function Settings() {
                     value={maxUnplayedValue}
                     onChange={handleMaxUnplayedValueChange}
                     placeholder="500"
-                    className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none "
+                    className={`${styles.maxInputField} rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none `}
                   />
                   <button
                     onClick={handleSaveMaxUnplayedValue}
                     disabled={isSavingMaxValue}
-                    className="text-lg bg-(--primary-color) text-black px-6 py-2 rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                    className={`text-lg bg-(--primary-color) text-black px-6 py-2 rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed h-fit ${styles.maxUnplayedButton}`}
                   >
                     {isSavingMaxValue ? "Saving..." : "Save"}
                   </button>
@@ -525,8 +526,8 @@ export default function Settings() {
 
       {activeTab === "account" && (
         <section className="mt-5 space-y-8">
-          <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
-            <div>
+          <div className={`bg-(--background-color) p-5 rounded-sm outline outline-white/10 ${styles.deleteAccountContainer} ${styles.settingTab}`}>
+            <div className="flex-1">
               <h3 className="text-xl font-bold text-(--text-color)">Delete account</h3>
               <p className="mt-3 text-lg text-(--secondary-text-color)">
                 This action is irreversible and will permanently remove all your data from
@@ -630,7 +631,7 @@ export default function Settings() {
       {activeTab === "Accessibility" && (
         <section className="mt-5 space-y-8">
           {/* Zoom Level Control */}
-          <div className="bg-(--background-color) p-5 rounded-sm outline outline-white/10 flex justify-between items-center">
+          <div className={`bg-(--background-color) p-5 rounded-sm outline outline-white/10 ${styles.resetAccessibilityContainer} ${styles.settingTab}`}>
             <div>
               <h3 className="text-xl font-bold text-(--text-color) mb-3">Zoom In/Out</h3>
               <p className="text-lg text-(--secondary-text-color)">
@@ -638,7 +639,7 @@ export default function Settings() {
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 my-auto">
               <button
                 onClick={() => setFontSizeLevel(2)}
                 className={`text-sm px-6 py-2 rounded-sm font-semibold transition-opacity ${
@@ -679,11 +680,6 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-(--text-color) text-lg font-semibold mb-2">High Contrast Mode</p>
-                <p className="text-(--secondary-text-color) text-lg">
-                  {settings.highContrast
-                    ? "Enabled - Using optimized colors for better visibility"
-                    : "Disabled - Using standard color scheme"}
-                </p>
               </div>
 
               {/* Toggle Switch */}
@@ -705,7 +701,7 @@ export default function Settings() {
           </div>
 
           {/* Reset Accessibility Settings */}
-          <div className="bg-(--background-color) p-5 flex justify-between items-start rounded-sm outline outline-white/10">
+          <div className={`bg-(--background-color) p-5 rounded-sm outline outline-white/10 ${styles.resetAccessibilityContainer}`}>
             <div>
               <h3 className="text-xl font-bold text-(--text-color)">Reset Accessibility Settings</h3>
               <p className="mt-3 text-lg text-(--secondary-text-color)">
