@@ -20,7 +20,8 @@ export default function Dashboard() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 mt-5">
       <div>
-        <h2 className="text-3xl font-bold text-(--text-color)">Welcome, {username}!</h2>
+        <h2 className="text-3xl font-bold text-(--text-color)">Welcome, <span className="text-(--primary-color)">{username}</span>!
+        </h2>
       </div>
 
       {/* This is the display when there's no connected platforms yet */}

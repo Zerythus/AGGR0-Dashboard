@@ -13,6 +13,11 @@ type Game = {
     unlocked_achievements?: number;
     platform?: "steam" | "epic";
     image_url?: string;
+    developer?: string;
+    genres?: string[];
+    metacritic?: number;
+    esrb?: string;
+    pegi?: string;
 }
 
 type Achievement = {
@@ -24,10 +29,6 @@ type Achievement = {
     achieved: boolean;
     unlocktime: number;
 };
-
-function minToHours(minutes: number): number {
-    return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
-}
 
 function epochToDate(epoch: number): string {
     const date = new Date(epoch * 1000); // Convert seconds to milliseconds
@@ -126,6 +127,38 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
             return game;
         }
     }, [steamId]);
+
+    const fetchGameDetails = useCallback(async (game: Game): Promise<Game> => {
+        if (game.platform !== "steam") {
+            return game;
+        }
+
+        try {
+            const response = await fetch("/api/steam-game-details", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ steamAppId: game.appid }),
+            });
+
+            if (!response.ok) {
+                return game;
+            }
+
+            const data = await response.json();
+
+            return {
+                ...game,
+                developer: data.response?.developer,
+                genres: data.response?.genres,
+                metacritic: data.response?.metacritic,
+                esrb: data.response?.esrb,
+                pegi: data.response?.pegi,
+            };
+        } catch (error) {
+            console.error(`Error fetching details for ${game.appid}:`, error);
+            return game;
+        }
+    }, []);
     
     useEffect(() => {
         const getCurrentSteamId = async () => {
@@ -199,16 +232,40 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                     }
                 }
 
-                const top3 = allGames
-                    .sort((a, b) => b.playtime_forever - a.playtime_forever)
-                    .slice(0, 3);
+                // Filter for unplayed games
+                const unplayedGames = allGames.filter(game => game.playtime_forever === 0);
+
+                if (unplayedGames.length === 0) {
+                    setGames([]);
+                    setLoading(false);
+                    return;
+                }
+
+                // Create a seeded random function based on current month/year
+                const now = new Date();
+                const monthYearSeed = now.getFullYear() * 12 + now.getMonth();
                 
-                // Fetch achievements for each top 3 game
+                // Shuffle unplayed games using seeded random
+                const shuffled = [...unplayedGames].sort(() => {
+                    // Simple seeded randomization using month/year
+                    const seed = (monthYearSeed * 9301 + 49297) % 233280;
+                    return (seed / 233280) - 0.5;
+                });
+
+                // Select first 3 (or less if not enough unplayed games)
+                const recommended = shuffled.slice(0, 3);
+                
+                // Fetch achievements for each recommended game
                 const gamesWithAchievements = await Promise.all(
-                    top3.map(game => fetchGameAchievementsData(game))
+                    recommended.map(game => fetchGameAchievementsData(game))
+                );
+
+                // Fetch details for each recommended game
+                const gamesWithDetails = await Promise.all(
+                    gamesWithAchievements.map(game => fetchGameDetails(game))
                 );
                 
-                setGames(gamesWithAchievements);
+                setGames(gamesWithDetails);
             } catch (error) {
                 console.error('Error fetching games:', error);
             } finally {
@@ -216,47 +273,22 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
             }
         };
         fetchGames();
-    }, [isSteamConnected, isEpicConnected, steamId, fetchGameAchievementsData]);
+    }, [isSteamConnected, isEpicConnected, steamId, fetchGameAchievementsData, fetchGameDetails]);
 
     if (loading) {
-        return <p className="text-center text-(--secondary-text-color) mt-5">Loading top games...</p>;
+        return <p className="text-center text-(--secondary-text-color) mt-5">Loading recommended games...</p>;
     }
 
     if (games.length === 0) {
-        return <p className="text-center text-(--secondary-text-color) mt-5">No games played yet.</p>;
+        return <p className="text-center text-(--secondary-text-color) mt-5">No unplayed games to recommend.</p>;
     }
-
-    const openAchievementsModal = async (game: Game) => {
-        if (game.platform !== "steam" || !steamId) return;
-
-        setSelectedGameForAchievements(game);
-        setAchievementsModalOpen(true);
-        setCurrentAchievementsPage(1);
-        setAchievementFilterBy('all');
-        setAchievementSortBy('newestFirst');
-
-        try {
-            const response = await fetch("/api/steam-achievements", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ steamId, steamAppId: game.appid }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setAchievements(data.response?.achievements || []);
-            }
-        } catch (error) {
-            console.error("Error fetching achievements:", error);
-        }
-    };
 
     return (
         <div className="mt-5 bg-(--background-color) p-5 rounded-sm outline-2 outline-(--background-color2)">
             <div className="mb-4">
-                <h3 className="text-2xl font-semibold mb-2">Most Played Games</h3>
+                <h3 className="text-2xl font-semibold mb-2">Monthly Recommended Games</h3>
                 <p className='text-base text-(--secondary-text-color)'>
-                    Your top 3 most played games based on total playtime, and when you last played them while connected online in your chosen platform.
+                    Three random unplayed games from your library, selected and updated monthly. Perfect for discovering something new to play this month.
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -276,30 +308,24 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                             <h3 className="text-lg font-semibold mb-2 text-(--primary-color)">{game.name}</h3>
 
                             <div className="flex justify-between items-center">
-                                <p className="text-base text-(--secondary-text-color)">Playtime:</p> 
-                                <p className="text-base text-(--text-color)"> {minToHours(game.playtime_forever)} hours</p>
+                                <p className="text-base text-(--secondary-text-color)">Developer:</p> 
+                                <p className="text-base font-bold text-(--text-color)">{game.developer || "N/A"}</p>
                             </div>
                             <div className="flex justify-between items-center">
-                                <p className="text-base text-(--secondary-text-color)">Last Played:</p> 
-                                <p className="text-base text-(--text-color)"> {epochToDate(game.rtime_last_played)}</p>
+                                <p className="text-base text-(--secondary-text-color)">Genres:</p> 
+                                <p className="text-base text-(--text-color)">{game.genres && game.genres.length > 0 ? game.genres.slice(0, 2).join(", ") : "N/A"}</p>
+                            </div>
+                            <div className="flex justify-between items-center mt-3">
+                                <p className="text-base text-(--secondary-text-color)">ESRB Rating:</p> 
+                                <p className="text-base text-(--text-color)">{game.esrb || "N/A"}</p>
                             </div>
                             <div className="flex justify-between items-center">
-                                <p className="text-base text-(--secondary-text-color)">Achievements:</p>
-                                <p className="text-base text-(--text-color)"> {game.unlocked_achievements || 0} / {game.total_achievements || 0} completed</p>
+                                <p className="text-base text-(--secondary-text-color)">PEGI Rating:</p> 
+                                <p className="text-base text-(--text-color)">{game.pegi || "N/A"}</p>
                             </div>
-                            <div className="flex mt-3 w-full">
-                                {game.platform === "steam" && (
-                                    <button
-                                        onClick={() => openAchievementsModal(game)}
-                                        className="w-full h-8 px-3 bg-(--primary-color) text-black text-lg rounded-sm hover:opacity-90 whitespace-nowrap"
-                                    >
-                                        View Achievements
-                                    </button>
-                                )}
-                            </div>
-                            <div className="flex justify-between items-center mt-5">
-                                <p className="text-base text-(--secondary-text-color)">Gaming Platform:</p>
-                                <p className="text-base text-(--text-color)"> {game.platform === "epic" ? "Epic Games" : "Steam"}</p>
+                            <div className="flex justify-between items-center mt-3">
+                                <p className="text-base text-(--secondary-text-color)">Metacritic:</p> 
+                                <p className="text-lg font-bold text-(--primary-color)">{game.metacritic ? `${game.metacritic}%` : "N/A"}</p>
                             </div>
                         </div>
                     </div>

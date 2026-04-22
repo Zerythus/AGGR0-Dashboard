@@ -4,10 +4,11 @@ import { getRandomGreeting } from '@/utils/greetingHelper';
 
 import MetricCard from '../components/metricCards';
 import GamePicker from '@/components/gamePicker';
-import TopGames from '@/components/top3Games';
+// import TopGames from '@/components/top3Games';
 import CostPerHour from '@/components/costPerHour';
 import GamesOwnedChart from '@/components/gamesOwnedChart';
 import GamesCategoryList from '@/components/gamesCategoryList';
+import MonthlyRecommend from '@/components/monthlyRecommend';
 
 interface Game {
     appid: number;
@@ -18,9 +19,25 @@ interface Game {
 
 export default function DashboardFill() {
     const { username } = useOutletContext<{ username: string }>();
-    const [greeting, setGreeting] = useState('Welcome');
+    const [greeting, setGreeting] = useState<{ greetingPrefix: string; username: string }>({ greetingPrefix: 'Welcome,', username: '' });
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [filteredGames, setFilteredGames] = useState<Game[]>([]);
+    const [isSteamConnected] = useState(() => {
+        const syncedPlatforms = localStorage.getItem("syncedPlatforms");
+        if (syncedPlatforms) {
+            const parsed = JSON.parse(syncedPlatforms);
+            return parsed["Steam"] === true;
+        }
+        return false;
+    });
+    const [isEpicConnected] = useState(() => {
+        const syncedPlatforms = localStorage.getItem("syncedPlatforms");
+        if (syncedPlatforms) {
+            const parsed = JSON.parse(syncedPlatforms);
+            return parsed["Epic Games"] === true;
+        }
+        return false;
+    });
 
     useEffect(() => {
         const loadGreeting = async () => {
@@ -30,6 +47,8 @@ export default function DashboardFill() {
         };
         loadGreeting();
     }, [username]);
+
+
 
     const handleBarClick = (category: string, games: Game[]) => {
         setSelectedCategory(category);
@@ -43,47 +62,58 @@ export default function DashboardFill() {
 
     return (
         <>
-            {/* max width to control content stretching on large screens, and padding on sides */}
-            <div className="px-4 sm:px-6 lg:px-8 max-w-350 mx-auto mt-5">
-                <h2 className="text-4xl font-bold text-(--text-color)">{greeting}</h2>
-
-                {/* Grid container for metric cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10 w-full">
-                    <MetricCard dataFile="SampleData.json" metric="totalGames" label="TOTAL GAMES" />
-                    <MetricCard dataFile="SampleData.json" metric="unplayedGames" label="UNPLAYED GAMES" />
-                    <MetricCard dataFile="SampleData.json" metric="totalHours" label="TOTAL PLAYTIME" unit="hrs" />
-                </div>
-
-                {/* MONITOR UP TO 3 GAMES */}
-                <GamePicker />
-
-                {/* Games owned chart with cost per hour on the right */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 w-full">
-                    <div className="lg:col-span-2">
-                        <GamesOwnedChart onBarClick={handleBarClick} />
-                    </div>
-                    <div className='lg:col-span-1'>
-                        <CostPerHour />
+            {!isSteamConnected && !isEpicConnected ? (
+                <div className="px-4 sm:px-6 lg:px-8 mt-5">
+                    <div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-(--text-color)">Welcome, <span className="text-(--primary-color)">{username}</span>!
+                        </h2>
                     </div>
                 </div>
+            ) : (
+                /* max width to control content stretching on large screens, and padding on sides */
+                <div className="px-4 sm:px-6 lg:px-8 max-w-350 mx-auto mt-5">
+                    <h2 className="text-[1.75rem] md:text-4xl font-bold text-(--text-color)">{greeting.greetingPrefix} <span className="text-(--primary-color)">{greeting.username}</span>!</h2>
 
-                {/* Games Category List */}
-                <div className="mt-5 w-full">
-                    <GamesCategoryList
-                        selectedCategory={selectedCategory}
-                        filteredGames={filteredGames}
-                        onClose={handleCloseList}
-                    />
+                    {/* Grid container for metric cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10 w-full">
+                        <MetricCard metric="totalGames" label="Total Games" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        <MetricCard metric="unplayedGames" label="Unplayed Games" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        <MetricCard metric="unplayedGamesPrice" label="Unplayed Games Value" unit="CAD" subtitle="Based on retail price" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        <MetricCard metric="totalHours" label="Total Playtime" unit="hrs" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                    </div>
+
+                    {/* MONITOR UP TO 3 GAMES */}
+                    <GamePicker isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+
+                    {/* Games owned chart with cost per hour on the right */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 w-full">
+                        <div className="lg:col-span-2">
+                            <GamesOwnedChart onBarClick={handleBarClick} isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        </div>
+                        <div className='lg:col-span-1'>
+                            <CostPerHour isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        </div>
+                    </div>
+
+                    {/* Games Category List */}
+                    <div className="mt-5 w-full">
+                        <GamesCategoryList
+                            selectedCategory={selectedCategory}
+                            filteredGames={filteredGames}
+                            onClose={handleCloseList}
+                            isSteamConnected={isSteamConnected}
+                            isEpicConnected={isEpicConnected}
+                        />
+                    </div>
+
+                    {/* Monthly Recommended Games */}
+                    <MonthlyRecommend isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+
+                    <div className='mb-10'>
+                        {/* Just footer space here */}
+                    </div>
                 </div>
-
-                {/* Most Played Games */}
-                <TopGames />
-
-                <div className='mb-10'>
-                    {/* Just footer space here */}
-                </div>
-            </div>
+            )}
         </>
     );
-
 }

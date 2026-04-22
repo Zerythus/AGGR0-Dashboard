@@ -1,8 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import SettingsCallback from "./pages/SettingsCallback";
 
 import AppLayout from "./layout/AppLayout";
+import { AccessibilityProvider } from "./contexts/AccessibilityContext";
 
 import Home from "./pages/Home";
 import CreateAccount from "./pages/CreateAccount";
@@ -15,16 +17,19 @@ import DashboardFill from "./pages/DashboardFill"; //FOR SHOW ONLY TO FILL IN TH
 import "./index.css";
 
 
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route>
-          <Route path="" element={<Home />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/create-account" element={<CreateAccount />} />
-        </Route>
+    <AccessibilityProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route>
+            <Route path="" element={<Home />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/create-account" element={<CreateAccount />} />
+            <Route path="/settings-callback" element={<SettingsCallback />} />
+          </Route>
 
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -33,5 +38,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </Route>
       </Routes>
     </BrowserRouter>
+    </AccessibilityProvider>
   </React.StrictMode>
 );

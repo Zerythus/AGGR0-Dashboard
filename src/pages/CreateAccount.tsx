@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import styles from "./CreateAccount.module.css";
 
 import { supabase } from "@/services/supabaseClient";
 
@@ -53,6 +54,7 @@ export default function CreateAccount() {
     try {
       setLoading(true);
 
+      // Proceed with signup
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -64,7 +66,12 @@ export default function CreateAccount() {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        // Check if it's a duplicate email error from auth
+        if (error.message.includes("already registered")) {
+          setErrorMessage("This email is already associated with an account.");
+        } else {
+          setErrorMessage(error.message);
+        }
         return;
       }
 
@@ -82,13 +89,19 @@ export default function CreateAccount() {
 
   return (
       <div className="grid h-full w-full grid-cols-1 md:grid-cols-[1.4fr_1fr]">
-        {/* left */}
-        <HomeHero />
+        <div className="hidden md:block">
+          <HomeHero />
+        </div>
 
         {/* right */}
-        <section className="flex h-full w-full items-center-safe bg-(--background-color) px-12 border-l border-white/10">
-            <div className="w-full">
-                
+        <section className={`flex flex-col h-full w-full bg-(--background-color) border-l border-white/10 ${styles.section}`}>
+            
+            <div className="flex justify-center md:justify-start py-6 md:hidden">
+              <img src="/logo/aggr0-logo.png" alt="AGGR0 Logo" className="h-10 w-50" />
+            </div>
+
+            <div className={`flex flex-1 items-center w-full max-w-2xl mx-auto ${styles.formContainer}`}>
+              <div className="w-full">
                 <ArrowLeft 
                     className="h-8 w-8 mb-6 cursor-pointer" 
                     onClick={() => navigate("/")} 
@@ -149,7 +162,7 @@ export default function CreateAccount() {
                     <div className="relative">
                         <input
                         id={confirmPasswordId}
-                        type={showPassword ? "text" : "password"}
+                        type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm Password"
                         autoComplete="confirm-password"
                         value={confirmPassword}
@@ -166,12 +179,12 @@ export default function CreateAccount() {
                                 text-slate-500 hover:text-slate-700
                                 focus:outline-none"
                         >
-                        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                        {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
                         </button>
                     </div>
 
                     {errorMessage && (
-                        <p className="text-sm text-red-400">{errorMessage}</p>
+                        <p className="text-base text-red-400 text-center">{errorMessage}</p>
                     )}
 
                     <button
@@ -182,6 +195,7 @@ export default function CreateAccount() {
                         {loading ? "Creating account..." : "Create Account"}
                     </button>
                 </form>
+              </div>
             </div>
         </section>
       </div>

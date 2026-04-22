@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "../services/supabaseClient";
 
-import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotateLeft } from "@fortawesome/free-solid-svg-icons/faRotateLeft";
+
 import SearchFilter from "./searchFilter";
 
 type GameItem = {
@@ -12,47 +14,156 @@ type GameItem = {
   header_image?: string;
   image?: string;
   img_icon_url?: string;
+  platform?: "steam" | "epic";
+  image_url?: string;
+  retail_price?: number;
 };
 
 function minToHours(minutes: number): number {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
 }
 
-function getGameImage(appid: number): string {
-    return `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
+function getGameImage(game: GameItem): string {
+    if (game.platform === "epic") {
+        return game.image_url || "https://placeholdit.com/800x600/1f2c44/cdcdcd?text=Game+Image&font=&font_size=80";
+    }
+    return `https://cdn.akamai.steamstatic.com/steam/apps/${Number(game.appid)}/header.jpg`;
 }
 
-function getGameIconUrl(appid: number, img_icon_url: string): string {
-    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
+function getGameIconUrl(game: GameItem): string {
+    if (game.platform === "epic") {
+        return "/icons/epic-games.svg";
+    }
+    return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${Number(game.appid)}/${game.img_icon_url || ""}.jpg`;
 }
 
-export default function CostPerHour() {
+interface CostPerHourProps {
+  isSteamConnected: boolean;
+  isEpicConnected: boolean;
+}
+
+export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostPerHourProps) {
   const [games, setGames] = useState<GameItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [pricePaid, setPricePaid] = useState("0.00");
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [retailPrice, setRetailPrice] = useState<number | null>(null);
   const [isFree, setIsFree] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch games from SampleData.json
+  // Fetch games from Steam API and/or EpicData.json
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch("/data/SampleData.json");
-        const data = await response.json();
-        const gameList: GameItem[] = data.response?.games || [];
-        setGames(gameList);
+        const allGames: GameItem[] = [];
+        let savedGame: { appid: string | number; platform: string } | null = null;
+
+        // Load saved game selection from Supabase first
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          const { data, error } = await supabase
+            .from('user_settings')
+            .select('*')
+            .eq('user_id', authUser.id)
+            .single();
+
+          console.log('Full user_settings row:', data);
+          console.log('Error (if any):', error);
+
+          if (data && data.cost_per_hour_game_appid) {
+            savedGame = {
+              appid: String(data.cost_per_hour_game_appid),
+              platform: data.cost_per_hour_game_platform,
+            };
+            console.log('Loaded saved game from Supabase:', savedGame);
+          } else if (data) {
+            console.log('Row exists but cost_per_hour_game_appid is:', data.cost_per_hour_game_appid);
+          } else if (error && error.code !== 'PGRST116') {
+            console.error('Error loading saved game:', error);
+          }
+        }
+
+        if (isSteamConnected) {
+          try {
+            // Get current user
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+            if (userError || !user) {
+              console.error("Failed to get user:", userError);
+            } else {
+              // Get Steam ID from user metadata
+              const steamId = user.user_metadata?.steam_id;
+
+              if (!steamId) {
+                console.error("No Steam ID in user metadata");
+              } else {
+                // Fetch Steam games data from API
+                const response = await fetch("/api/steam-owned-games", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ steamId }),
+                });
+
+                if (!response.ok) {
+                  console.error("Failed to fetch Steam games:", response.statusText);
+                } else {
+                  const data = await response.json();
+                  const gameList: GameItem[] = data.response?.games || [];
+                  const steamGames = gameList.map((game: GameItem) => ({
+                    ...game,
+                    platform: "steam" as const
+                  }));
+                  allGames.push(...steamGames);
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching Steam games:", error);
+          }
+        }
+
+        if (isEpicConnected) {
+          try {
+            const epicResponse = await fetch("/data/EpicData.json");
+            const epicData = await epicResponse.json();
+            const epicGames = (epicData.epic?.games || []).map((game: GameItem) => ({
+              ...game,
+              platform: "epic" as const
+            }));
+            allGames.push(...epicGames);
+          } catch (error) {
+            console.error("Error fetching Epic games:", error);
+          }
+        }
+
+        setGames(allGames);
+
+        // Restore previously selected game after games are loaded
+        if (savedGame) {
+          console.log('Attempting to restore game. Looking for appid:', savedGame.appid, 'platform:', savedGame.platform);
+          console.log('Available games:', allGames.map(g => ({ appid: String(g.appid), platform: g.platform })));
+          const restoredGame = allGames.find(
+            (g) => String(g.appid) === String(savedGame.appid) && g.platform === savedGame.platform
+          );
+          if (restoredGame) {
+            console.log('Game restored:', restoredGame.name);
+            setSelectedGame(restoredGame);
+            setSearchTerm(restoredGame.name);
+            // Price will be fetched by the useEffect watching selectedGame
+          } else {
+            console.log('Game not found in games list');
+          }
+        }
       } catch (error) {
         console.error("Error fetching games:", error);
       }
     };
     fetchGames();
-  }, []);
+  }, [isSteamConnected, isEpicConnected]);
 
   const filteredGames = useMemo(() => {
     if (!searchTerm.trim()) return games.slice(0, 50);
@@ -78,6 +189,40 @@ export default function CostPerHour() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Fetch retail price when selected game changes
+  useEffect(() => {
+    if (!selectedGame) {
+      setRetailPrice(null);
+      setPricePaid("0.00");
+      return;
+    }
+
+    const fetchPrice = async () => {
+      if (selectedGame.platform === "steam" && !selectedGame.retail_price) {
+        try {
+          const priceResponse = await fetch('/api/steam-price', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ steamAppId: selectedGame.appid }),
+          });
+          const priceData = await priceResponse.json();
+          const price = priceData.response?.price;
+          if (price) {
+            setRetailPrice(price);
+            setPricePaid(String(price));
+          }
+        } catch (error) {
+          console.error('Error fetching retail price:', error);
+        }
+      } else if (selectedGame.retail_price) {
+        setRetailPrice(selectedGame.retail_price);
+        setPricePaid(String(selectedGame.retail_price));
+      }
+    };
+
+    fetchPrice();
+  }, [selectedGame]);
+
   function getHours(game: GameItem | null) {
     if (!game) return 0;
     if (typeof game.hours === "number") return game.hours;
@@ -91,20 +236,56 @@ export default function CostPerHour() {
     setSelectedGame(game);
     setSearchTerm(game.name);
     setIsDropdownOpen(false);
+
+    // Save to Supabase
+    const saveGameSelection = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      console.log('Saving game selection:', { appid: String(game.appid), platform: game.platform });
+
+      const { error: fetchError } = await supabase
+        .from('user_settings')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code === 'PGRST116') {
+        // Row doesn't exist, insert
+        const { error: insertError } = await supabase
+          .from('user_settings')
+          .insert({
+            user_id: user.id,
+            cost_per_hour_game_appid: String(game.appid),
+            cost_per_hour_game_platform: game.platform,
+          });
+        if (insertError) console.error('Error inserting game selection:', insertError);
+        else console.log('Game selection inserted');
+      } else if (fetchError) {
+        console.error('Error checking user_settings:', fetchError);
+      } else {
+        // Row exists, update
+        const { error: updateError } = await supabase
+          .from('user_settings')
+          .update({
+            cost_per_hour_game_appid: String(game.appid),
+            cost_per_hour_game_platform: game.platform,
+          })
+          .eq('user_id', user.id);
+        if (updateError) console.error('Error updating game selection:', updateError);
+        else console.log('Game selection updated');
+      }
+    };
+
+    saveGameSelection();
   }
 
   function handleClearSearch() {
     setSearchTerm("");
     setSelectedGame(null);
     setIsDropdownOpen(false);
-    setIsEditingPrice(false);
     setIsFree(false);
     setPricePaid("0.00");
-  }
-
-  function handleGiftToggle() {
-    setIsFree((prev) => !prev);
-    setIsEditingPrice(false);
   }
 
   const hours = getHours(selectedGame);
@@ -112,7 +293,7 @@ export default function CostPerHour() {
 
   const imageSrc =
     selectedGame
-      ? getGameImage(Number(selectedGame.appid))
+      ? getGameImage(selectedGame)
       : "https://placeholdit.com/800x600/1f2c44/cdcdcd?text=Game+Image&font=&font_size=80";
 
   return (
@@ -120,13 +301,12 @@ export default function CostPerHour() {
 
     <div className="flex items-center justify-between mb-4">
         <h3 className="text-2xl font-semibold text-(--disabled-color)">Cost per hour</h3>  
-        {/* <FontAwesomeIcon icon={faCircleInfo} size='lg' style={{color: "var(--disabled-color)"}}/> */}
     </div>
-    <p className='text-base text-gray-300'>
+    <p className='text-base text-(--secondary-text-color)'>
       Cost per hour calculates how much money you've spent for each hour of gameplay on a specific game.
     </p>
 
-      <div ref={wrapperRef} className="relative mb-6">
+      <div ref={wrapperRef} className="relative py-5">
         <SearchFilter 
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm}
@@ -139,33 +319,29 @@ export default function CostPerHour() {
         />
 
         {isDropdownOpen && (
-          <div className="absolute left-0 right-0 z-20 max-h-72 overflow-y-auto rounded-sm border border-slate-300 bg-white shadow-lg">
+          <div className="absolute left-0 right-0 z-20 max-h-72 overflow-y-auto rounded-sm bg-(--background-inner-color) outline outline-white/10">
             {filteredGames.length > 0 ? (
               filteredGames.map((game) => (
                 <button
                   key={game.appid}
                   type="button"
                   onClick={() => handleSelectGame(game)}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-100"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition text-(--text-color) hover:bg-white/10"
                 >
-                  <div className="h-6 w-6 overflow-hidden rounded-sm bg-slate-200">
+                  <div className="rounded-sm">
                     <img
-                      src={
-                        game.header_image ||
-                        game.image ||
-                        getGameIconUrl(Number(game.appid), game.img_icon_url || "")
-                      }
+                      src={getGameIconUrl(game)}
                       alt={game.name}
-                      className="h-full w-full object-cover"
+                      className="w-6 h-6 inline mr-2"
                     />
                   </div>
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-(--text-color)">
                     {game.name}
                   </span>
                 </button>
               ))
             ) : (
-              <div className="px-4 py-4 text-lg text-slate-500">
+              <div className="px-4 py-4 text-lg text-(--disabled-color)">
                 No games found
               </div>
             )}
@@ -182,11 +358,11 @@ export default function CostPerHour() {
           />
         </div>
 
-        <h3 className="mb-3 text-2xl font-bold tracking-tight text-slate-50">
+        <h3 className="mb-5 text-2xl font-bold tracking-tight text-(--primary-color)">
           {selectedGame?.name || "Game Title"}
         </h3>
 
-        <div className="mb-3 flex items-center justify-between gap-4">
+        <div className="mb-5 flex items-center justify-between gap-4">
           <span className="text-xl text-white">Your hours</span>
           <span className="text-xl text-white">
             {selectedGame ? `${hours} hours` : "--"}
@@ -214,46 +390,27 @@ export default function CostPerHour() {
                   setPricePaid(value);
                 }
               }}
-              disabled={!isEditingPrice || isFree}
-              className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none disabled:cursor-not-allowed"
+              disabled={isFree}
+              className="w-25 rounded-sm border border-slate-300 bg-white px-2 py-2 text-right text-xl text-slate-900 outline-none"
             />
 
             <button
               type="button"
-              disabled={isFree}
+              disabled={isFree || !retailPrice}
               onClick={() => {
-                setIsEditingPrice((prev) => !prev);
-                setTimeout(() => inputRef.current?.focus(), 0);
+                if (retailPrice) {
+                  setPricePaid(String(retailPrice));
+                }
               }}
-              className="rounded-sm bg-sky-500 p-3 text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-500"
-              aria-label="Edit price"
+              className="rounded-sm bg-sky-500 p-3 text-slate-950 transition hover:bg-sky-400"
+              aria-label="Reset to retail price"
             >
-              <FontAwesomeIcon icon={faPencil} className="h-6 w-6" strokeWidth={2.2} />
+              <FontAwesomeIcon icon={faRotateLeft} className="h-6 w-6" />
             </button>
           </div>
         </div>
 
-        <div className="flex items-center">
-          <label className="cursor-pointer flex items-center">
-            <input
-              type="checkbox"
-              checked={isFree}
-              onChange={handleGiftToggle}
-              className="h-5 w-5 rounded-sm border-slate-300 accent-sky-500"
-            />
-          </label>
-
-          <span className="text-xl text-slate-100 ml-3">
-            Received as a gift / free
-          </span>
-        </div>
-
-        <div className="text-center mt-5">
-          {isFree ? (
-            <p className="text-3xl font-medium tracking-tight text-sky-400">
-              FREE
-            </p>
-          ) : (
+        <div className="text-center py-5">
             <p className="text-3xl font-medium tracking-tight text-slate-50">
               <span className="text-sky-400">
                 {selectedGame && hours > 0 && !Number.isNaN(numericPrice)
@@ -266,7 +423,6 @@ export default function CostPerHour() {
                 <span className="text-slate-100"> CAD / hour</span>
               )}
             </p>
-          )}
         </div>
       </div>
     </section>

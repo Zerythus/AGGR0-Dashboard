@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { useAccessibility } from "../contexts/AccessibilityContext";
+
 type UserMenuProps = {
   username: string;
   chevronSrc?: string;
@@ -8,12 +10,13 @@ type UserMenuProps = {
 
 export default function UserMenu({
   username,
-  chevronSrc = "/public/icons/chevron-down.svg",
+  chevronSrc = "/icons/chevron-down.svg",
   onAccountSettings,
   onLogout,
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { settings } = useAccessibility();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -41,7 +44,7 @@ export default function UserMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 w-50 bg-(--background-color2) text-xl">
+        <div className={`absolute right-0 w-50 bg-(--background-color) text-xl rounded-sm ${settings.highContrast ? "border border-white/20" : ""}`}>
            <button
             onClick={onAccountSettings}
             className="block px-4 py-2 text-right text-(--text-color) hover:opacity-80"
