@@ -1,4 +1,5 @@
 import UserMenu from "@/components/userMenu";
+import Footer from "@/components/footer";
 import { Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/services/supabaseClient";
 import { getSteamProfileData } from "@/services/steamProfileService";
@@ -131,9 +132,10 @@ export default function AppLayout() {
         {/* SCROLL AREA */}
         <main
           ref={(el) => setScrollContainer(el)}
-          className="min-w-0 flex-1 overflow-y-auto"
+          className="min-w-0 flex-1 overflow-y-auto flex flex-col"
         >
           <Outlet context={{ username }} />
+          <Footer />
         </main>
 
         {/* BACK TO TOP */}

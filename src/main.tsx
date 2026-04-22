@@ -31,13 +31,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/settings-callback" element={<SettingsCallback />} />
           </Route>
 
-          <Route element={<AppLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/dashboardFill" element={<DashboardFill />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/dashboardFill" element={<DashboardFill />} /> {/* TEST ONLY - DELETE LATER */}
+        </Route>
+      </Routes>
+    </BrowserRouter>
     </AccessibilityProvider>
   </React.StrictMode>
 );
