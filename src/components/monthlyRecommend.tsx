@@ -309,27 +309,23 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
 
                             <div className="flex justify-between items-center">
                                 <p className="text-base text-(--secondary-text-color)">Developer:</p> 
-                                <p className="text-base text-(--text-color)">{game.developer || "N/A"}</p>
+                                <p className="text-base font-bold text-(--text-color)">{game.developer || "N/A"}</p>
                             </div>
                             <div className="flex justify-between items-center">
                                 <p className="text-base text-(--secondary-text-color)">Genres:</p> 
                                 <p className="text-base text-(--text-color)">{game.genres && game.genres.length > 0 ? game.genres.slice(0, 2).join(", ") : "N/A"}</p>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <p className="text-base text-(--secondary-text-color)">Metacritic:</p> 
-                                <p className="text-base text-(--text-color)">{game.metacritic ? `${game.metacritic}%` : "N/A"}</p>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <p className="text-base text-(--secondary-text-color)">ESRB:</p> 
+                            <div className="flex justify-between items-center mt-3">
+                                <p className="text-base text-(--secondary-text-color)">ESRB Rating:</p> 
                                 <p className="text-base text-(--text-color)">{game.esrb || "N/A"}</p>
                             </div>
                             <div className="flex justify-between items-center">
-                                <p className="text-base text-(--secondary-text-color)">PEGI:</p> 
+                                <p className="text-base text-(--secondary-text-color)">PEGI Rating:</p> 
                                 <p className="text-base text-(--text-color)">{game.pegi || "N/A"}</p>
                             </div>
                             <div className="flex justify-between items-center mt-3">
-                                <p className="text-base text-(--secondary-text-color)">Gaming Platform:</p>
-                                <p className="text-base text-(--text-color)"> {game.platform === "epic" ? "Epic Games" : "Steam"}</p>
+                                <p className="text-lg text-(--secondary-text-color)">Metacritic:</p> 
+                                <p className="text-lg font-bold text-(--text-color)">{game.metacritic ? `${game.metacritic}%` : "N/A"}</p>
                             </div>
                         </div>
                     </div>
