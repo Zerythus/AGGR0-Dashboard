@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       response: {
         price: priceOverview.final / 100, // Convert from cents to dollars
         currency: priceOverview.currency,
-        formatted: priceOverview.final_formatted,
+        formatted: priceOverview.initial_formatted,
       },
     });
   } catch (error) {
