@@ -293,7 +293,7 @@ function getGameIconUrl(appid: number, img_icon_url: string): string {
                                                     <div className="rounded-sm shrink-0">
                                                         <img
                                                             src={
-                                                                game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || \"\")
+                                                                game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "")
                                                             }
                                                             alt={game.name}
                                                             className="w-6 h-6 inline mr-2"
