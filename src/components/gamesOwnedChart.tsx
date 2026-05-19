@@ -8,13 +8,13 @@ interface Game {
     name: string;
     playtime_forever: number;
     rtime_last_played: number;
-    platform?: "steam" | "epic";
+    platform?: "steam";
 }
 
 interface GamesOwnedChartProps {
     onBarClick?: (category: string, games: Game[]) => void;
     isSteamConnected?: boolean;
-    isEpicConnected?: boolean;
+
 }
 
 // Playtime category constants
@@ -30,7 +30,7 @@ const PLAYTIME_CATEGORIES = [
     { min: 6001, max: Infinity, label: '100+h' }
 ];
 
-export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, isEpicConnected = false }: GamesOwnedChartProps) {
+export default function GamesOwnedChart({ onBarClick, isSteamConnected = true }: GamesOwnedChartProps) {
     const { settings } = useAccessibility();
     const [playtimeCategoryData, setPlaytimeCategoryData] = useState<{ category: string; count: number; }[]>([]);
     const [allGames, setAllGames] = useState<Game[]>([]);
@@ -100,20 +100,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
                     }
                 }
 
-                // Fetch Epic data if connected
-                if (isEpicConnected) {
-                    try {
-                        const epicResponse = await fetch('data/EpicData.json');
-                        const epicData = await epicResponse.json();
-                        const epicGames: Game[] = (epicData.epic?.games || []).map((game: Game) => ({
-                            ...game,
-                            platform: "epic" as const
-                        }));
-                        allGamesData = [...allGamesData, ...epicGames];
-                    } catch (error) {
-                        console.error('Error loading Epic data:', error);
-                    }
-                }
+
 
                 setAllGames(allGamesData);
 
@@ -143,7 +130,7 @@ export default function GamesOwnedChart({ onBarClick, isSteamConnected = true, i
         };
 
         fetchData();
-    }, [isSteamConnected, isEpicConnected, steamId]);
+    }, [isSteamConnected, steamId]);
 
     const handleBarClick = (props: { payload?: { category: string; count: number } }) => {
         if (!onBarClick || !props.payload) return;

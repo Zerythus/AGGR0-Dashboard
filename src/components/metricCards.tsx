@@ -13,10 +13,10 @@ interface MetricCardProps {
   metric?: 'totalHours' | 'totalGames' | 'unplayedGames' | 'unplayedGamesPrice';
   subtitle?: string;
   isSteamConnected?: boolean;
-  isEpicConnected?: boolean;
+
 }
 
-export default function MetricCard({ label, value, unit, metric, subtitle, isSteamConnected = false, isEpicConnected = false }: MetricCardProps) {
+export default function MetricCard({ label, value, unit, metric, subtitle, isSteamConnected = false }: MetricCardProps) {
   const [displayValue, setDisplayValue] = useState<number | string>(value || 0);
   const [loading, setLoading] = useState(true);
   const [steamId, setSteamId] = useState<string | null>(null);
@@ -86,7 +86,6 @@ export default function MetricCard({ label, value, unit, metric, subtitle, isSte
       try {
         setLoading(true);
         let steamGames = [];
-        let epicGames = [];
 
         // Fetch Steam data if connected and has steamId
         if (isSteamConnected && steamId) {
@@ -108,21 +107,8 @@ export default function MetricCard({ label, value, unit, metric, subtitle, isSte
           }
         }
 
-        // Fetch Epic data if connected
-        if (isEpicConnected) {
-          try {
-            const epicRes = await fetch('data/EpicData.json');
-            if (epicRes.ok) {
-              const epicData = await epicRes.json();
-              epicGames = epicData.epic?.games || [];
-            }
-          } catch (error) {
-            console.error('Error fetching Epic games:', error);
-          }
-        }
-
         // Combine games from both platforms
-        const allGames = [...steamGames, ...epicGames];
+        const allGames = [...steamGames];
 
         switch (metric) {
           case 'totalHours': {
@@ -179,7 +165,7 @@ export default function MetricCard({ label, value, unit, metric, subtitle, isSte
     };
 
     loadData();
-  }, [isSteamConnected, isEpicConnected, metric, steamId, maxUnplayedValue]);
+  }, [isSteamConnected, metric, steamId, maxUnplayedValue]);
 
   // Subscribe to user_settings changes
   useEffect(() => {

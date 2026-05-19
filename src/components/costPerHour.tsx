@@ -14,7 +14,7 @@ type GameItem = {
   header_image?: string;
   image?: string;
   img_icon_url?: string;
-  platform?: "steam" | "epic";
+  platform?: "steam";
   image_url?: string;
   retail_price?: number;
 };
@@ -24,25 +24,18 @@ function minToHours(minutes: number): number {
 }
 
 function getGameImage(game: GameItem): string {
-    if (game.platform === "epic") {
-        return game.image_url || "https://placeholdit.com/800x600/1f2c44/cdcdcd?text=Game+Image&font=&font_size=80";
-    }
     return `https://cdn.akamai.steamstatic.com/steam/apps/${Number(game.appid)}/header.jpg`;
 }
 
 function getGameIconUrl(game: GameItem): string {
-    if (game.platform === "epic") {
-        return "/icons/epic-games.svg";
-    }
     return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${Number(game.appid)}/${game.img_icon_url || ""}.jpg`;
 }
 
 interface CostPerHourProps {
   isSteamConnected: boolean;
-  isEpicConnected: boolean;
 }
 
-export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostPerHourProps) {
+export default function CostPerHour({ isSteamConnected }: CostPerHourProps) {
   const [games, setGames] = useState<GameItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(null);
@@ -55,7 +48,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch games from Steam API and/or EpicData.json
+  // Fetch games from Steam API
   useEffect(() => {
     const fetchGames = async () => {
       try {
@@ -126,19 +119,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
           }
         }
 
-        if (isEpicConnected) {
-          try {
-            const epicResponse = await fetch("/data/EpicData.json");
-            const epicData = await epicResponse.json();
-            const epicGames = (epicData.epic?.games || []).map((game: GameItem) => ({
-              ...game,
-              platform: "epic" as const
-            }));
-            allGames.push(...epicGames);
-          } catch (error) {
-            console.error("Error fetching Epic games:", error);
-          }
-        }
+
 
         setGames(allGames);
 
@@ -163,7 +144,7 @@ export default function CostPerHour({ isSteamConnected, isEpicConnected }: CostP
       }
     };
     fetchGames();
-  }, [isSteamConnected, isEpicConnected]);
+  }, [isSteamConnected]);
 
   const filteredGames = useMemo(() => {
     if (!searchTerm.trim()) return games.slice(0, 50);

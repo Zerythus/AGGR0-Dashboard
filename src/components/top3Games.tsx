@@ -11,7 +11,7 @@ type Game = {
     rtime_last_played: number; //Epoch time of last played date
     total_achievements?: number;
     unlocked_achievements?: number;
-    platform?: "steam" | "epic";
+    platform?: "steam";
     image_url?: string;
 }
 
@@ -38,18 +38,14 @@ function epochToDate(epoch: number): string {
 }
 
 function getGameHeaderUrl(game: Game): string {
-    if (game.platform === "epic" && game.image_url) {
-        return game.image_url;
-    }
     return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
 interface Top3GamesProps {
     isSteamConnected: boolean;
-    isEpicConnected: boolean;
 }
 
-export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3GamesProps) {
+export default function Top3Games({ isSteamConnected }: Top3GamesProps) {
     const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState(true);
     const [steamId, setSteamId] = useState<string | null>(null);
@@ -185,19 +181,7 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                     }
                 }
 
-                if (isEpicConnected) {
-                    try {
-                        const epicResponse = await fetch('/data/EpicData.json');
-                        const epicData = await epicResponse.json();
-                        const epicGames = (epicData.epic?.games || []).map((game: Game) => ({
-                            ...game,
-                            platform: "epic" as const
-                        }));
-                        allGames.push(...epicGames);
-                    } catch (error) {
-                        console.error('Error fetching Epic games:', error);
-                    }
-                }
+
 
                 const top3 = allGames
                     .sort((a, b) => b.playtime_forever - a.playtime_forever)
@@ -216,7 +200,7 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
             }
         };
         fetchGames();
-    }, [isSteamConnected, isEpicConnected, steamId, fetchGameAchievementsData]);
+    }, [isSteamConnected, steamId, fetchGameAchievementsData]);
 
     if (loading) {
         return <p className="text-center text-(--secondary-text-color) mt-5">Loading top games...</p>;
@@ -299,7 +283,7 @@ export default function Top3Games({ isSteamConnected, isEpicConnected }: Top3Gam
                             </div>
                             <div className="flex justify-between items-center mt-5">
                                 <p className="text-base text-(--secondary-text-color)">Gaming Platform:</p>
-                                <p className="text-base text-(--text-color)"> {game.platform === "epic" ? "Epic Games" : "Steam"}</p>
+
                             </div>
                         </div>
                     </div>
