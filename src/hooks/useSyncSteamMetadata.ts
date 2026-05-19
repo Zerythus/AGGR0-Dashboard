@@ -27,8 +27,7 @@ export function useSyncSteamMetadata() {
           syncedPlatforms["Steam"] = false;
         }
 
-        // Preserve other platforms
-        // (Epic Games or any future platforms)
+        // Preserve other platforms if any future ones are added
         
         localStorage.setItem("syncedPlatforms", JSON.stringify(syncedPlatforms));
       } catch (error) {

@@ -10,7 +10,7 @@ import { supabase } from "../services/supabaseClient";
 import { deleteUserAccount } from "../services/accountService";
 import { getSteamProfileData } from "../services/steamProfileService";
 import { useAccessibility } from "../contexts/AccessibilityContext";
-import epicLogo from "/public/icons/epic-games.svg";
+
 import styles from "./Settings.module.css";
 
 export default function Settings() {
@@ -330,10 +330,6 @@ export default function Settings() {
       name: "Steam",
       icon: faSteam,
     },
-    {
-      name: "Epic Games",
-      icon: epicLogo,
-    },
   ];
 
   return (
@@ -399,8 +395,7 @@ export default function Settings() {
           <div className="bg-(--background-color) rounded-sm p-5">
             <h3 className="text-lg font-semibold text-(--text-color)">Linked Platforms</h3>
             <p>
-              Note: Steam profile data visibility must be public. Epic Games is currently using mock
-              data (JSON file)
+              Note: Steam profile data visibility must be public.
             </p>
 
             <div

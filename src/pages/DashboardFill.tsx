@@ -30,14 +30,7 @@ export default function DashboardFill() {
         }
         return false;
     });
-    const [isEpicConnected] = useState(() => {
-        const syncedPlatforms = localStorage.getItem("syncedPlatforms");
-        if (syncedPlatforms) {
-            const parsed = JSON.parse(syncedPlatforms);
-            return parsed["Epic Games"] === true;
-        }
-        return false;
-    });
+
 
     useEffect(() => {
         const loadGreeting = async () => {
@@ -62,7 +55,7 @@ export default function DashboardFill() {
 
     return (
         <>
-            {!isSteamConnected && !isEpicConnected ? (
+            {!isSteamConnected ? (
                 <div className="px-4 sm:px-6 lg:px-8 mt-5">
                     <div>
                         <h2 className="text-3xl md:text-4xl font-bold text-(--text-color)">Welcome, <span className="text-(--primary-color)">{username}</span>!
@@ -76,22 +69,22 @@ export default function DashboardFill() {
 
                     {/* Grid container for metric cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10 w-full">
-                        <MetricCard metric="totalGames" label="Total Games" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
-                        <MetricCard metric="unplayedGames" label="Unplayed Games" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
-                        <MetricCard metric="unplayedGamesPrice" label="Unplayed Games Value" unit="CAD" subtitle="Based on retail price" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
-                        <MetricCard metric="totalHours" label="Total Playtime" unit="hrs" isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                        <MetricCard metric="totalGames" label="Total Games" isSteamConnected={isSteamConnected} />
+                        <MetricCard metric="unplayedGames" label="Unplayed Games" isSteamConnected={isSteamConnected} />
+                        <MetricCard metric="unplayedGamesPrice" label="Unplayed Games Value" unit="CAD" subtitle="Based on retail price" isSteamConnected={isSteamConnected} />
+                        <MetricCard metric="totalHours" label="Total Playtime" unit="hrs" isSteamConnected={isSteamConnected} />
                     </div>
 
                     {/* MONITOR UP TO 3 GAMES */}
-                    <GamePicker isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                    <GamePicker isSteamConnected={isSteamConnected} />
 
                     {/* Games owned chart with cost per hour on the right */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 w-full">
                         <div className="lg:col-span-2">
-                            <GamesOwnedChart onBarClick={handleBarClick} isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                            <GamesOwnedChart onBarClick={handleBarClick} isSteamConnected={isSteamConnected} />
                         </div>
                         <div className='lg:col-span-1'>
-                            <CostPerHour isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                            <CostPerHour isSteamConnected={isSteamConnected} />
                         </div>
                     </div>
 
@@ -102,12 +95,11 @@ export default function DashboardFill() {
                             filteredGames={filteredGames}
                             onClose={handleCloseList}
                             isSteamConnected={isSteamConnected}
-                            isEpicConnected={isEpicConnected}
                         />
                     </div>
 
                     {/* Monthly Recommended Games */}
-                    <MonthlyRecommend isSteamConnected={isSteamConnected} isEpicConnected={isEpicConnected} />
+                    <MonthlyRecommend isSteamConnected={isSteamConnected} />
 
                     <div className='mb-10'>
                         {/* Just footer space here */}

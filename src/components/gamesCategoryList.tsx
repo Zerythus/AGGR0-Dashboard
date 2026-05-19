@@ -12,7 +12,7 @@ interface Game {
     rtime_last_played: number;
     header_image?: string;
     image?: string;
-    platform?: "steam" | "epic"; //Track which platform the game came from
+    platform?: "steam"; //Track which platform the game came from
     img_icon_url?: string;
     total_achievements?: number;
     unlocked_achievements?: number;
@@ -24,7 +24,7 @@ interface GamesCategoryListProps {
     filteredGames: Game[];
     onClose: () => void;
     isSteamConnected?: boolean;
-    isEpicConnected?: boolean;
+
 }
 
 export default function GamesCategoryList({
@@ -32,11 +32,10 @@ export default function GamesCategoryList({
     filteredGames,
     onClose,
     isSteamConnected = true,
-    isEpicConnected = true,
 }: GamesCategoryListProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState<'nameAZ' | 'nameZA' | 'hoursLow' | 'hoursHigh' | 'priceLow' | 'priceHigh'>('hoursHigh');
-    const [filterBy, setFilterBy] = useState<'all' | 'steam' | 'epic'>('all');
+    const [filterBy, setFilterBy] = useState<'all' | 'steam'>('all');
     const [enrichedGames, setEnrichedGames] = useState<Game[]>(filteredGames);
     const [isLoading, setIsLoading] = useState(false);
     const itemsPerPage = 10;
@@ -63,12 +62,8 @@ export default function GamesCategoryList({
 
                 const enrichedGamesList = await Promise.all(
                     filteredGames.map(async (game) => {
-                        // Skip if already enriched or if it's an Epic game
+                        // Skip if already enriched
                         if (game.total_achievements !== undefined && game.retail_price !== undefined) {
-                            return game;
-                        }
-
-                        if (game.platform === "epic") {
                             return game;
                         }
 
@@ -142,8 +137,6 @@ export default function GamesCategoryList({
         switch (filterBy) {
             case 'steam':
                 return games.filter(game => game.platform === "steam");
-            case 'epic':
-                return games.filter(game => game.platform === "epic");
             case 'all':
             default:
                 return games;
@@ -188,12 +181,8 @@ const minutesToHours = (minutes: number) => {
     return Math.round((minutes / 60) * 10) / 10; // Round to 1 decimal place
 };
 
-function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" | "epic"): string {
-    if (platform === "epic") {
-        return "/icons/epic-games.svg";
-    }
+function getGameIconUrl(appid: number, img_icon_url: string): string {
     // Default to Steam CDN for steam games
-
     return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`; // Do not change this url for Steam
 }
 
@@ -249,14 +238,13 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                             <select
                                 value={filterBy}
                                 onChange={(e) => {
-                                    setFilterBy(e.target.value as 'all' | 'steam' | 'epic');
+                                    setFilterBy(e.target.value as 'all' | 'steam');
                                 }}
                                 className="bg-(--background-inner-color) text-(--text-color) border border-white/20 rounded-sm pl-3 pr-8 py-2 focus:outline-none focus:border-white/40 appearance-none bg-no-repeat disabled:opacity-50 disabled:cursor-not-allowed"
                                 style={{ backgroundImage: 'url("/icons/chevron-down.svg")', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
                             >
                                 <option value="all">All Games</option>
                                 <option value="steam" disabled={!isSteamConnected}>Steam Games</option>
-                                <option value="epic" disabled={!isEpicConnected}>Epic Games</option>
                             </select>
                         </div>
 
@@ -305,9 +293,7 @@ function getGameIconUrl(appid: number, img_icon_url: string, platform?: "steam" 
                                                     <div className="rounded-sm shrink-0">
                                                         <img
                                                             src={
-                                                                game.platform === "epic"
-                                                                    ? "/icons/epic-games.svg"
-                                                                    : (game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || "", game.platform))
+                                                                game.header_image || game.image || getGameIconUrl(Number(game.appid), game.img_icon_url || \"\")
                                                             }
                                                             alt={game.name}
                                                             className="w-6 h-6 inline mr-2"

@@ -9,7 +9,7 @@ import styles from "./gamePicker.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRectangleXmark } from "@fortawesome/free-solid-svg-icons/faRectangleXmark";
 
-type Platform = "steam" | "epic";
+type Platform = "steam";
 
 type Game = {
     appid: number;
@@ -55,28 +55,19 @@ function epochToDate(epoch: number): string {
     });
 }
 
-function getGameIconUrl(appid: number, img_icon_url: string, platform?: Platform): string {
-    if (platform === "epic") {
-        return "/icons/epic-games.svg";
-    }
-
+function getGameIconUrl(appid: number, img_icon_url: string): string {
     return `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`;
 }
 
 function getGameHeaderUrl(game: Game): string {
-    if (game.platform === "epic" && game.image_url) {
-        return game.image_url;
-    }
-
     return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
 }
 
 interface GamePickerProps {
     isSteamConnected: boolean;
-    isEpicConnected: boolean;
 }
 
-export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePickerProps) {
+export default function GamePicker({ isSteamConnected }: GamePickerProps) {
     const [games, setGames] = useState<Game[]>([]);
     const [slots, setSlots] = useState<(Game | null)[]>([null, null, null]);
 
@@ -251,25 +242,13 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                 }
             }
 
-            if (isEpicConnected) {
-                try {
-                    const response = await fetch("/data/EpicData.json");
-                    const json = await response.json();
-                    const epicGames = (json.epic?.games || []).map((game: Game) => ({
-                        ...game,
-                        platform: "epic" as const,
-                    }));
-                    allGames.push(...epicGames);
-                } catch (error) {
-                    console.error("Error fetching Epic games:", error);
-                }
-            }
+
 
             setGames(allGames);
         };
 
         fetchGames();
-    }, [isSteamConnected, isEpicConnected, steamId]);
+    }, [isSteamConnected, steamId]);
 
     useEffect(() => {
         async function fetchSelectedGames() {
@@ -419,7 +398,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                 <h3 className="text-2xl font-semibold text-(--disabled-color)">Track your game stats</h3>
             </div>
             <p className="text-base text-(--secondary-text-color)">
-                Select up to three games to track their playtime and achievements at a glance. View detailed achievement info for your Steam games. Note: Epic Games achievements are not supported due to API limitations.
+                Select up to three games to track their playtime and achievements at a glance. View detailed achievement info for your Steam games.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mx-auto mt-5">
@@ -476,10 +455,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                         )}
                                     </div>
 
-                                    <div className="flex justify-between items-center mt-5">
-                                        <p>Gaming Platform: </p>
-                                        <p>{game.platform === "epic" ? "Epic Games" : "Steam"}</p>
-                                    </div>
+
                                 </div>
                             </div>
                         ) : (
@@ -535,7 +511,7 @@ export default function GamePicker({ isSteamConnected, isEpicConnected }: GamePi
                                             className="w-full text-left px-3 py-3 rounded-sm hover:bg-white/10 text-(--text-color)"
                                         >
                                             <img
-                                                src={getGameIconUrl(game.appid, game.img_icon_url, game.platform)}
+                                                src={getGameIconUrl(game.appid, game.img_icon_url)}
                                                 alt={game.name}
                                                 className="w-6 h-6 inline mr-2"
                                             />
